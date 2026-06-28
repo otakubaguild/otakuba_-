@@ -26,8 +26,8 @@
   left:50%;
   bottom:2px;
   transform:translateX(-50%);
-  max-width:42%;
-  max-height:136px;
+  max-width:46%;
+  max-height:132px;
   z-index:2;
   image-rendering:auto;
   filter:drop-shadow(0 10px 8px rgba(0,0,0,.62));
