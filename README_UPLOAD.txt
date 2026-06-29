@@ -1,12 +1,11 @@
-# otakuba-ui-rpg-layout-v3-startfix
+おたく場ギルド v2.0 修正版
 
-## 修正
-- 最初の「メニューを開きますか？」画面ではカテゴリメニューを表示しない
-- 「はい」でメニュー画面に入った後だけRPG UI表示
-- 元のようこそ画面が裏に残るバグを抑制
+変更点:
+- 最初の画面に「🔐 管理者用」ボタンを目立つように追加
+- 管理画面の商品一覧をジャンル別に常時小分け表示
+- 商品画像登録/表示は維持
 
-## GitHub
-index.html と admin.html を上書き。
-
-## 確認
-https://hayate19980821.github.io/otakuba_guild/?v=rpgui3
+使い方:
+1. GitHubの index.html と admin.html をこのZIPのファイルで上書き
+2. ブラウザで index.html?v=2.0 を開く
+3. 変わらない場合は、古いファイルを開いているかキャッシュです
