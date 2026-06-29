@@ -1,9 +1,124 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#050505"><title>おたく場ギルド</title><link rel="stylesheet" href="css/main.css?v=3.0-split-managed"></head><body><div class="phone"><div class="bg" id="pageBg"></div><div id="toast" class="toast"></div>
-<section class="screen active center" id="welcome"><div class="panel"><div class="title">おたく場ギルドへ<br>ようこそ</div><div class="subtitle">メニューを開きますか？</div><div class="row"><button class="btn gold" id="startBtn">はい</button><button class="btn" id="noBtn">いいえ</button></div><div class="tiny" style="margin-top:12px">GitHub Pages対応 / v<span id="appVersion">2.0</span></div><button class="btn" id="welcomeAdminBtn" style="margin-top:18px;width:100%;border-color:#8bd3ff;color:#8bd3ff;font-weight:900;font-size:16px;background:rgba(0,0,0,.72)">🔐 管理者用</button></div></section>
-<section class="screen center" id="nameScreen"><div class="panel"><div class="title" style="font-size:24px">冒険者登録</div><p>冒険者名を入力してください</p><input id="advName" placeholder="例：タロウ"><div class="row" style="margin-top:10px"><button class="btn gold" id="saveNameBtn">登録</button><button class="btn" id="backWelcomeBtn">戻る</button></div></div></section>
-<section class="screen" id="main"><div class="rpg"><div id="noticeBox"></div><div class="hud"><div class="panel"><div class="hud-title">冒険者情報</div><div class="hud-main" id="advInfo">---</div><div class="tiny" id="advSub">Lv.1 / 二つ名なし</div></div><div class="panel"><div class="hud-title" id="stageInfo">現在ステージ</div><div class="hud-main" id="enemyName">---</div><div class="tiny" id="enemyHpText">HP 0 / 0</div><div class="hpbar"><div class="hpfill" id="enemyHpFill"></div></div></div></div><div class="battlefield" id="battleField"><div class="enemy" id="enemySprite">👾</div><div class="damage" id="damagePop"></div><div class="defeat" id="defeatPop">撃破！</div></div><div class="categories"><button class="btn" data-cat="food">🍖 フード</button><button class="btn" data-cat="drink">🥤 ドリンク</button><button class="btn" data-cat="alcohol">🍺 酒</button><button class="btn" data-cat="dessert">🍰 デザート</button><button class="btn" data-cat="event">🎉 イベント</button><button class="btn" id="openOrders">📜 受注一覧</button><button class="btn gold" id="questClear">🏆 クエスト達成（会計）</button><button class="btn" onclick="location.href='admin.html'">⚙ 管理</button></div></div></section>
-<div class="modal" id="menuModal"><div class="modal-head"><h2 id="modalTitle">メニュー</h2><button class="btn small" id="closeMenu">閉じる</button></div><div class="scroll" id="productList"></div></div>
-<div class="modal" id="ordersModal"><div class="modal-head"><h2>受注一覧</h2><button class="btn small" id="closeOrders">閉じる</button></div><div class="scroll"><div id="orderList"></div><div class="total" id="orderTotal">0G</div><button class="btn gold" id="confirmOrder">📜 注文する（厨房へ送信）</button><button class="btn green" id="checkoutFromOrders" style="margin-top:8px;width:100%">🏆 クエスト達成（会計）</button><button class="btn red" id="clearOrder" style="margin-top:8px;width:100%">受注を空にする</button></div></div>
-<div class="modal" id="orderConfirmModal"><div class="modal-head"><h2>クエスト受注確認</h2><button class="btn small" id="cancelOrderConfirm">戻る</button></div><div class="scroll"><div class="panel"><div id="orderConfirmBody" style="white-space:pre-wrap;line-height:1.6"></div><div class="row" style="margin-top:12px"><button class="btn gold" id="doOrderYes">はい、注文する</button><button class="btn" id="doOrderNo">いいえ</button></div></div></div></div>
-<div class="modal" id="checkoutConfirmModal"><div class="modal-head"><h2>クエスト達成（会計）</h2><button class="btn small" id="cancelCheckoutConfirm">戻る</button></div><div class="scroll"><div class="panel"><div id="checkoutConfirmBody" style="white-space:pre-wrap;line-height:1.6"></div><div class="row" style="margin-top:12px"><button class="btn gold" id="doCheckoutYes">帰還して会計する</button><button class="btn" id="doCheckoutNo">いいえ</button></div></div></div></div>
-</div><script src="js/audio.js?v=3.0-split-managed"></script><script src="js/battle.js?v=3.0-split-managed"></script><script src="js/main.js?v=3.0-split-managed"></script></body></html>
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#050505">
+  <title>おたく場ギルド</title>
+  <link rel="stylesheet" href="css/main.css?v=3.0-full-modular">
+  <link rel="stylesheet" href="css/battle.css?v=3.0-full-modular">
+  <link rel="stylesheet" href="css/menu.css?v=3.0-full-modular">
+  <link rel="stylesheet" href="css/effects.css?v=3.0-full-modular">
+</head>
+<body>
+  <div class="app">
+    <div class="bg" id="pageBg"></div>
+    <div class="scan"></div>
+    <div id="toast" class="toast"></div>
+
+    <section class="screen active center" id="screenWelcome">
+      <div class="panel window">
+        <div class="title-logo">おたく場ギルドへ<br>ようこそ</div>
+        <div class="subtitle">メニューを開きますか？</div>
+        <div class="row choice">
+          <button class="btn gold" id="btnStartYes">はい</button>
+          <button class="btn" id="btnStartNo">いいえ</button>
+        </div>
+        <div class="tiny mt">GitHub Pages対応 / v<span id="appVersion">3.0</span></div>
+        <button class="btn admin-link mt" id="btnAdmin">🔐 管理者用</button>
+      </div>
+    </section>
+
+    <section class="screen center" id="screenName">
+      <div class="panel window">
+        <div class="title-logo small">冒険者登録</div>
+        <p>冒険者名を入力してください</p>
+        <input id="nameInput" placeholder="例：タロウ" autocomplete="name">
+        <div class="row mt">
+          <button class="btn gold" id="btnNameOk">登録</button>
+          <button class="btn" id="btnBackWelcome">戻る</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="screenMain">
+      <div class="rpg">
+        <div id="noticeBox"></div>
+        <header class="hud">
+          <div class="panel hud-card">
+            <div class="hud-title">冒険者情報</div>
+            <div class="hud-main" id="adventurerName">---</div>
+            <div class="tiny" id="adventurerSub">Lv.1 / 二つ名なし</div>
+          </div>
+          <div class="panel hud-card">
+            <div class="hud-title" id="stageName">現在ステージ</div>
+            <div class="hud-main" id="enemyName">---</div>
+            <div class="tiny" id="enemyHpText">HP 0 / 0</div>
+            <div class="hpbar"><div class="hpfill" id="enemyHpFill"></div></div>
+          </div>
+        </header>
+
+        <main class="battlefield" id="battleField">
+          <div class="enemy" id="enemySprite">👾</div>
+          <div class="damage" id="damagePop"></div>
+          <div class="defeat" id="defeatPop">撃破！</div>
+        </main>
+
+        <nav class="categories" id="categoryButtons"></nav>
+        <button class="btn gold checkout-main" id="btnCheckout">🏆 クエスト達成（会計）</button>
+      </div>
+    </section>
+
+    <div class="modal" id="modalMenu">
+      <div class="modal-head">
+        <h2 id="menuTitle">メニュー</h2>
+        <button class="btn small" id="btnCloseMenu">閉じる</button>
+      </div>
+      <div class="scroll" id="productList"></div>
+    </div>
+
+    <div class="modal" id="modalOrderConfirm">
+      <div class="modal-head">
+        <h2>クエスト受注確認</h2>
+        <button class="btn small" id="btnCancelOrder">戻る</button>
+      </div>
+      <div class="scroll">
+        <div class="panel">
+          <div id="orderConfirmBody" class="confirm-text"></div>
+          <div class="row mt">
+            <button class="btn gold" id="btnDoOrder">はい、注文する</button>
+            <button class="btn" id="btnNoOrder">いいえ</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="modalCheckoutConfirm">
+      <div class="modal-head">
+        <h2>クエスト達成（会計）</h2>
+        <button class="btn small" id="btnCancelCheckout">戻る</button>
+      </div>
+      <div class="scroll">
+        <div class="panel">
+          <div id="checkoutConfirmBody" class="confirm-text"></div>
+          <div class="row mt">
+            <button class="btn gold" id="btnDoCheckout">帰還して会計する</button>
+            <button class="btn" id="btnNoCheckout">いいえ</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/utils.js?v=3.0-full-modular"></script>
+  <script src="js/storage.js?v=3.0-full-modular"></script>
+  <script src="js/audio.js?v=3.0-full-modular"></script>
+  <script src="js/ui.js?v=3.0-full-modular"></script>
+  <script src="js/customer.js?v=3.0-full-modular"></script>
+  <script src="js/battle.js?v=3.0-full-modular"></script>
+  <script src="js/discord.js?v=3.0-full-modular"></script>
+  <script src="js/menu.js?v=3.0-full-modular"></script>
+  <script src="js/order.js?v=3.0-full-modular"></script>
+  <script src="js/app.js?v=3.0-full-modular"></script>
+</body>
+</html>

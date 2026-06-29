@@ -1,74 +1,10 @@
 [
-  {
-    "id": "beer",
-    "category": "drink",
-    "name": "ビール",
-    "desc": "ギルド定番の一杯。",
-    "price": 700,
-    "icon": "🍺",
-    "image": ""
-  },
-  {
-    "id": "highball",
-    "category": "drink",
-    "name": "ハイボール",
-    "desc": "爽快な一撃。",
-    "price": 650,
-    "icon": "🥃",
-    "image": ""
-  },
-  {
-    "id": "oolong",
-    "category": "soft",
-    "name": "ウーロン茶",
-    "desc": "休憩用ポーション。",
-    "price": 400,
-    "icon": "🍵",
-    "image": ""
-  },
-  {
-    "id": "cola",
-    "category": "soft",
-    "name": "コーラ",
-    "desc": "弾ける黒の魔水。",
-    "price": 400,
-    "icon": "🥤",
-    "image": ""
-  },
-  {
-    "id": "karaage",
-    "category": "food",
-    "name": "唐揚げ",
-    "desc": "冒険者の基本装備。",
-    "price": 650,
-    "icon": "🍗",
-    "image": ""
-  },
-  {
-    "id": "potato",
-    "category": "food",
-    "name": "ポテト",
-    "desc": "みんなでつまめる定番。",
-    "price": 550,
-    "icon": "🍟",
-    "image": ""
-  },
-  {
-    "id": "curry",
-    "category": "food",
-    "name": "ギルドカレー",
-    "desc": "腹を満たす主食クエスト。",
-    "price": 900,
-    "icon": "🍛",
-    "image": ""
-  },
-  {
-    "id": "dessert",
-    "category": "special",
-    "name": "本日の甘味",
-    "desc": "マスター気まぐれ報酬。",
-    "price": 500,
-    "icon": "🍰",
-    "image": ""
-  }
+  {"id":"karaage","cat":"food","name":"唐揚げ","price":600,"emoji":"🍗","desc":"ギルド定番のフード。","image":""},
+  {"id":"potato","cat":"food","name":"ポテト","price":500,"emoji":"🍟","desc":"みんなでつまめる。","image":""},
+  {"id":"cola","cat":"drink","name":"コーラ","price":400,"emoji":"🥤","desc":"ソフトドリンク。","image":""},
+  {"id":"melon_soda","cat":"drink","name":"メロンソーダ","price":400,"emoji":"🥤","desc":"緑の回復薬。","image":""},
+  {"id":"beer","cat":"alcohol","name":"生ビール","price":600,"emoji":"🍺","desc":"酒場の基本。","image":""},
+  {"id":"highball","cat":"alcohol","name":"ハイボール","price":550,"emoji":"🥃","desc":"強炭酸。","image":""},
+  {"id":"ice","cat":"dessert","name":"アイス","price":350,"emoji":"🍨","desc":"食後の甘味。","image":""},
+  {"id":"daily","cat":"event","name":"本日の限定","price":700,"emoji":"🎉","desc":"イベントメニュー。","image":""}
 ]

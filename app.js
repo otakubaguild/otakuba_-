@@ -1,49 +1,25 @@
-window.GuildApp = (() => {
-  let data, name = "";
-
-  const $ = id => document.getElementById(id);
-
-  function show(id){
-    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-    $(id).classList.add("active");
-  }
-
-  function getName(){ return name || localStorage.getItem("otakuba.v3.name") || "冒険者"; }
-
-  async function init(){
-    data = await GuildStorage.init();
-    name = localStorage.getItem("otakuba.v3.name") || "";
-    GuildBattle.init(data.monsters);
-    GuildMenu.init(data);
-
-    $("btnStartYes").onclick = () => {
-      GuildAudio.play("ok");
-      if(name){ applyName(); show("screenMenu"); }
-      else show("screenName");
-    };
-    $("btnStartNo").onclick = () => {
-      GuildAudio.play("bad");
-      const t = document.querySelector("#screenStart .subtitle");
-      t.textContent = "冷やかしか？さっさとメニューを開け";
-    };
-    $("btnNameOk").onclick = () => {
-      const v = $("nameInput").value.trim();
-      if(!v) return;
-      name = v; localStorage.setItem("otakuba.v3.name", name);
-      applyName();
-      GuildAudio.play("ok");
-      show("screenMenu");
-    };
-    $("btnReturn").onclick = () => show("screenStart");
-    applyName();
-  }
-
-  function applyName(){
-    $("adventurerName").textContent = getName();
-    const visits = Number(localStorage.getItem("otakuba.v3.visits") || "1");
-    $("levelBadge").textContent = `Lv.${Math.max(1, visits)}`;
-  }
-
-  return {init, show, getName};
+window.GuildApp = {VERSION:'3.0-full-modular'};
+(async function(){
+  const {$}=GuildUtils;
+  const data = await GuildStorage.init();
+  GuildAudio.init(data.settings);
+  GuildBattle.init(data);
+  GuildMenu.init(data);
+  if($('appVersion')) $('appVersion').textContent = GuildApp.VERSION;
+  if(data.currentCustomer) $('nameInput').value=data.currentCustomer;
+  $('btnStartYes').onclick=()=>{ GuildAudio.playSe('ok'); GuildAudio.playBgm('title'); data.currentCustomer ? (GuildUI.show('screenMain'), GuildBattle.render()) : GuildUI.show('screenName'); };
+  $('btnStartNo').onclick=()=>{ GuildAudio.playSe('cancel'); GuildUI.toast('冷やかしか？さっさとメニューを開け'); };
+  $('btnAdmin').onclick=()=>location.href='admin.html';
+  $('btnBackWelcome').onclick=()=>{ GuildAudio.playSe('cancel'); GuildUI.show('screenWelcome'); };
+  $('btnNameOk').onclick=()=>{ const n=$('nameInput').value.trim(); if(!n){ GuildAudio.playSe('cancel'); GuildUI.toast('名前を入力してください'); return; } GuildAudio.playSe('ok'); GuildCustomer.setName(n); GuildUI.show('screenMain'); GuildBattle.render(); };
+  $('btnCloseMenu').onclick=()=>GuildUI.closeModals();
+  $('btnCancelOrder').onclick=GuildOrder.cancelPending;
+  $('btnNoOrder').onclick=GuildOrder.cancelPending;
+  $('btnDoOrder').onclick=GuildOrder.confirmOrder;
+  $('btnCheckout').onclick=GuildOrder.checkoutAsk;
+  $('btnCancelCheckout').onclick=()=>GuildUI.closeModals();
+  $('btnNoCheckout').onclick=()=>GuildUI.closeModals();
+  $('btnDoCheckout').onclick=GuildOrder.checkoutDo;
+  GuildUI.show('screenWelcome');
+  GuildAudio.playBgm('title');
 })();
-document.addEventListener("DOMContentLoaded", GuildApp.init);

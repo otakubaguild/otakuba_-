@@ -1,43 +1,44 @@
 {
-  "guildName": "おたく場ギルド",
-  "currency": "G",
-  "discordWebhookUrl": "",
-  "battleMode": "continue",
-  "adminPassword": "OTAKU",
-  "categories": [
-    {
-      "id": "all",
-      "name": "全部"
-    },
-    {
-      "id": "drink",
-      "name": "酒場"
-    },
-    {
-      "id": "food",
-      "name": "食事"
-    },
-    {
-      "id": "soft",
-      "name": "回復"
-    },
-    {
-      "id": "special",
-      "name": "限定"
-    }
+  "version":"3.0-full-modular",
+  "guildName":"おたく場ギルド",
+  "currency":"G",
+  "discordWebhookUrl":"",
+  "gasUrl":"",
+  "notifyOn":true,
+  "adminPassword":"OTAKU",
+  "defaultBg":"assets/bg/background.jpg",
+  "levelStep":3000,
+  "categories":[
+    {"id":"food","name":"フード","icon":"🍖"},
+    {"id":"drink","name":"ドリンク","icon":"🥤"},
+    {"id":"alcohol","name":"酒","icon":"🍺"},
+    {"id":"dessert","name":"デザート","icon":"🍰"},
+    {"id":"event","name":"イベント","icon":"🎉"}
   ],
-  "bgmVolume": 0.45,
-  "seVolume": 0.9,
-  "audioFiles": {
-    "title": "冒険への誘い.mp3",
-    "slime": "maou_bgm_fantasy15.mp3",
-    "goblin": "Baring_Their_Fangs.mp3",
-    "orc": "反撃の一矢.mp3",
-    "cave": "Rumbling.mp3",
-    "ruins": "龍太鼓.mp3",
-    "maou": "Extinguish.mp3",
-    "ending": "March_for__delightful_future.mp3",
-    "victory": "RPG風ファンファーレ.mp3",
-    "levelup": "レベルアップ.mp3"
-  }
+  "notice":{"enabled":false,"title":"本日のお知らせ","body":"","position":"top"},
+  "audioFiles":{
+    "bgm":{
+      "title":"assets/bgm/title.mp3",
+      "slime":"assets/bgm/slime.mp3",
+      "goblin":"assets/bgm/goblin.mp3",
+      "orc":"assets/bgm/orc.mp3",
+      "cave":"assets/bgm/cave.mp3",
+      "ruins":"assets/bgm/ruins.mp3",
+      "maou":"assets/bgm/maou.mp3",
+      "ending":"assets/bgm/ending.mp3"
+    },
+    "se":{
+      "ok":"assets/se/ok.mp3",
+      "cancel":"assets/se/cancel.mp3",
+      "bad":"assets/se/cancel.mp3",
+      "add":"assets/se/add.mp3",
+      "confirm":"assets/se/ok.mp3",
+      "damage":"assets/se/damage.mp3",
+      "defeat":"assets/se/cancel.mp3",
+      "levelup":"assets/se/levelup.mp3",
+      "victory":"assets/se/victory.mp3"
+    }
+  },
+  "bgmVolume":0.45,
+  "seVolume":0.9
 }
