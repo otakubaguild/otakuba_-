@@ -22,7 +22,7 @@ html.admin-locked .admin-app{display:none!important}
 .customer-form{display:grid;gap:8px}.customer-form label{display:grid;gap:4px;color:var(--gold);font-size:12px}.customer-form textarea{min-height:72px}.customer-savebar{position:sticky;bottom:10px;z-index:30;margin-top:12px;background:rgba(0,0,0,.72);border:1px solid rgba(246,200,79,.55);border-radius:14px;padding:10px;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
 .asset-preview{display:grid;grid-template-columns:1fr 92px;gap:8px;align-items:center}.asset-preview img{width:92px;height:92px;object-fit:cover;border:1px solid var(--line);border-radius:10px;background:#000}.asset-preview.enemy img{object-fit:contain}.asset-note{font-size:11px;opacity:.75;color:var(--gold)}
 @media (max-width:719px){.customer-meta{grid-template-columns:1fr 1fr}.customer-card{padding:10px}.customer-name{font-size:18px}.table.customer-old{display:none}}
-</style><script>(function(){try{localStorage.removeItem('otakubaAdminAuth.v1')}catch(e){};if(sessionStorage.getItem('otakubaAdminSession.v1')!=='ok')document.documentElement.classList.add('admin-locked')})();</script></head><body><div id="adminLogin"><div class="panel login-card"><div class="login-title">🔐 管理者ログイン</div><p class="tiny">パスワードを入力してください</p><input id="adminPassInput" type="password" placeholder="パスワード"><button class="btn gold" id="adminLoginBtn" style="width:100%;margin-top:10px">ログイン</button><div id="adminLoginError" class="login-error"></div><button class="btn small" onclick="location.href='index.html'" style="width:100%;margin-top:8px">一般画面へ戻る</button></div></div><div class="admin-app"><div id="toast" class="toast"></div><div class="admin-head"><h1>おたく場ギルド 管理画面 <span class="tiny">v3.0</span></h1><button class="btn small" onclick="location.href='index.html'">一般画面</button><button class="btn red small" id="adminLogoutBtn">ログアウト</button></div><div class="admin-tabs" id="tabs"></div><div id="sections"></div></div><script>
+</style><script>(function(){try{localStorage.removeItem('otakubaAdminAuth.v1');sessionStorage.removeItem('otakubaAdminSession.v1')}catch(e){}document.documentElement.classList.add('admin-locked')})();</script></head><body><div id="adminLogin"><div class="panel login-card"><div class="login-title">🔐 管理者ログイン</div><p class="tiny">パスワードを入力してください</p><input id="adminPassInput" type="password" placeholder="パスワード"><button class="btn gold" id="adminLoginBtn" style="width:100%;margin-top:10px">ログイン</button><div id="adminLoginError" class="login-error"></div><button class="btn small" onclick="location.href='index.html'" style="width:100%;margin-top:8px">一般画面へ戻る</button></div></div><div class="admin-app"><div id="toast" class="toast"></div><div class="admin-head"><h1>おたく場ギルド 管理画面 <span class="tiny">v3.0-admin-pass-fixed</span></h1><button class="btn small" onclick="location.href='index.html'">一般画面</button><button class="btn red small" id="adminLogoutBtn">ログアウト</button></div><div class="admin-tabs" id="tabs"></div><div id="sections"></div></div><script>
 (function(){'use strict';
 const APP_VERSION='3.0-fixed10-overflow'; const DEFAULT_GAS_URL='https://script.google.com/macros/s/AKfycbzX6hTXf6HWtpVarXymnKc2xGA6BhkmIhXMu4QIweqHJlkADWLlHDIM0daJJuXXJgjpLA/exec'; const KEY='otakubaGuildApp.v1.complete'; const OLD='otakubaGuildApp.v2.masterMenu';
 const CATS={food:'フード',drink:'ドリンク',alcohol:'アルコール',dessert:'デザート',event:'イベント'}; const CAT_KEYS=Object.keys(CATS);
@@ -194,4 +194,46 @@ async function sendGasAction(id,action,itemId,currentQty){const input=$('gasFetc
 async function sendTest(){const url=($('gasUrl').value||'').trim(); if(!url){toast('URL未設定');return} try{await fetch(url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'test',message:'おたく場ギルド通知テスト',time:new Date().toISOString()})});toast('通知テスト送信')}catch(e){toast('送信失敗')}}
 initTabs(); render();
 })();
-</script><script>(function(){const input=document.getElementById('adminPassInput');const btn=document.getElementById('adminLoginBtn');const err=document.getElementById('adminLoginError');function login(){if((input.value||'').trim()==='OTAKU'){try{localStorage.removeItem('otakubaAdminAuth.v1');sessionStorage.setItem('otakubaAdminSession.v1','ok')}catch(e){}document.documentElement.classList.remove('admin-locked');err.textContent=''}else{err.textContent='パスワードが違います';input.value='';input.focus()}}if(btn)btn.onclick=login;if(input)input.addEventListener('keydown',e=>{if(e.key==='Enter')login()});const out=document.getElementById('adminLogoutBtn');if(out)out.onclick=function(){try{localStorage.removeItem('otakubaAdminAuth.v1');sessionStorage.removeItem('otakubaAdminSession.v1')}catch(e){}document.documentElement.classList.add('admin-locked');if(input){input.value='';setTimeout(()=>input.focus(),50)}}})();</script></body></html>
+</script><script>(function(){
+  const PASSWORD = 'OTAKU';
+  const input = document.getElementById('adminPassInput');
+  const btn = document.getElementById('adminLoginBtn');
+  const err = document.getElementById('adminLoginError');
+  const root = document.documentElement;
+
+  // 認証情報を保存しない。ページを開くたびに必ずロックする。
+  try{
+    localStorage.removeItem('otakubaAdminAuth.v1');
+    sessionStorage.removeItem('otakubaAdminSession.v1');
+  }catch(e){}
+  root.classList.add('admin-locked');
+
+  function login(){
+    if((input.value || '').trim() === PASSWORD){
+      root.classList.remove('admin-locked');
+      if(err) err.textContent = '';
+      if(input) input.value = '';
+    }else{
+      if(err) err.textContent = 'パスワードが違います';
+      if(input){ input.value = ''; input.focus(); }
+    }
+  }
+
+  if(btn) btn.onclick = login;
+  if(input){
+    setTimeout(() => input.focus(), 120);
+    input.addEventListener('keydown', e => { if(e.key === 'Enter') login(); });
+  }
+
+  const out = document.getElementById('adminLogoutBtn');
+  if(out){
+    out.onclick = function(){
+      try{
+        localStorage.removeItem('otakubaAdminAuth.v1');
+        sessionStorage.removeItem('otakubaAdminSession.v1');
+      }catch(e){}
+      root.classList.add('admin-locked');
+      if(input){ input.value = ''; setTimeout(() => input.focus(), 80); }
+    };
+  }
+})();</script></body></html>
