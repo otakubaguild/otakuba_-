@@ -26,28 +26,18 @@
       "name": "限定"
     }
   ],
-  "audio": {
-    "bgm": {
-      "title": "冒険への誘い.mp3",
-      "slime": "maou_bgm_fantasy15.mp3",
-      "goblin": "Baring_Their_Fangs.mp3",
-      "orc": "反撃の一矢.mp3",
-      "cave": "Rumbling.mp3",
-      "ruins": "龍太鼓.mp3",
-      "maou": "Extinguish.mp3",
-      "ending": "March_for__delightful_future.mp3"
-    },
-    "se": {
-      "ok": "maou_se_system37.mp3",
-      "cancel": "maou_se_system49.mp3",
-      "add": "maou_se_onepoint16.mp3",
-      "hit": "maou_se_onepoint20.mp3",
-      "defeat": "maou_se_system49.mp3",
-      "levelup": "レベルアップ.mp3",
-      "fanfare": "ファンファーレ.mp3"
-    },
-    "bgmVolume": 0.45,
-    "seVolume": 0.8
-  },
-  "version": "3.0"
+  "bgmVolume": 0.45,
+  "seVolume": 0.9,
+  "audioFiles": {
+    "title": "冒険への誘い.mp3",
+    "slime": "maou_bgm_fantasy15.mp3",
+    "goblin": "Baring_Their_Fangs.mp3",
+    "orc": "反撃の一矢.mp3",
+    "cave": "Rumbling.mp3",
+    "ruins": "龍太鼓.mp3",
+    "maou": "Extinguish.mp3",
+    "ending": "March_for__delightful_future.mp3",
+    "victory": "RPG風ファンファーレ.mp3",
+    "levelup": "レベルアップ.mp3"
+  }
 }
