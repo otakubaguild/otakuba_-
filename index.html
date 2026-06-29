@@ -90,15 +90,26 @@ function bgmKeyForEnemy(e){
   if(id.includes("dragon")||name.includes("ドラゴン")) return "orc";
   return "slime";
 }
-const APP_VERSION='3.0-audio'; const DEFAULT_GAS_URL='https://script.google.com/macros/s/AKfycbzX6hTXf6HWtpVarXymnKc2xGA6BhkmIhXMu4QIweqHJlkADWLlHDIM0daJJuXXJgjpLA/exec'; const KEY='otakubaGuildApp.v1.complete'; const OLD='otakubaGuildApp.v2.masterMenu';
+const APP_VERSION='3.0-fixed10-overflow'; const DEFAULT_GAS_URL='https://script.google.com/macros/s/AKfycbzX6hTXf6HWtpVarXymnKc2xGA6BhkmIhXMu4QIweqHJlkADWLlHDIM0daJJuXXJgjpLA/exec'; const KEY='otakubaGuildApp.v1.complete'; const OLD='otakubaGuildApp.v2.masterMenu';
 const CATS={food:'フード',drink:'ドリンク',alcohol:'アルコール',dessert:'デザート',event:'イベント'};
 const CAT_ICONS={food:'🍖',drink:'🥤',alcohol:'🍺',dessert:'🍰',event:'🎉'};
 const DEFAULT_PRODUCTS=[
 {id:uid(),cat:'food',name:'唐揚げ',price:600,emoji:'🍗',desc:'ギルド定番のフード。',image:''},{id:uid(),cat:'food',name:'ポテト',price:500,emoji:'🍟',desc:'みんなでつまめる。',image:''},{id:uid(),cat:'drink',name:'コーラ',price:400,emoji:'🥤',desc:'ソフトドリンク。',image:''},{id:uid(),cat:'drink',name:'メロンソーダ',price:400,emoji:'🥤',desc:'緑の回復薬。',image:''},{id:uid(),cat:'alcohol',name:'生ビール',price:600,emoji:'🍺',desc:'酒場の基本。',image:''},{id:uid(),cat:'alcohol',name:'ハイボール',price:550,emoji:'🥃',desc:'強炭酸。',image:''},{id:uid(),cat:'dessert',name:'アイス',price:350,emoji:'🍨',desc:'食後の甘味。',image:''},{id:uid(),cat:'event',name:'本日の限定',price:700,emoji:'🎉',desc:'イベントメニュー。',image:''}];
 function uid(){return 'id'+Math.random().toString(36).slice(2,9)+Date.now().toString(36)}
-function defaultEnemies(){const stages=['草原','森','洞窟','遺跡','魔王城入口','魔王城・大広間','雪山','砂漠','街道','地下酒場','古代図書館','竜の巣','深淵回廊','魔王の間','最終決戦'];const names=['スライム','ゴブリン','オーク','スケルトン','魔法使い','ミノタウロス','ガーゴイル','ドラゴン','魔王','ミミック','ゴブリン精鋭','オーク将軍','デーモン','魔王の側近','魔王・最終形態'];const imgs=['slime.png','goblin.png','orc.png','skeleton.png','mage.png','minotaur.png','gargoyle.png','dragon.png','demonlord.png','mimic.png','goblin.png','orc.png','mage.png','demonlord.png','dragon.png'];const bgs=['background.jpg','background.jpg','background.jpg','background.jpg','background.jpg','background.jpg','background.jpg','background.jpg','background.jpg','background.jpg','background.jpg','background.jpg','background.jpg','background.jpg','background.jpg'];return names.map((n,i)=>({id:'enemy'+(i+1),name:n,hp:(i+1)*100,maxHp:(i+1)*100,bg:bgs[i],stage:stages[i],image:imgs[i]}))}
+function defaultEnemies(){return [
+{id:'slime',name:'スライム',stage:'草原',hp:100,maxHp:100,bg:'grass.png',background:'grass.png',image:'slime.png'},
+{id:'goblin',name:'ゴブリン',stage:'森',hp:200,maxHp:200,bg:'forest.png',background:'forest.png',image:'goblin.png'},
+{id:'orc',name:'オーク',stage:'森',hp:350,maxHp:350,bg:'forest.png',background:'forest.png',image:'orc.png'},
+{id:'skeleton',name:'スケルトン',stage:'遺跡',hp:500,maxHp:500,bg:'ruins.png',background:'ruins.png',image:'skeleton.png'},
+{id:'mimic',name:'ミミック',stage:'洞窟',hp:700,maxHp:700,bg:'cave.png',background:'cave.png',image:'mimic.png'},
+{id:'gargoyle',name:'ガーゴイル',stage:'山岳',hp:900,maxHp:900,bg:'mountain.png',background:'mountain.png',image:'gargoyle.png'},
+{id:'dark_wizard',name:'ダークウィザード',stage:'魔王城',hp:1200,maxHp:1200,bg:'castle.png',background:'castle.png',image:'dark_wizard.png'},
+{id:'minotaur',name:'ミノタウロス',stage:'洞窟',hp:1600,maxHp:1600,bg:'cave.png',background:'cave.png',image:'minotaur.png'},
+{id:'dragon',name:'ドラゴン',stage:'火山',hp:2200,maxHp:2200,bg:'volcano.png',background:'volcano.png',image:'dragon.png'},
+{id:'maou',name:'魔王',stage:'魔王城',hp:3000,maxHp:3000,bg:'castle.png',background:'castle.png',image:'maou.png'}
+]}
 function defaults(){return {products:DEFAULT_PRODUCTS,orders:[],activeBill:[],sales:[],customers:[],settings:{notice:{enabled:false,title:'本日のお知らせ',body:'',position:'top'},gasUrl:'',notifyOn:true,currentEnemyIndex:0,enemies:defaultEnemies(),design:{bg:'background.jpg',bgm:''}},currentCustomer:''}}
-function migrate(o){const d=defaults(); if(!o||typeof o!=='object')return d; o.products=Array.isArray(o.products)&&o.products.length?o.products:d.products; o.orders=Array.isArray(o.orders)?o.orders:[]; o.activeBill=Array.isArray(o.activeBill)?o.activeBill:[]; o.sales=Array.isArray(o.sales)?o.sales:[]; o.customers=Array.isArray(o.customers)?o.customers:[]; o.settings=o.settings||{}; o.settings.notice=o.settings.notice||d.settings.notice; o.settings.enemies=Array.isArray(o.settings.enemies)&&o.settings.enemies.length?o.settings.enemies:d.settings.enemies; while(o.settings.enemies.length<15)o.settings.enemies.push(d.settings.enemies[o.settings.enemies.length]); o.settings.enemies=o.settings.enemies.map((e,i)=>{const de=d.settings.enemies[i]; e=e||{}; if(!e.image)e.image=de.image; if(!e.bg)e.bg=de.bg; return e}); o.settings.currentEnemyIndex=Number.isFinite(+o.settings.currentEnemyIndex)?+o.settings.currentEnemyIndex:0; o.settings.gasUrl=o.settings.gasUrl||''; o.settings.notifyOn=o.settings.notifyOn!==false; o.settings.design=o.settings.design||d.settings.design; if(!o.currentCustomer&&o.name)o.currentCustomer=o.name; return o;}
+function migrate(o){const d=defaults(); if(!o||typeof o!=='object')return d; o.products=Array.isArray(o.products)&&o.products.length?o.products:d.products; o.orders=Array.isArray(o.orders)?o.orders:[]; o.activeBill=Array.isArray(o.activeBill)?o.activeBill:[]; o.sales=Array.isArray(o.sales)?o.sales:[]; o.customers=Array.isArray(o.customers)?o.customers:[]; o.settings=o.settings||{}; o.settings.notice=o.settings.notice||d.settings.notice; const oldEnemies=Array.isArray(o.settings.enemies)?o.settings.enemies:[]; o.settings.enemies=defaultEnemies().map(base=>{const old=oldEnemies.find(x=>x&&(x.id===base.id||x.name===base.name)); const hp=old&&Number.isFinite(Number(old.hp))?Math.max(0,Math.min(Number(old.hp),base.maxHp)):base.hp; return Object.assign({},base,{hp});}); o.settings.currentEnemyIndex=Number.isFinite(+o.settings.currentEnemyIndex)?Math.max(0,Math.min(o.settings.enemies.length-1,+o.settings.currentEnemyIndex)):0; o.settings.gasUrl=o.settings.gasUrl||''; o.settings.notifyOn=o.settings.notifyOn!==false; o.settings.design=o.settings.design||d.settings.design; if(!o.currentCustomer&&o.name)o.currentCustomer=o.name; return o;}
 function load(){try{let cur=JSON.parse(localStorage.getItem(KEY)); if(cur)return migrate(cur); let old=JSON.parse(localStorage.getItem(OLD)); if(old){old.currentCustomer=old.name||old.currentCustomer||''; return migrate(old)}}catch(e){} return defaults()}
 let state=load(); function save(){localStorage.setItem(KEY,JSON.stringify(state)); localStorage.setItem(OLD,JSON.stringify(state))}
 function $(id){return document.getElementById(id)} function fileUrl(name){name=String(name||'').trim(); if(!name)return 'background.jpg'; if(/^data:image\//.test(name)||/^https?:\/\//.test(name))return name; return name.replace(/\\/g,'/').replace(/^\/+/, '')} function yen(n){return (Number(n)||0).toLocaleString('ja-JP')+'G'} function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
@@ -107,7 +118,7 @@ function applyStageBg(bg){const fallback=fileUrl((state.settings.design&&state.s
 function closeAllModals(){document.querySelectorAll('.modal').forEach(m=>m.classList.remove('active'))}
 function show(id){closeAllModals(); document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active')); const target=$(id); if(target)target.classList.add('active'); if(id==='main')renderMain(); else if(id==='welcome')GuildAudio.playBgm('title')}
 function customer(){let n=(state.currentCustomer||'').trim(); if(!n)return null; let c=state.customers.find(x=>x.name===n); if(!c){c={id:uid(),name:n,level:1,title:'新米冒険者',visits:0,total:0,lastVisit:'',memo:''}; state.customers.push(c)} return c}
-function enemy(){let i=Math.max(0,Math.min(14,Number(state.settings.currentEnemyIndex)||0)); state.settings.currentEnemyIndex=i; return state.settings.enemies[i]}
+function enemy(){let i=Math.max(0,Math.min((state.settings.enemies||[]).length-1,Number(state.settings.currentEnemyIndex)||0)); state.settings.currentEnemyIndex=i; return state.settings.enemies[i]}
 function renderMain(){const c=customer(); const e=enemy(); if(!e)return; e.maxHp=Number(e.maxHp||e.hp||1); e.hp=Number.isFinite(Number(e.hp))?Number(e.hp):e.maxHp; const bg=e.bg||e.background||'background.jpg'; $('advInfo').textContent=c?c.name:'名もなき冒険者'; $('advSub').textContent='Lv.'+(c?c.level:1)+' / '+(c&&c.title?c.title:'二つ名なし'); $('stageInfo').textContent='現在ステージ：'+(e.stage||'---'); $('enemyName').textContent=e.name; $('enemyHpText').textContent='HP '+Math.max(0,Math.ceil(e.hp))+' / '+e.maxHp; $('enemyHpFill').style.width=Math.max(0,Math.min(100,(Number(e.hp)/Number(e.maxHp||1))*100))+'%'; applyStageBg(bg); GuildAudio.playBgm(bgmKeyForEnemy(e)); $('enemySprite').innerHTML=e.image?'<img src="'+esc(fileUrl(e.image))+'" alt="'+esc(e.name)+'" onerror="this.replaceWith(document.createTextNode(\'👾\'))">':'👾'; renderNotice(); save()}
 function renderNotice(){const n=state.settings.notice||{}; const box=$('noticeBox'); if(!n.enabled||!n.body){box.innerHTML='';return} const pos=n.position||'top'; box.style.order=pos==='bottom'?'2':'-1'; box.innerHTML='<div class="panel notice notice-pos-'+esc(pos)+'"><b class="goldtxt">📢 '+esc(n.title||'本日のお知らせ')+'</b><div style="margin-top:6px;line-height:1.5">'+esc(n.body).replace(/\n/g,'<br>')+'</div></div>'}
 function openMenu(cat){$('modalTitle').textContent=(CAT_ICONS[cat]||'')+' '+(CATS[cat]||cat); const list=$('productList'); const items=state.products.filter(p=>p.cat===cat && p.hidden!==true); list.innerHTML=items.length?'':'<div class="empty">このカテゴリの商品はありません</div>'; items.forEach(p=>{const el=document.createElement('div'); el.className='panel product'; el.setAttribute('role','button'); el.tabIndex=0; el.innerHTML='<div class="product-info"><div class="product-name">'+(p.image?'<img src="'+esc(fileUrl(p.image))+'" style="width:48px;height:48px;object-fit:cover;border-radius:8px;vertical-align:middle;margin-right:8px" onerror="this.style.display=\'none\'">':esc(p.emoji||'🍽️')+' ')+esc(p.name)+'</div><div class="product-desc">'+esc(p.desc||'')+'</div><div class="product-price">'+yen(p.price)+'</div></div><button type="button" class="btn gold small" data-add-id="'+p.id+'">追加</button>'; const add=()=>addOrder(p.id); el.addEventListener('click',add); el.addEventListener('keydown',ev=>{if(ev.key==='Enter')add()}); el.querySelector('button').addEventListener('click',ev=>{ev.stopPropagation();add()}); list.appendChild(el)}); $('menuModal').classList.add('active')}
@@ -115,19 +126,141 @@ function addOrder(id){let p=state.products.find(x=>x.id===id); if(!p)return; let
 function orderItems(){return state.orders.map(o=>{const p=state.products.find(x=>x.id===o.id); return p?{id:p.id,name:p.name,cat:p.cat,price:Number(p.price)||0,qty:Number(o.qty)||0,subtotal:(Number(p.price)||0)*(Number(o.qty)||0)}:null}).filter(Boolean)}
 function renderOrders(){const list=$('orderList'); const items=orderItems(); const bill=Array.isArray(state.activeBill)?state.activeBill:[]; const billTotal=bill.reduce((s,i)=>s+Number(i.subtotal||0),0); list.innerHTML=items.length?'':'<div class="empty">受注はありません</div>'; items.forEach(i=>{const el=document.createElement('div'); el.className='panel order-item'; el.innerHTML='<div><b class="goldtxt">'+esc(i.name)+'</b><div class="tiny">'+yen(i.price)+' × '+i.qty+' = '+yen(i.subtotal)+'</div></div><div class="qty"><button type="button" class="btn small">−</button><span>'+i.qty+'</span><button type="button" class="btn small">＋</button><button type="button" class="btn red small">取消</button></div>'; const bs=el.querySelectorAll('button'); bs[0].onclick=()=>chg(i.id,-1); bs[1].onclick=()=>chg(i.id,1); bs[2].onclick=()=>del(i.id); list.appendChild(el)}); if(bill.length){const b=document.createElement('div'); b.className='billbox'; b.innerHTML='<b class="goldtxt">未会計の注文</b><div class="tiny">'+bill.map(i=>esc(i.name)+' × '+Number(i.qty||1)).join('<br>')+'</div><div class="greentxt">未会計合計 '+yen(billTotal)+'</div>'; list.appendChild(b)} $('orderTotal').textContent='今回の注文 '+yen(items.reduce((s,i)=>s+i.subtotal,0))+' / 未会計 '+yen(billTotal)}
 function chg(id,d){let o=state.orders.find(x=>x.id===id); if(!o)return; o.qty+=d; if(o.qty<=0)state.orders=state.orders.filter(x=>x.id!==id); save(); renderOrders()} function del(id){state.orders=state.orders.filter(x=>x.id!==id); save(); renderOrders()}
-function nextEnemy(){let idx=Number(state.settings.currentEnemyIndex)||0; if(idx<14)state.settings.currentEnemyIndex=idx+1; let e=enemy(); if(e.hp<=0)e.hp=e.maxHp; save(); renderMain()}
+function nextEnemy(){let idx=Number(state.settings.currentEnemyIndex)||0; if(idx<(state.settings.enemies||[]).length-1)state.settings.currentEnemyIndex=idx+1; let e=enemy(); if(e.hp<=0)e.hp=e.maxHp; save(); renderMain()}
 function recordSale(type,items,total,reason){const c=customer()||{name:'未登録',level:1,title:''}; const rec={id:uid(),type,customer:c.name,items,total,time:new Date().toISOString(),timeText:new Date().toLocaleString('ja-JP',{timeZone:'Asia/Tokyo'}),reason:reason||''}; state.sales.push(rec); if(type==='order'||type==='checkout'){c.total=(Number(c.total)||0)+total; c.lastVisit=rec.timeText} save(); return rec}
 async function notify(payload){const url=(state.settings.gasUrl||DEFAULT_GAS_URL||'').trim(); if(!url||state.settings.notifyOn===false){toast('通知URL未設定：端末内に保存しました');return false} try{await fetch(url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)});return true}catch(e){toast('通知送信に失敗：端末内には保存済み');return false}}
 function buildPayload(type,sale,items,total,extra){const c=customer(); const e=enemy(); return Object.assign({action:'order',type:type,orderId:sale.id,sale,adventurerId:(c&&c.id)||'',adventurer:(c&&c.name)||sale.customer||'未登録',name:(c&&c.name)||sale.customer||'未登録',title:(c&&c.title)||'',level:(c&&c.level)||1,visits:(c&&c.visits)||0,partyCount:1,items,total,enemy:{name:e.name,hp:e.hp,maxHp:e.maxHp,defeated:false},source:'index',appVersion:APP_VERSION,time:new Date().toLocaleString('ja-JP',{timeZone:'Asia/Tokyo'})},extra||{})}
 function sendKitchenOrder(){if($('main').classList.contains('combat-lock'))return; const items=orderItems(); if(!items.length){toast('受注がありません');return} const total=items.reduce((s,i)=>s+i.subtotal,0); const lines=items.map(i=>'・'+i.name+' ×'+i.qty+' = '+yen(i.subtotal)).join('\n'); if(!confirm('この内容でクエストを受注しますか？\n\n'+lines+'\n\n合計 '+yen(total))){return} $('confirmOrder').disabled=true; const sale=recordSale('order',items,total); state.activeBill=state.activeBill||[]; items.forEach(i=>{const old=state.activeBill.find(x=>x.id===i.id); if(old){old.qty+=i.qty; old.subtotal+=i.subtotal}else state.activeBill.push(Object.assign({},i))}); notify(buildPayload('order',sale,items,total)); state.orders=[]; save(); renderOrders(); renderMain(); $('ordersModal').classList.remove('active'); $('confirmOrder').disabled=false; toast('クエストを受注しました！')}
-function applyCheckoutDamage(total,done){const e=enemy(); const finalBoss=isFinalEnemy(e); const after=Math.max(0,Number(e.hp||0)-Number(total||0)); const defeated=after<=0; $('main').classList.add('combat-lock'); GuildAudio.playSe('damage'); $('damagePop').textContent='-'+yen(total); $('damagePop').classList.remove('on'); void $('damagePop').offsetWidth; $('damagePop').classList.add('on'); setTimeout(()=>{e.hp=after; renderMain()},450); setTimeout(()=>{if(defeated){$('defeatPop').textContent=finalBoss?'魔王討伐！':'撃破！'; $('defeatPop').classList.add('on'); if(finalBoss){GuildAudio.stopBgm(); GuildAudio.playSe('victory'); setTimeout(()=>GuildAudio.playBgm('ending'),8300)}else{GuildAudio.playSe('defeat')} setTimeout(()=>{$('defeatPop').classList.remove('on'); if(!finalBoss)nextEnemy(); done&&done(defeated);},finalBoss?9200:1400)}else{done&&done(defeated)}},2100)}
-function checkout(){if($('main').classList.contains('combat-lock'))return; const current=orderItems(); const bill=(Array.isArray(state.activeBill)?state.activeBill:[]).slice(); const all=bill.concat(current); const total=all.reduce((s,i)=>s+Number(i.subtotal||0),0); const msg=all.length?'帰還しますか？\n\n会計合計 '+yen(total)+'\n\nはいを押すと会計して敵にダメージを与えます。':'未会計の注文はありません。帰還しますか？'; if(!confirm(msg))return; const sale=recordSale('checkout',all,total); notify(buildPayload('checkout',sale,all,total)); const finish=(defeated)=>{const c=customer(); if(c){c.visits=(Number(c.visits)||0)+1;c.level=Math.max(1,Math.floor((Number(c.total)||0)/3000)+1);c.lastVisit=new Date().toLocaleString('ja-JP',{timeZone:'Asia/Tokyo'})} state.orders=[]; state.activeBill=[]; save(); renderOrders(); renderMain(); closeAllModals(); $('main').classList.remove('combat-lock'); $('damagePop').classList.remove('on'); toast(defeated?'撃破！ 会計完了':'クエスト達成（会計）を送信しました'); setTimeout(()=>show('welcome'),900)}; if(total>0)applyCheckoutDamage(total,finish); else finish(false)}
+function applyCheckoutDamage(total,done){
+  let remaining=Math.max(0,Number(total)||0);
+  let defeatedAny=false;
+  let finalDefeated=false;
+  $('main').classList.add('combat-lock');
+  show('main');
+  function step(){
+    const e=enemy();
+    if(!e||remaining<=0){ done&&done(defeatedAny,finalDefeated); return; }
+    e.maxHp=Number(e.maxHp||e.hp||1);
+    e.hp=Number.isFinite(Number(e.hp))?Number(e.hp):e.maxHp;
+    if(e.hp<=0){
+      if(isFinalEnemy(e)){ done&&done(defeatedAny,finalDefeated); return; }
+      nextEnemy();
+      setTimeout(step,450);
+      return;
+    }
+    const chunk=Math.min(remaining,e.hp);
+    remaining-=chunk;
+    GuildAudio.playSe('damage');
+    $('damagePop').textContent='-'+yen(chunk);
+    $('damagePop').classList.remove('on');
+    void $('damagePop').offsetWidth;
+    $('damagePop').classList.add('on');
+    setTimeout(()=>{
+      e.hp=Math.max(0,Number(e.hp||0)-chunk);
+      renderMain();
+    },420);
+    setTimeout(()=>{
+      if(e.hp<=0){
+        defeatedAny=true;
+        const finalBoss=isFinalEnemy(e);
+        if(finalBoss) finalDefeated=true;
+        $('defeatPop').textContent=finalBoss?'魔王討伐！':'撃破！';
+        $('defeatPop').classList.add('on');
+        if(finalBoss){
+          GuildAudio.stopBgm();
+          GuildAudio.playSe('victory');
+          setTimeout(()=>GuildAudio.playBgm('ending'),8300);
+        }else{
+          GuildAudio.playSe('defeat');
+        }
+        setTimeout(()=>{
+          $('defeatPop').classList.remove('on');
+          if(finalBoss){
+            done&&done(defeatedAny,finalDefeated);
+          }else{
+            nextEnemy();
+            setTimeout(step,650);
+          }
+        }, finalBoss?9200:1350);
+      }else{
+        setTimeout(step,450);
+      }
+    },1350);
+  }
+  step();
+}
+function checkout(){if($('main').classList.contains('combat-lock'))return; const current=orderItems(); const bill=(Array.isArray(state.activeBill)?state.activeBill:[]).slice(); const all=bill.concat(current); const total=all.reduce((s,i)=>s+Number(i.subtotal||0),0); const msg=all.length?'帰還しますか？\n\n会計合計 '+yen(total)+'\n\n会計時は未送信の注文分だけ敵へダメージを与えます。超過分は次の敵にも順番に入ります。':'未会計の注文はありません。帰還しますか？'; if(!confirm(msg))return; const sale=recordSale('checkout',all,total); notify(buildPayload('checkout',sale,all,total)); const finish=(defeated)=>{const c=customer(); if(c){c.visits=(Number(c.visits)||0)+1;c.level=Math.max(1,Math.floor((Number(c.total)||0)/3000)+1);c.lastVisit=new Date().toLocaleString('ja-JP',{timeZone:'Asia/Tokyo'})} state.orders=[]; state.activeBill=[]; save(); renderOrders(); renderMain(); closeAllModals(); $('main').classList.remove('combat-lock'); $('damagePop').classList.remove('on'); toast(defeated?'撃破！ 会計完了':'クエスト達成（会計）を送信しました'); setTimeout(()=>show('welcome'),900)}; if(total>0)applyCheckoutDamage(total,finish); else finish(false)}
 
 function updateOrderBadge(){const n=state.orders.reduce((s,o)=>s+(Number(o.qty)||0),0); const b=$('openOrders'); if(b)b.textContent='📜 受注一覧'+(n?'（'+n+'）':'')}
 function orderConfirmScreen(){GuildAudio.playSe('ok');const items=orderItems(); if(!items.length){toast('受注がありません');return} const total=items.reduce((s,i)=>s+i.subtotal,0); $('orderConfirmBody').textContent='この内容でクエストを受注しますか？\n\n'+items.map(i=>'・'+i.name+' ×'+i.qty+' = '+yen(i.subtotal)).join('\n')+'\n\n合計 '+yen(total); $('ordersModal').classList.remove('active'); $('orderConfirmModal').classList.add('active')}
-function sendKitchenOrderDirect(){GuildAudio.playSe('confirm');const items=orderItems(); if(!items.length){toast('受注がありません');return} const total=items.reduce((s,i)=>s+i.subtotal,0); $('doOrderYes').disabled=true; const sale=recordSale('order',items,total); state.activeBill=state.activeBill||[]; items.forEach(i=>{const old=state.activeBill.find(x=>x.id===i.id); if(old){old.qty+=i.qty; old.subtotal+=i.subtotal}else state.activeBill.push(Object.assign({},i))}); notify(buildPayload('order',sale,items,total)); state.orders=[]; save(); renderOrders(); renderMain(); updateOrderBadge(); $('orderConfirmModal').classList.remove('active'); $('doOrderYes').disabled=false; toast('クエストを受注しました！')}
-function checkoutConfirmScreen(){GuildAudio.playSe('ok');if($('main').classList.contains('combat-lock'))return; const current=orderItems(); const bill=(Array.isArray(state.activeBill)?state.activeBill:[]).slice(); const all=bill.concat(current); const total=all.reduce((s,i)=>s+Number(i.subtotal||0),0); $('checkoutConfirmBody').textContent=(all.length?'帰還しますか？\n\n'+all.map(i=>'・'+i.name+' ×'+Number(i.qty||1)+' = '+yen(i.subtotal)).join('\n')+'\n\n会計合計 '+yen(total)+'\n\nはいを押すと会計して敵にダメージを与えます。':'未会計の注文はありません。帰還しますか？'); closeAllModals(); $('checkoutConfirmModal').classList.add('active')}
-function checkoutDirect(){const current=orderItems(); const bill=(Array.isArray(state.activeBill)?state.activeBill:[]).slice(); const all=bill.concat(current); const total=all.reduce((sum,i)=>sum+Number(i.subtotal||0),0); $('checkoutConfirmModal').classList.remove('active'); const beforeEnemy=enemy(); const sale=recordSale('checkout',all,total); notify(buildPayload('checkout',sale,all,total)); const finish=(defeated)=>{const c=customer(); let oldLv=c?Number(c.level||1):1; if(c){c.visits=(Number(c.visits)||0)+1;c.level=Math.max(1,Math.floor((Number(c.total)||0)/3000)+1);c.lastVisit=new Date().toLocaleString('ja-JP',{timeZone:'Asia/Tokyo'}); if(c.level>oldLv)GuildAudio.playSe('levelup')} state.orders=[]; state.activeBill=[]; save(); renderOrders(); renderMain(); updateOrderBadge(); closeAllModals(); $('main').classList.remove('combat-lock'); $('damagePop').classList.remove('on'); const finalBoss=defeated&&isFinalEnemy(beforeEnemy); toast(finalBoss?'魔王を討伐した！':(defeated?'撃破！ 会計完了':'クエスト達成（会計）を送信しました')); setTimeout(()=>show('welcome'),finalBoss?12000:900)}; if(total>0)applyCheckoutDamage(total,finish); else finish(false)}
+function sendKitchenOrderDirect(){
+  GuildAudio.playSe('confirm');
+  if($('main').classList.contains('combat-lock'))return;
+  const items=orderItems();
+  if(!items.length){toast('受注がありません');return}
+  const total=items.reduce((s,i)=>s+i.subtotal,0);
+  $('doOrderYes').disabled=true;
+  const sale=recordSale('order',items,total);
+  state.activeBill=state.activeBill||[];
+  items.forEach(i=>{
+    const old=state.activeBill.find(x=>x.id===i.id);
+    if(old){old.qty+=i.qty; old.subtotal+=i.subtotal}else state.activeBill.push(Object.assign({},i))
+  });
+  notify(buildPayload('order',sale,items,total));
+  state.orders=[];
+  save();
+  renderOrders();
+  renderMain();
+  updateOrderBadge();
+  $('orderConfirmModal').classList.remove('active');
+  show('main');
+
+  const finish=(defeated,finalDefeated)=>{
+    save();
+    renderOrders();
+    renderMain();
+    updateOrderBadge();
+    $('main').classList.remove('combat-lock');
+    $('damagePop').classList.remove('on');
+    $('doOrderYes').disabled=false;
+    toast(finalDefeated?'魔王を討伐した！':(defeated?'撃破！ 注文ダメージが入りました':'注文完了！ ダメージが入りました'));
+  };
+  if(total>0)applyCheckoutDamage(total,finish); else finish(false);
+}
+function checkoutConfirmScreen(){GuildAudio.playSe('ok');if($('main').classList.contains('combat-lock'))return; const current=orderItems(); const bill=(Array.isArray(state.activeBill)?state.activeBill:[]).slice(); const all=bill.concat(current); const total=all.reduce((s,i)=>s+Number(i.subtotal||0),0); $('checkoutConfirmBody').textContent=(all.length?'帰還しますか？\n\n'+all.map(i=>'・'+i.name+' ×'+Number(i.qty||1)+' = '+yen(i.subtotal)).join('\n')+'\n\n会計合計 '+yen(total)+'\n\n会計時は未送信の注文分だけ敵へダメージを与えます。超過分は次の敵にも順番に入ります。':'未会計の注文はありません。帰還しますか？'); closeAllModals(); $('checkoutConfirmModal').classList.add('active')}
+function checkoutDirect(){
+  const current=orderItems();
+  const bill=(Array.isArray(state.activeBill)?state.activeBill:[]).slice();
+  const all=bill.concat(current);
+  const total=all.reduce((sum,i)=>sum+Number(i.subtotal||0),0);
+  const damageTotal=current.reduce((sum,i)=>sum+Number(i.subtotal||0),0);
+  $('checkoutConfirmModal').classList.remove('active');
+  const beforeEnemy=enemy();
+  const sale=recordSale('checkout',all,total);
+  notify(buildPayload('checkout',sale,all,total,{checkoutDamage:damageTotal}));
+  const finish=(defeated,finalDefeated)=>{
+    const c=customer();
+    let oldLv=c?Number(c.level||1):1;
+    if(c){
+      c.visits=(Number(c.visits)||0)+1;
+      c.level=Math.max(1,Math.floor((Number(c.total)||0)/3000)+1);
+      c.lastVisit=new Date().toLocaleString('ja-JP',{timeZone:'Asia/Tokyo'});
+      if(c.level>oldLv)GuildAudio.playSe('levelup')
+    }
+    state.orders=[];
+    state.activeBill=[];
+    save();
+    renderOrders();
+    renderMain();
+    updateOrderBadge();
+    closeAllModals();
+    $('main').classList.remove('combat-lock');
+    $('damagePop').classList.remove('on');
+    toast(finalDefeated?'魔王を討伐した！':(defeated?'撃破！ 会計完了':'クエスト達成（会計）を送信しました'));
+    setTimeout(()=>show('welcome'),finalDefeated?12000:900)
+  };
+  if(damageTotal>0)applyCheckoutDamage(damageTotal,finish); else finish(false)
+}
 $('startBtn').onclick=()=>{GuildAudio.playSe('ok'); GuildAudio.playBgm('title'); show('nameScreen')}; $('noBtn').onclick=()=>{GuildAudio.playSe('cancel');toast('冷やかしか？さっさとメニューを開け')}; $('welcomeAdminBtn').onclick=()=>location.href='admin.html'; $('backWelcomeBtn').onclick=()=>{GuildAudio.playSe('cancel');show('welcome')}; $('saveNameBtn').onclick=()=>{const n=$('advName').value.trim(); if(!n){GuildAudio.playSe('cancel');toast('名前を入力してください');return} GuildAudio.playSe('ok'); state.currentCustomer=n; customer(); save(); show('main')}; document.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{GuildAudio.playSe('ok');openMenu(b.dataset.cat)}); document.addEventListener('click',ev=>{const cat=ev.target.closest('[data-cat]'); if(cat){openMenu(cat.dataset.cat);return} const add=ev.target.closest('[data-add-id]'); if(add){ev.preventDefault();ev.stopPropagation();addOrder(add.dataset.addId);return}}); $('closeMenu').onclick=()=>{GuildAudio.playSe('cancel');$('menuModal').classList.remove('active')}; $('openOrders').onclick=()=>{GuildAudio.playSe('ok');renderOrders();$('ordersModal').classList.add('active')}; $('closeOrders').onclick=()=>{GuildAudio.playSe('cancel');$('ordersModal').classList.remove('active')}; $('confirmOrder').onclick=orderConfirmScreen; const chk=$('checkoutFromOrders'); if(chk)chk.onclick=checkoutConfirmScreen; $('clearOrder').onclick=()=>{GuildAudio.playSe('cancel');state.orders=[];save();renderOrders();updateOrderBadge()}; $('questClear').onclick=checkoutConfirmScreen; $('cancelOrderConfirm').onclick=()=>$('orderConfirmModal').classList.remove('active'); $('doOrderNo').onclick=()=>{GuildAudio.playSe('cancel');$('orderConfirmModal').classList.remove('active')}; $('doOrderYes').onclick=sendKitchenOrderDirect; $('cancelCheckoutConfirm').onclick=()=>$('checkoutConfirmModal').classList.remove('active'); $('doCheckoutNo').onclick=()=>{GuildAudio.playSe('cancel');$('checkoutConfirmModal').classList.remove('active')}; $('doCheckoutYes').onclick=checkoutDirect; if($('appVersion'))$('appVersion').textContent=APP_VERSION; if(state.currentCustomer)$('advName').value=state.currentCustomer; renderMain(); updateOrderBadge();
 })();
 </script></body></html>
