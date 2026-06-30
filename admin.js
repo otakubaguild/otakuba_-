@@ -1,116 +1,30 @@
 (async function(){
   const {$, esc, yen} = GuildUtils;
   const data = await GuildStorage.init();
-  const SESSION='otakuba.v3.full.admin.session';
-  const tabs=[['dash','📊 概要'],['menu','🍴 メニュー'],['monsters','⚔️ 討伐'],['settings','⚙️ 設定'],['customers','👤 顧客'],['sales','💰 売上'],['export','💾 出力'],['reset','🧹 初期化']];
-  let current='dash';
-  function loginOk(){ return sessionStorage.getItem(SESSION)==='ok'; }
-  function showLogin(){ $('adminLogin').classList.remove('hidden'); $('adminApp').classList.add('hidden'); }
-  function showApp(){ $('adminLogin').classList.add('hidden'); $('adminApp').classList.remove('hidden'); renderTabs(); render(); }
-  function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toast.timer); toast.timer=setTimeout(()=>t.classList.remove('show'),1500); }
-  function save(){ GuildStorage.save(); toast('保存しました'); render(); }
-  function num(v){ return Number(v)||0; }
-  function uid(prefix){ return GuildUtils.uid(prefix); }
-  function opt(value, label, selected){ return `<option value="${esc(value)}" ${String(value)===String(selected)?'selected':''}>${esc(label)}</option>`; }
-  const cats=()=>data.settings.categories||[];
-  const bgOptions=['grass.png','forest.png','cave.png','ruins.png','mountain.png','volcano.png','castle.png','background.jpg'];
-  const monsterOptions=['slime.png','goblin.png','orc.png','skeleton.png','mimic.png','minotaur.png','gargoyle.png','dragon.png','dark_wizard.png','maou.png'];
-  const bgmOptions=['title','slime','goblin','orc','cave','ruins','maou','ending'];
-
-  $('adminLoginBtn').onclick=()=>{ if($('adminPass').value === (data.settings.adminPassword || 'OTAKU')){ sessionStorage.setItem(SESSION,'ok'); showApp(); } else $('loginError').textContent='パスワードが違います'; };
-  $('adminBackToIndex').onclick=()=>{ location.href='index.html'; };
-  $('adminHeaderToIndex').onclick=()=>{ location.href='index.html'; };
-  $('logoutBtn').onclick=()=>{ sessionStorage.removeItem(SESSION); showLogin(); };
-  function renderTabs(){ $('adminTabs').innerHTML=tabs.map(t=>`<button class="tab ${current===t[0]?'active':''}" data-tab="${t[0]}">${t[1]}</button>`).join(''); document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{current=b.dataset.tab;renderTabs();render();}); }
-
-  function renderDash(){
-    const c=data.customers.length;
-    const salesTotal=data.sales.filter(x=>x.type==='checkout').reduce((a,x)=>a+num(x.total),0);
-    const e=data.monsters[data.currentEnemyIndex]||{};
-    const bill=(data.activeBill||[]).reduce((a,x)=>a+num(x.subtotal),0);
-    $('adminContent').innerHTML=`<h2>概要</h2><div class="grid">
-      <div class="admin-card"><div class="admin-card-title">現在の敵</div><b>${esc(e.name||'-')}</b><br>HP ${num(e.hp)}/${num(e.maxHp)}</div>
-      <div class="admin-card"><div class="admin-card-title">顧客数</div>${c}</div>
-      <div class="admin-card"><div class="admin-card-title">会計売上累計</div>${yen(salesTotal,data.settings.currency)}</div>
-      <div class="admin-card"><div class="admin-card-title">未会計合計</div>${yen(bill,data.settings.currency)}</div>
-    </div><p class="tiny mt">ここからメニュー・討伐・顧客をカード形式で編集できます。JSON直接編集は「出力」から確認できます。</p>`;
-  }
-
-  function renderMenu(){
-    $('adminContent').innerHTML=`<h2>メニュー管理</h2><div class="toolbar"><button class="btn gold" id="addProduct">商品追加</button><button class="btn" id="saveAll">保存</button></div><div class="admin-list" id="menuCards"></div>`;
-    $('addProduct').onclick=()=>{ data.menu.push({id:uid('menu'),cat:(cats()[0]&&cats()[0].id)||'food',name:'新商品',price:500,emoji:'🍽️',desc:'',image:'',hidden:false}); save(); };
-    $('saveAll').onclick=save;
-    const box=$('menuCards');
-    box.innerHTML=(data.menu||[]).map((p,i)=>`<div class="admin-edit-card">
-      <div class="admin-card-title">${esc(p.name||'商品')} <span class="tiny">${esc(p.cat||p.category||'')}</span></div>
-      <label>商品名<input data-menu="name" data-i="${i}" value="${esc(p.name||'')}"></label>
-      <div class="admin-two"><label>価格<input type="number" data-menu="price" data-i="${i}" value="${num(p.price)}"></label><label>カテゴリ<select data-menu="cat" data-i="${i}">${cats().map(c=>opt(c.id,`${c.icon||''} ${c.name}`,p.cat||p.category)).join('')}</select></label></div>
-      <label>絵文字<input data-menu="emoji" data-i="${i}" value="${esc(p.emoji||p.icon||'')}"></label>
-      <label>説明<textarea rows="2" data-menu="desc" data-i="${i}">${esc(p.desc||'')}</textarea></label>
-      <label>画像ファイル<input data-menu="image" data-i="${i}" value="${esc(p.image||'')}"></label>
-      <label class="checkline"><input type="checkbox" data-menu="hidden" data-i="${i}" ${p.hidden?'checked':''}> 非表示</label>
-      <div class="toolbar"><button class="btn gold small" data-menu-save="${i}">保存</button><button class="btn red small" data-menu-del="${i}">削除</button></div>
-    </div>`).join('') || '<div class="empty">商品がありません</div>';
-    box.querySelectorAll('[data-menu]').forEach(el=>el.oninput=el.onchange=()=>{ const p=data.menu[+el.dataset.i]; const k=el.dataset.menu; p[k]= k==='price'?num(el.value):(k==='hidden'?el.checked:el.value); });
-    box.querySelectorAll('[data-menu-save]').forEach(b=>b.onclick=save);
-    box.querySelectorAll('[data-menu-del]').forEach(b=>b.onclick=()=>{ if(confirm('この商品を削除しますか？')){ data.menu.splice(+b.dataset.menuDel,1); save(); }});
-  }
-
-  function renderMonsters(){
-    $('adminContent').innerHTML=`<h2>討伐管理</h2><div class="toolbar"><button class="btn gold" id="addEnemy">敵追加</button><button class="btn" id="saveAll">保存</button><button class="btn red" id="resetHp">全HP回復</button></div><div class="admin-list" id="monsterCards"></div>`;
-    $('addEnemy').onclick=()=>{ data.monsters.push({id:uid('enemy'),name:'新しい敵',stage:'草原',hp:500,maxHp:500,bg:'grass.png',image:'slime.png',bgm:'slime'}); save(); };
-    $('saveAll').onclick=save;
-    $('resetHp').onclick=()=>{ if(confirm('全モンスターのHPを最大値に戻しますか？')){ data.monsters.forEach(m=>m.hp=num(m.maxHp)); save(); }};
-    const box=$('monsterCards');
-    box.innerHTML=(data.monsters||[]).map((m,i)=>`<div class="admin-edit-card ${i===data.currentEnemyIndex?'current-enemy':''}">
-      <div class="monster-row"><img src="${esc(m.image||'slime.png')}" onerror="this.style.display='none'"><div><div class="admin-card-title">${i+1}. ${esc(m.name||'敵')}</div><div class="tiny">${esc(m.stage||'')} / HP ${num(m.hp)}/${num(m.maxHp)}</div></div></div>
-      <label>敵名<input data-mon="name" data-i="${i}" value="${esc(m.name||'')}"></label>
-      <div class="admin-two"><label>ステージ<input data-mon="stage" data-i="${i}" value="${esc(m.stage||'')}"></label><label>BGM<select data-mon="bgm" data-i="${i}">${bgmOptions.map(x=>opt(x,x,m.bgm)).join('')}</select></label></div>
-      <div class="admin-two"><label>現在HP<input type="number" data-mon="hp" data-i="${i}" value="${num(m.hp)}"></label><label>最大HP<input type="number" data-mon="maxHp" data-i="${i}" value="${num(m.maxHp)}"></label></div>
-      <div class="admin-two"><label>背景<select data-mon="bg" data-i="${i}">${bgOptions.map(x=>opt(x,x,m.bg)).join('')}</select></label><label>敵画像<select data-mon="image" data-i="${i}">${monsterOptions.map(x=>opt(x,x,m.image)).join('')}</select></label></div>
-      <div class="toolbar"><button class="btn gold small" data-mon-save="${i}">この敵を保存</button><button class="btn small" data-set-current="${i}">現在の敵にする</button><button class="btn small" data-dup="${i}">複製</button><button class="btn red small" data-mon-del="${i}">削除</button></div>
-    </div>`).join('') || '<div class="empty">敵がありません</div>';
-    box.querySelectorAll('[data-mon]').forEach(el=>el.oninput=el.onchange=()=>{ const m=data.monsters[+el.dataset.i]; const k=el.dataset.mon; m[k]=(k==='hp'||k==='maxHp')?num(el.value):el.value; if(k==='bg')m.background=el.value; });
-    box.querySelectorAll('[data-mon-save]').forEach(b=>b.onclick=save);
-    box.querySelectorAll('[data-set-current]').forEach(b=>b.onclick=()=>{ data.currentEnemyIndex=+b.dataset.setCurrent; save(); });
-    box.querySelectorAll('[data-dup]').forEach(b=>b.onclick=()=>{ const copy=JSON.parse(JSON.stringify(data.monsters[+b.dataset.dup])); copy.id=uid('enemy'); data.monsters.splice(+b.dataset.dup+1,0,copy); save(); });
-    box.querySelectorAll('[data-mon-del]').forEach(b=>b.onclick=()=>{ if(confirm('この敵を削除しますか？')){ data.monsters.splice(+b.dataset.monDel,1); data.currentEnemyIndex=Math.min(data.currentEnemyIndex,Math.max(0,data.monsters.length-1)); save(); }});
-  }
-
-  function renderSettings(){
-    const s=data.settings;
-    $('adminContent').innerHTML=`<h2>設定</h2><div class="admin-list"><div class="admin-edit-card">
-      <label>ギルド名<input id="guildName" value="${esc(s.guildName||'')}"></label>
-      <div class="admin-two"><label>通貨<input id="currency" value="${esc(s.currency||'G')}"></label><label>管理パスワード<input id="adminPassword" value="${esc(s.adminPassword||'OTAKU')}"></label></div>
-      <label>GAS / Discord URL<input id="gasUrl" value="${esc(s.gasUrl||s.discordWebhookUrl||'')}"></label>
-      <div class="admin-two"><label>BGM音量<input type="number" step="0.05" min="0" max="1" id="bgmVolume" value="${Number(s.bgmVolume??0.45)}"></label><label>SE音量<input type="number" step="0.05" min="0" max="1" id="seVolume" value="${Number(s.seVolume??0.9)}"></label></div>
-      <label class="checkline"><input type="checkbox" id="notifyOn" ${s.notifyOn!==false?'checked':''}> 通知ON</label>
-      <div class="toolbar"><button class="btn gold" id="saveSettings">保存</button></div>
-    </div></div>`;
-    $('saveSettings').onclick=()=>{ Object.assign(s,{guildName:$('guildName').value,currency:$('currency').value||'G',adminPassword:$('adminPassword').value||'OTAKU',gasUrl:$('gasUrl').value,discordWebhookUrl:$('gasUrl').value,bgmVolume:Number($('bgmVolume').value),seVolume:Number($('seVolume').value),notifyOn:$('notifyOn').checked}); save(); };
-  }
-
-  function renderCustomers(){
-    $('adminContent').innerHTML=`<h2>顧客管理</h2><div class="admin-list" id="customerCards"></div>`;
-    const box=$('customerCards');
-    box.innerHTML=(data.customers||[]).map((c,i)=>`<div class="admin-edit-card"><div class="admin-card-title">${esc(c.name||'冒険者')}</div>
-      <div class="admin-two"><label>名前<input data-cust="name" data-i="${i}" value="${esc(c.name||'')}"></label><label>Lv<input type="number" data-cust="level" data-i="${i}" value="${num(c.level||1)}"></label></div>
-      <div class="admin-two"><label>二つ名<input data-cust="title" data-i="${i}" value="${esc(c.title||'')}"></label><label>来店回数<input type="number" data-cust="visits" data-i="${i}" value="${num(c.visits)}"></label></div>
-      <label>累計注文<input type="number" data-cust="total" data-i="${i}" value="${num(c.total)}"></label>
-      <label>メモ<textarea rows="2" data-cust="memo" data-i="${i}">${esc(c.memo||'')}</textarea></label>
-      <div class="tiny">最終来店：${esc(c.lastVisit||'-')}</div><div class="toolbar"><button class="btn gold small" data-cust-save="${i}">保存</button><button class="btn red small" data-cust-del="${i}">削除</button></div></div>`).join('') || '<div class="empty">顧客データはまだありません</div>';
-    box.querySelectorAll('[data-cust]').forEach(el=>el.oninput=el.onchange=()=>{ const c=data.customers[+el.dataset.i]; const k=el.dataset.cust; c[k]=['level','visits','total'].includes(k)?num(el.value):el.value; });
-    box.querySelectorAll('[data-cust-save]').forEach(b=>b.onclick=save);
-    box.querySelectorAll('[data-cust-del]').forEach(b=>b.onclick=()=>{ if(confirm('この顧客を削除しますか？')){ data.customers.splice(+b.dataset.custDel,1); save(); }});
-  }
-
-  function renderSales(){
-    const total=(data.sales||[]).filter(x=>x.type==='checkout').reduce((a,x)=>a+num(x.total),0);
-    $('adminContent').innerHTML=`<h2>売上</h2><div class="toolbar"><button class="btn red" id="clearSales">売上一覧を削除</button></div><div class="admin-card"><div class="admin-card-title">会計売上累計</div>${yen(total,data.settings.currency)}</div><div class="admin-list">${(data.sales||[]).slice().reverse().map(s=>`<div class="admin-edit-card"><div class="admin-card-title">${esc(s.customer||'-')} / ${yen(s.total,data.settings.currency)}</div><div class="tiny">${esc(s.timeText||s.time||'')}</div><div>${(s.items||[]).map(i=>`・${esc(i.name)} ×${num(i.qty)} = ${yen(i.subtotal,data.settings.currency)}`).join('<br>')}</div></div>`).join('')||'<div class="empty">売上はまだありません</div>'}</div>`;
-    $('clearSales').onclick=()=>{ if(confirm('売上一覧を削除しますか？')){ data.sales=[]; save(); }};
-  }
-
-  function renderRaw(key,label){ $('adminContent').innerHTML=`<h2>${label}</h2><textarea class="json-box" id="jsonEdit">${esc(JSON.stringify(data[key],null,2))}</textarea><div class="toolbar"><button class="btn gold" id="saveJson">保存</button><button class="btn" id="formatJson">整形</button></div>`; $('saveJson').onclick=()=>{ try{ data[key]=JSON.parse($('jsonEdit').value); save(); }catch(e){ toast('JSONエラー: '+e.message); } }; $('formatJson').onclick=()=>{ try{$('jsonEdit').value=JSON.stringify(JSON.parse($('jsonEdit').value),null,2);}catch(e){toast('JSONエラー');} }; }
-  function render(){ if(current==='dash')renderDash(); if(current==='menu')renderMenu(); if(current==='monsters')renderMonsters(); if(current==='settings')renderSettings(); if(current==='customers')renderCustomers(); if(current==='sales')renderSales(); if(current==='export')renderRaw('','全データExport'),$('jsonEdit').value=JSON.stringify(data,null,2); if(current==='reset'){ $('adminContent').innerHTML=`<h2>初期化</h2><p>討伐進行と未会計注文だけをリセットします。</p><button class="btn red" id="resetProgress">討伐進行を初期化</button>`; $('resetProgress').onclick=()=>{ if(confirm('討伐進行を初期化しますか？')){ GuildStorage.resetProgress(); toast('リセットしました'); render(); } }; } }
+  const SESSION='otakuba.v3.final.admin.session';
+  const tabs=[['dash','📊 概要'],['menu','🍴 メニュー'],['monsters','⚔️ 討伐'],['settings','⚙️ 設定'],['customers','👤 顧客'],['sales','💰 履歴'],['sync','☁️ 同期'],['reset','🧹 reset']];
+  let current='dash', customerQuery='', salesQuery='';
+  function loginOk(){return sessionStorage.getItem(SESSION)==='ok'} function showLogin(){$('adminLogin').classList.remove('hidden');$('adminApp').classList.add('hidden')} function showApp(){$('adminLogin').classList.add('hidden');$('adminApp').classList.remove('hidden');renderTabs();render()}
+  $('adminLoginBtn').onclick=()=>{if($('adminPass').value===(data.settings.adminPassword||'OTAKU')){sessionStorage.setItem(SESSION,'ok');showApp()}else $('loginError').textContent='パスワードが違います'};
+  $('adminBackToIndex').onclick=()=>location.href='index.html';$('adminHeaderToIndex').onclick=()=>location.href='index.html';$('logoutBtn').onclick=()=>{sessionStorage.removeItem(SESSION);showLogin()};
+  function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),1500)}
+  function save(){GuildStorage.save()}
+  function renderTabs(){$('adminTabs').innerHTML=tabs.map(t=>`<button class="tab ${current===t[0]?'active':''}" data-tab="${t[0]}">${t[1]}</button>`).join('');document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{current=b.dataset.tab;renderTabs();render()})}
+  function cats(){const a=Array.isArray(data.settings.categories)?data.settings.categories:[];return a.length?a:[{id:'food',name:'フード',icon:'🍖'}]}
+  function normalizeProduct(p,i){p=p||{};p.id=p.id||GuildUtils.uid('menu');p.cat=p.cat||p.category||'food';p.category=p.cat;p.name=p.name||'商品';p.price=Number(p.price)||0;p.emoji=p.emoji||p.icon||'🍽️';p.icon=p.emoji;p.desc=p.desc||'';p.image=p.image||'';p.hidden=!!p.hidden;p.sort=Number(p.sort||i);return p}
+  function renderMenu(){data.menu=(data.menu||[]).map(normalizeProduct);const cs=cats();const opts=cs.map(c=>`<option value="${esc(c.id)}">${esc((c.icon?c.icon+' ':'')+c.name)}</option>`).join('');$('adminContent').innerHTML=`<h2>🍴 メニュー管理</h2><div class="toolbar"><button class="btn gold" id="addProduct">商品追加</button><button class="btn green" id="saveMenu">保存</button><button class="btn" id="openAll">全部開く</button><button class="btn" id="closeAll">全部閉じる</button><button class="btn" id="jsonMode">JSON</button></div><div class="category-list">${cs.map((c,ci)=>{const items=data.menu.map((p,i)=>({p,i})).filter(x=>x.p.cat===c.id);return `<section class="category-block ${ci===0?'open':''}"><button class="category-head"><span>${esc((c.icon?c.icon+' ':'')+c.name)} <b>(${items.length})</b></span><span class="category-toggle">${ci===0?'閉じる':'開く'}</span></button><div class="category-body">${items.length?items.map(({p,i})=>productCard(p,i,opts)).join(''):'<div class="empty">なし</div>'}</div></section>`}).join('')}</div>`;
+    document.querySelectorAll('.category-head').forEach(h=>h.onclick=()=>{const b=h.closest('.category-block');b.classList.toggle('open');h.querySelector('.category-toggle').textContent=b.classList.contains('open')?'閉じる':'開く'});document.querySelectorAll('[data-menu-index]').forEach(card=>{const p=data.menu[+card.dataset.menuIndex];card.querySelector('[data-field="cat"]').value=p.cat});document.querySelectorAll('[data-del-product]').forEach(btn=>btn.onclick=()=>{if(confirm('削除しますか？')){data.menu.splice(+btn.dataset.delProduct,1);save();renderMenu()}});$('addProduct').onclick=()=>{saveMenuForm();data.menu.push(normalizeProduct({name:'新商品',cat:cs[0].id},data.menu.length));save();renderMenu()};$('saveMenu').onclick=()=>{saveMenuForm();toast('保存しました')};$('openAll').onclick=()=>toggleCats(true);$('closeAll').onclick=()=>toggleCats(false);$('jsonMode').onclick=()=>textareaEditor('menu','menu.json')}
+  function toggleCats(o){document.querySelectorAll('.category-block').forEach(b=>{b.classList.toggle('open',o);b.querySelector('.category-toggle').textContent=o?'閉じる':'開く'})}
+  function productCard(p,i,opts){return `<div class="admin-card product-edit-card" data-menu-index="${i}"><div class="admin-card-title">#${i+1} ${esc(p.name)}</div><label>商品名<input data-field="name" value="${esc(p.name)}"></label><label>ジャンル<select data-field="cat">${opts}</select></label><label>価格<input data-field="price" type="number" value="${p.price}"></label><label>絵文字<input data-field="emoji" value="${esc(p.emoji)}"></label><label>画像<input data-field="image" value="${esc(p.image)}"></label><label>説明<textarea data-field="desc">${esc(p.desc)}</textarea></label><label class="check-row"><input data-field="hidden" type="checkbox" ${p.hidden?'checked':''}>非表示</label><button class="btn red small" data-del-product="${i}">削除</button></div>`}
+  function saveMenuForm(){document.querySelectorAll('[data-menu-index]').forEach(card=>{const p=data.menu[+card.dataset.menuIndex];p.name=card.querySelector('[data-field="name"]').value;p.cat=card.querySelector('[data-field="cat"]').value;p.category=p.cat;p.price=+card.querySelector('[data-field="price"]').value||0;p.emoji=card.querySelector('[data-field="emoji"]').value||'🍽️';p.icon=p.emoji;p.image=card.querySelector('[data-field="image"]').value;p.desc=card.querySelector('[data-field="desc"]').value;p.hidden=card.querySelector('[data-field="hidden"]').checked});save()}
+  function renderCustomers(){const q=customerQuery.toLowerCase();const list=(data.customers||[]).map((c,i)=>({c,i})).filter(({c})=>!q||[c.name,c.title,c.memo,c.id].some(v=>String(v||'').toLowerCase().includes(q)));$('adminContent').innerHTML=`<h2>👤 顧客管理</h2><div class="toolbar searchbar"><input id="customerSearch" placeholder="顧客検索" value="${esc(customerQuery)}"><button class="btn gold" id="addCustomer">追加</button><button class="btn green" id="saveCustomers">保存</button><button class="btn" id="jsonCustomers">JSON</button></div><div class="customer-list">${list.length?list.map(({c,i})=>customerCard(c,i)).join(''):'<div class="empty">なし</div>'}</div>`;$('customerSearch').oninput=e=>{customerQuery=e.target.value;renderCustomers()};$('addCustomer').onclick=()=>{data.customers.unshift({id:GuildUtils.uid('cust'),name:'新規冒険者',level:1,title:'新米冒険者',visits:0,total:0,lastVisit:'',memo:''});save();renderCustomers()};$('saveCustomers').onclick=()=>{saveCustomerForm();toast('保存しました')};$('jsonCustomers').onclick=()=>textareaEditor('customers','customers.json');document.querySelectorAll('[data-del-customer]').forEach(b=>b.onclick=()=>{if(confirm('削除しますか？')){data.customers.splice(+b.dataset.delCustomer,1);save();renderCustomers()}});document.querySelectorAll('[data-sales-of]').forEach(b=>b.onclick=()=>{salesQuery=data.customers[+b.dataset.salesOf].name;current='sales';renderTabs();renderSales()})}
+  function customerCard(c,i){const sales=(data.sales||[]).filter(s=>s.customer===c.name);return `<div class="admin-card customer-card" data-customer-index="${i}"><div class="customer-head"><div class="admin-card-title">👤 ${esc(c.name)}</div><span class="badge">${esc(c.id||'')}</span></div><div class="customer-mini-grid"><label>名前<input data-field="name" value="${esc(c.name||'')}"></label><label>Lv<input data-field="level" type="number" value="${c.level||1}"></label><label>二つ名<input data-field="title" value="${esc(c.title||'')}"></label><label>来店<input data-field="visits" type="number" value="${c.visits||0}"></label><label>累計<input data-field="total" type="number" value="${c.total||0}"></label><label>最終<input data-field="lastVisit" value="${esc(c.lastVisit||'')}"></label></div><label class="wide-label">メモ<textarea data-field="memo">${esc(c.memo||'')}</textarea></label><div class="billbox">履歴 ${sales.length}件</div><div class="toolbar"><button class="btn small" data-sales-of="${i}">履歴を見る</button><button class="btn red small" data-del-customer="${i}">削除</button></div></div>`}
+  function saveCustomerForm(){document.querySelectorAll('[data-customer-index]').forEach(card=>{const c=data.customers[+card.dataset.customerIndex];c.name=card.querySelector('[data-field="name"]').value;c.level=+card.querySelector('[data-field="level"]').value||1;c.title=card.querySelector('[data-field="title"]').value;c.visits=+card.querySelector('[data-field="visits"]').value||0;c.total=+card.querySelector('[data-field="total"]').value||0;c.lastVisit=card.querySelector('[data-field="lastVisit"]').value;c.memo=card.querySelector('[data-field="memo"]').value});save()}
+  function renderSales(){const q=salesQuery.toLowerCase();const list=(data.sales||[]).map((s,i)=>({s,i})).filter(({s})=>!q||[s.customer,s.timeText,s.reason,s.type,(s.items||[]).map(x=>x.name).join(' ')].some(v=>String(v||'').toLowerCase().includes(q))).reverse();$('adminContent').innerHTML=`<h2>💰 注文・会計履歴</h2><div class="toolbar searchbar"><input id="salesSearch" placeholder="履歴検索" value="${esc(salesQuery)}"><button class="btn green" id="saveSales">保存</button><button class="btn" id="clearSales">検索解除</button><button class="btn" id="jsonSales">JSON</button></div><div class="sales-list">${list.length?list.map(({s,i})=>saleCard(s,i)).join(''):'<div class="empty">なし</div>'}</div>`;$('salesSearch').oninput=e=>{salesQuery=e.target.value;renderSales()};$('saveSales').onclick=()=>{saveSalesForm();toast('保存しました')};$('clearSales').onclick=()=>{salesQuery='';renderSales()};$('jsonSales').onclick=()=>textareaEditor('sales','sales.json');document.querySelectorAll('[data-del-sale]').forEach(b=>b.onclick=()=>{if(confirm('削除しますか？')){data.sales.splice(+b.dataset.delSale,1);save();renderSales()}});document.querySelectorAll('[data-cancel-sale]').forEach(b=>b.onclick=()=>{const s=data.sales[+b.dataset.cancelSale];s.type='cancel';s.reason=(s.reason||'')+' キャンセル';save();renderSales()})}
+  function saleCard(s,i){const items=(s.items||[]).map(it=>`・${esc(it.name)} ×${it.qty||1} = ${yen(it.subtotal||0,data.settings.currency)}`).join('<br>');return `<div class="admin-card sale-card" data-sale-index="${i}"><div class="customer-head"><div class="admin-card-title">${s.type==='cancel'?'❌':'💰'} ${esc(s.customer||'')}</div><span class="badge">${esc(s.type||'checkout')}</span></div><div class="customer-mini-grid"><label>顧客<input data-field="customer" value="${esc(s.customer||'')}"></label><label>種別<select data-field="type"><option value="checkout" ${s.type==='checkout'?'selected':''}>会計</option><option value="order" ${s.type==='order'?'selected':''}>注文</option><option value="cancel" ${s.type==='cancel'?'selected':''}>キャンセル</option></select></label><label>合計<input data-field="total" type="number" value="${s.total||0}"></label><label>人数<input data-field="partyCount" type="number" value="${s.partyCount||1}"></label><label class="wide-label">日時<input data-field="timeText" value="${esc(s.timeText||'')}"></label></div><div class="billbox">${items||'明細なし'}</div><label class="wide-label">メモ<textarea data-field="reason">${esc(s.reason||'')}</textarea></label><div class="toolbar"><button class="btn small" data-cancel-sale="${i}">キャンセル扱い</button><button class="btn red small" data-del-sale="${i}">削除</button></div></div>`}
+  function saveSalesForm(){document.querySelectorAll('[data-sale-index]').forEach(card=>{const s=data.sales[+card.dataset.saleIndex];s.customer=card.querySelector('[data-field="customer"]').value;s.type=card.querySelector('[data-field="type"]').value;s.total=+card.querySelector('[data-field="total"]').value||0;s.partyCount=+card.querySelector('[data-field="partyCount"]').value||1;s.timeText=card.querySelector('[data-field="timeText"]').value;s.reason=card.querySelector('[data-field="reason"]').value});save()}
+  function textareaEditor(key,label){$('adminContent').innerHTML=`<h2>${label}</h2><textarea class="json-box" id="jsonEdit">${esc(JSON.stringify(data[key],null,2))}</textarea><div class="toolbar"><button class="btn gold" id="saveJson">保存</button><button class="btn" id="formatJson">整形</button></div>`;$('saveJson').onclick=()=>{try{data[key]=JSON.parse($('jsonEdit').value);save();toast('保存しました');render()}catch(e){toast('JSONエラー')}};$('formatJson').onclick=()=>{try{$('jsonEdit').value=JSON.stringify(JSON.parse($('jsonEdit').value),null,2)}catch(e){toast('JSONエラー')}}}
+  async function renderSync(){const summary=`GAS URL: ${data.settings.gasUrl||'未設定'}`;$('adminContent').innerHTML=`<h2>☁️ GAS同期</h2><div class="billbox">${esc(summary)}</div><div class="toolbar"><button class="btn gold" id="syncPull">GASから取得</button><button class="btn green" id="syncPushMenu">メニュー送信</button><button class="btn green" id="syncPushMonsters">敵送信</button></div><pre id="syncResult" class="json-box" style="min-height:30dvh"></pre>`;$('syncPull').onclick=async()=>{const r=await GuildNotify.sync();$('syncResult').textContent=JSON.stringify(r,null,2)};$('syncPushMenu').onclick=()=>GuildNotify.send({action:'menuSave',menu:data.menu});$('syncPushMonsters').onclick=()=>GuildNotify.send({action:'monstersSave',monsters:data.monsters})}
+  function render(){if(current==='dash'){const total=(data.sales||[]).filter(x=>x.type!=='cancel').reduce((a,x)=>a+(+x.total||0),0);const e=data.monsters[data.currentEnemyIndex]||{};$('adminContent').innerHTML=`<h2>概要</h2><div class="grid"><div class="admin-card"><div class="admin-card-title">現在の敵</div>${esc(e.name||'-')}<br>HP ${e.hp||0}/${e.maxHp||0}</div><div class="admin-card"><div class="admin-card-title">顧客数</div>${data.customers.length}</div><div class="admin-card"><div class="admin-card-title">売上累計</div>${yen(total,data.settings.currency)}</div><div class="admin-card"><div class="admin-card-title">状態</div>v3.0 final</div></div>`} if(current==='menu')renderMenu(); if(current==='monsters')textareaEditor('monsters','monsters.json'); if(current==='settings')textareaEditor('settings','settings.json'); if(current==='customers')renderCustomers(); if(current==='sales')renderSales(); if(current==='sync')renderSync(); if(current==='reset'){$('adminContent').innerHTML=`<h2>リセット</h2><button class="btn red" id="resetProgress">討伐進行を初期化</button>`;$('resetProgress').onclick=()=>{if(confirm('初期化しますか？')){GuildStorage.resetProgress();toast('リセットしました')}}}}
   loginOk()?showApp():showLogin();
 })();

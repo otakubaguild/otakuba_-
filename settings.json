@@ -1,57 +1,61 @@
 {
-  "guildName": "おたく場ギルド",
   "currency": "G",
-  "discordWebhookUrl": "",
-  "battleMode": "continue",
+  "coverCharge": 500,
+  "levelStep": 3000,
   "adminPassword": "OTAKU",
+  "notifyOn": true,
+  "gasUrl": "",
+  "discordWebhookUrl": "",
   "categories": [
     {
-      "id": "all",
-      "name": "全部"
+      "id": "alcohol",
+      "name": "酒",
+      "icon": "🍺"
     },
     {
       "id": "drink",
-      "name": "酒場"
+      "name": "ドリンク",
+      "icon": "🥤"
     },
     {
       "id": "food",
-      "name": "食事"
+      "name": "フード",
+      "icon": "🍖"
     },
     {
-      "id": "soft",
-      "name": "回復"
+      "id": "dessert",
+      "name": "デザート",
+      "icon": "🍰"
     },
     {
-      "id": "special",
-      "name": "限定"
+      "id": "event",
+      "name": "イベント",
+      "icon": "🎉"
     }
   ],
   "bgmVolume": 0.45,
   "seVolume": 0.9,
   "audioFiles": {
     "bgm": {
-      "title": "title.mp3",
-      "slime": "slime.mp3",
-      "goblin": "goblin.mp3",
-      "orc": "orc.mp3",
-      "cave": "cave.mp3",
-      "ruins": "ruins.mp3",
-      "maou": "maou.mp3",
-      "ending": "ending.mp3"
+      "title": "冒険への誘い.mp3",
+      "slime": "maou_bgm_fantasy15.mp3",
+      "goblin": "Baring_Their_Fangs.mp3",
+      "orc": "反撃の一矢.mp3",
+      "cave": "Rumbling.mp3",
+      "ruins": "龍太鼓.mp3",
+      "maou": "Extinguish.mp3",
+      "ending": "March_for__delightful_future.mp3"
     },
     "se": {
-      "ok": "ok.mp3",
-      "cancel": "cancel.mp3",
-      "bad": "cancel.mp3",
-      "add": "add.mp3",
-      "confirm": "ok.mp3",
-      "damage": "damage.mp3",
-      "hit": "damage.mp3",
-      "defeat": "defeat.mp3",
-      "levelup": "levelup.mp3",
-      "victory": "victory.mp3"
+      "ok": "maou_se_system37.mp3",
+      "cancel": "maou_se_system49.mp3",
+      "bad": "maou_se_system49.mp3",
+      "add": "maou_se_onepoint16.mp3",
+      "confirm": "maou_se_system37.mp3",
+      "damage": "maou_se_onepoint20.mp3",
+      "defeat": "maou_se_system49.mp3",
+      "victory": "RPG風ファンファーレ.mp3",
+      "levelup": "レベルアップ.mp3"
     }
-  },
-  "notifyOn": true,
-  "levelStep": 3000
+  }
 }

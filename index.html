@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#050505">
   <title>おたく場ギルド</title>
-  <link rel="stylesheet" href="main.css?v=3.0-stable-direct">
-  <link rel="stylesheet" href="battle.css?v=3.0-stable-direct">
-  <link rel="stylesheet" href="menu.css?v=3.0-stable-direct">
-  <link rel="stylesheet" href="effects.css?v=3.0-stable-direct">
+  <link rel="stylesheet" href="main.css?v=3.0-final">
+  <link rel="stylesheet" href="battle.css?v=3.0-final">
+  <link rel="stylesheet" href="menu.css?v=3.0-final">
+  <link rel="stylesheet" href="effects.css?v=3.0-final">
 </head>
 <body>
   <div class="app">
@@ -41,6 +41,25 @@
       </div>
     </section>
 
+    <section class="screen center" id="screenParty">
+      <div class="panel window">
+        <div class="title-logo small">パーティ人数</div>
+        <p>ご来店人数を選択してください</p>
+        <div class="party-control">
+          <button class="btn" id="btnPartyMinus" type="button">−</button>
+          <div class="panel party-count-panel">
+            <div id="partyCountView" class="party-count-view">1名</div>
+          </div>
+          <button class="btn" id="btnPartyPlus" type="button">＋</button>
+        </div>
+        <div class="tiny" id="chargePreview"></div>
+        <div class="row mt">
+          <button class="btn gold" id="btnPartyOk">次へ</button>
+          <button class="btn" id="btnPartyBack">戻る</button>
+        </div>
+      </div>
+    </section>
+
     <section class="screen" id="screenMain">
       <div class="rpg">
         <div id="noticeBox"></div>
@@ -66,6 +85,7 @@
 
         <nav class="categories" id="categoryButtons"></nav>
         <button class="btn gold checkout-main" id="btnCheckout">🏆 クエスト達成（会計）</button>
+        <button class="btn checkout-main" id="btnBackTitle">🏠 最初の画面へ</button>
       </div>
     </section>
 
@@ -93,6 +113,22 @@
       </div>
     </div>
 
+    <div class="modal" id="modalChargeConfirm">
+      <div class="modal-head">
+        <h2>ギルド登録料</h2>
+        <button class="btn small" id="btnCancelCharge">戻る</button>
+      </div>
+      <div class="scroll">
+        <div class="panel">
+          <div id="chargeConfirmBody" class="confirm-text"></div>
+          <div class="row mt">
+            <button class="btn gold" id="btnDoCharge">登録する</button>
+            <button class="btn" id="btnNoCharge">いいえ</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="modal" id="modalCheckoutConfirm">
       <div class="modal-head">
         <h2>クエスト達成（会計）</h2>
@@ -108,17 +144,25 @@
         </div>
       </div>
     </div>
+
+    <div id="levelUpOverlay" class="level-up-overlay">
+      <div class="panel window">
+        <div class="level-up-title">LEVEL UP!</div>
+        <div id="levelUpText" class="level-up-text"></div>
+        <button class="btn gold mt" id="levelUpClose">OK</button>
+      </div>
+    </div>
   </div>
 
-  <script src="utils.js?v=3.0-stable-direct"></script>
-  <script src="storage.js?v=3.0-stable-direct"></script>
-  <script src="audio.js?v=3.0-stable-direct"></script>
-  <script src="ui.js?v=3.0-stable-direct"></script>
-  <script src="customer.js?v=3.0-stable-direct"></script>
-  <script src="battle.js?v=3.0-stable-direct"></script>
-  <script src="discord.js?v=3.0-stable-direct"></script>
-  <script src="menu.js?v=3.0-stable-direct"></script>
-  <script src="order.js?v=3.0-stable-direct"></script>
-  <script src="app.js?v=3.0-stable-direct"></script>
+  <script src="utils.js?v=3.0-final"></script>
+  <script src="storage.js?v=3.0-final"></script>
+  <script src="audio.js?v=3.0-final"></script>
+  <script src="ui.js?v=3.0-final"></script>
+  <script src="customer.js?v=3.0-final"></script>
+  <script src="battle.js?v=3.0-final"></script>
+  <script src="discord.js?v=3.0-final"></script>
+  <script src="menu.js?v=3.0-final"></script>
+  <script src="order.js?v=3.0-final"></script>
+  <script src="app.js?v=3.0-final"></script>
 </body>
 </html>

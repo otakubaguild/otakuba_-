@@ -1,74 +1,106 @@
 [
   {
     "id": "beer",
-    "category": "drink",
-    "name": "ビール",
-    "desc": "ギルド定番の一杯。",
-    "price": 700,
+    "cat": "alcohol",
+    "category": "alcohol",
+    "name": "生ビール",
+    "desc": "酒場の基本。",
+    "price": 600,
+    "emoji": "🍺",
     "icon": "🍺",
-    "image": ""
+    "image": "",
+    "hidden": false,
+    "sort": 1
   },
   {
     "id": "highball",
-    "category": "drink",
+    "cat": "alcohol",
+    "category": "alcohol",
     "name": "ハイボール",
-    "desc": "爽快な一撃。",
-    "price": 650,
+    "desc": "強炭酸。",
+    "price": 550,
+    "emoji": "🥃",
     "icon": "🥃",
-    "image": ""
-  },
-  {
-    "id": "oolong",
-    "category": "soft",
-    "name": "ウーロン茶",
-    "desc": "休憩用ポーション。",
-    "price": 400,
-    "icon": "🍵",
-    "image": ""
+    "image": "",
+    "hidden": false,
+    "sort": 2
   },
   {
     "id": "cola",
-    "category": "soft",
+    "cat": "drink",
+    "category": "drink",
     "name": "コーラ",
-    "desc": "弾ける黒の魔水。",
+    "desc": "ソフトドリンク。",
     "price": 400,
+    "emoji": "🥤",
     "icon": "🥤",
-    "image": ""
+    "image": "",
+    "hidden": false,
+    "sort": 3
+  },
+  {
+    "id": "melon_soda",
+    "cat": "drink",
+    "category": "drink",
+    "name": "メロンソーダ",
+    "desc": "緑の回復薬。",
+    "price": 400,
+    "emoji": "🥤",
+    "icon": "🥤",
+    "image": "",
+    "hidden": false,
+    "sort": 4
   },
   {
     "id": "karaage",
+    "cat": "food",
     "category": "food",
     "name": "唐揚げ",
-    "desc": "冒険者の基本装備。",
-    "price": 650,
+    "desc": "ギルド定番のフード。",
+    "price": 600,
+    "emoji": "🍗",
     "icon": "🍗",
-    "image": ""
+    "image": "",
+    "hidden": false,
+    "sort": 5
   },
   {
     "id": "potato",
+    "cat": "food",
     "category": "food",
     "name": "ポテト",
-    "desc": "みんなでつまめる定番。",
-    "price": 550,
-    "icon": "🍟",
-    "image": ""
-  },
-  {
-    "id": "curry",
-    "category": "food",
-    "name": "ギルドカレー",
-    "desc": "腹を満たす主食クエスト。",
-    "price": 900,
-    "icon": "🍛",
-    "image": ""
-  },
-  {
-    "id": "dessert",
-    "category": "special",
-    "name": "本日の甘味",
-    "desc": "マスター気まぐれ報酬。",
+    "desc": "みんなでつまめる。",
     "price": 500,
-    "icon": "🍰",
-    "image": ""
+    "emoji": "🍟",
+    "icon": "🍟",
+    "image": "",
+    "hidden": false,
+    "sort": 6
+  },
+  {
+    "id": "ice",
+    "cat": "dessert",
+    "category": "dessert",
+    "name": "アイス",
+    "desc": "食後の甘味。",
+    "price": 350,
+    "emoji": "🍨",
+    "icon": "🍨",
+    "image": "",
+    "hidden": false,
+    "sort": 7
+  },
+  {
+    "id": "limited",
+    "cat": "event",
+    "category": "event",
+    "name": "本日の限定",
+    "desc": "イベントメニュー。",
+    "price": 700,
+    "emoji": "🎉",
+    "icon": "🎉",
+    "image": "",
+    "hidden": false,
+    "sort": 8
   }
 ]
