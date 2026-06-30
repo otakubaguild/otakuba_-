@@ -1,4 +1,4 @@
-window.GuildApp = {VERSION:'3.0-full-modular'};
+window.GuildApp = {VERSION:'3.0-stable-direct'};
 (async function(){
   const {$}=GuildUtils;
   const data = await GuildStorage.init();
