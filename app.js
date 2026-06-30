@@ -11,12 +11,18 @@ window.GuildApp = {VERSION:'実働版 v3.1'};
   function applyCoverCharge(){ const count=Math.max(1,Math.min(20,Number(data.partyCount||1)||1)); const charge=Number(data.settings.coverCharge??500)||0; const total=charge*count; data.activeBill=Array.isArray(data.activeBill)?data.activeBill:[]; data.activeBill=data.activeBill.filter(i=>i.id!=='cover_charge'); if(charge>0&&count>0){ data.activeBill.unshift({id:'cover_charge',name:'ギルド登録料（チャージ）',cat:'charge',price:charge,qty:count,subtotal:total,partyCount:count,isCharge:true}); } GuildStorage.save(); }
   GuildApp.showWelcomeBack=function(){ welcomeText('おかえりなさい、冒険者。次のクエストを受けますか？'); GuildUI.show('screenWelcome'); GuildAudio.playBgm('title'); };
   GuildApp.showLevelUp=function(oldLevel,newLevel){ const o=$('levelUpOverlay'); $('levelUpText').textContent=`Lv.${oldLevel} → Lv.${newLevel}`; o.classList.add('show'); };
+  GuildApp.showVictoryClear=function(){ const o=$('victoryClearOverlay'); if(o) o.classList.add('show'); };
+  if($('victoryClearClose')) $('victoryClearClose').onclick=()=>{ const o=$('victoryClearOverlay'); if(o) o.classList.remove('show'); GuildAudio.stopBgm(); if(GuildStorage.resetProgress) GuildStorage.resetProgress(); GuildBattle.render(); if(GuildApp.showWelcomeBack) GuildApp.showWelcomeBack(); else GuildUI.show('screenWelcome'); };
   $('levelUpClose').onclick=()=>$('levelUpOverlay').classList.remove('show');
   $('btnStartYes').onclick=()=>{ GuildAudio.playSe('ok'); GuildAudio.playBgm('title'); hideMasterMessage(); GuildUI.show('screenName'); };
   $('btnStartNo').onclick=()=>{ GuildAudio.playSe('cancel'); showMasterMessage('冷やかしか？さっさとメニューを開け'); };
   $('btnAdmin').onclick=()=>location.href='admin.html';
   $('btnBackWelcome').onclick=()=>{ GuildAudio.playSe('cancel'); GuildUI.show('screenWelcome'); };
   $('btnNameOk').onclick=()=>{ const n=$('nameInput').value.trim(); if(!n){GuildAudio.playSe('cancel'); GuildUI.toast('名前を入力してください'); return;} GuildAudio.playSe('ok'); GuildCustomer.setName(n); renderParty(); GuildUI.show('screenParty'); };
+  function renderExistingList(q){ const list=GuildCustomer.list().filter(c=>!q||String(c.name||'').toLowerCase().includes(q.toLowerCase())); $('existingList').innerHTML = list.length ? list.map(c=>`<button class="btn existing-pick" data-cid="${c.id}" style="display:block;width:100%;text-align:left;margin:4px 0">${GuildUtils.esc(c.name)} <span style="opacity:.6;font-size:.85em">Lv.${c.level||1}・来店${c.visits||0}回</span></button>`).join('') : '<p style="opacity:.6;text-align:center">該当なし</p>'; document.querySelectorAll('.existing-pick').forEach(b=>b.onclick=()=>{ const c=GuildCustomer.selectExisting(b.dataset.cid); if(c){ GuildAudio.playSe('ok'); $('existingOverlay').classList.remove('show'); $('nameInput').value=c.name; renderParty(); GuildUI.show('screenParty'); } }); }
+  $('btnSelectExisting').onclick=()=>{ GuildAudio.playSe('ok'); $('existingSearch').value=''; renderExistingList(''); $('existingOverlay').classList.add('show'); };
+  $('existingSearch').oninput=e=>renderExistingList(e.target.value);
+  $('existingClose').onclick=()=>{ GuildAudio.playSe('cancel'); $('existingOverlay').classList.remove('show'); };
   $('btnPartyMinus').onclick=()=>{ data.partyCount=Math.max(1,Number(data.partyCount||1)-1); GuildStorage.save(); renderParty(); };
   $('btnPartyPlus').onclick=()=>{ data.partyCount=Math.min(20,Number(data.partyCount||1)+1); GuildStorage.save(); renderParty(); };
   $('btnPartyBack').onclick=()=>{ GuildAudio.playSe('cancel'); GuildUI.show('screenName'); };

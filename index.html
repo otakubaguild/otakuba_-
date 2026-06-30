@@ -35,11 +35,23 @@
         <p>冒険者名を入力してください</p>
         <input id="nameInput" placeholder="例：タロウ" autocomplete="name">
         <div class="row mt">
-          <button class="btn gold" id="btnNameOk">登録</button>
+          <button class="btn gold" id="btnNameOk">新規登録</button>
           <button class="btn" id="btnBackWelcome">戻る</button>
+        </div>
+        <div class="row mt">
+          <button class="btn" id="btnSelectExisting">📋 登録済みの冒険者から選ぶ</button>
         </div>
       </div>
     </section>
+
+    <div id="existingOverlay" class="level-up-overlay">
+      <div class="panel window" style="max-width:92vw;width:420px;max-height:80dvh;display:flex;flex-direction:column">
+        <div class="title-logo small">冒険者を選択</div>
+        <input id="existingSearch" placeholder="名前で検索" style="margin:6px 0">
+        <div id="existingList" style="flex:1;overflow-y:auto;text-align:left;margin:8px 0"></div>
+        <button class="btn" id="existingClose">閉じる</button>
+      </div>
+    </div>
 
     <section class="screen center" id="screenParty">
       <div class="panel window">
@@ -151,6 +163,11 @@
         <div id="levelUpText" class="level-up-text"></div>
         <button class="btn gold mt" id="levelUpClose">OK</button>
       </div>
+    </div>
+
+    <div id="victoryClearOverlay" class="victory-clear-overlay">
+      <img src="victory_clear.png" alt="魔王討伐完了" class="victory-clear-img" onerror="this.style.display='none'">
+      <button class="btn gold" id="victoryClearClose">🏠 最初の画面へ</button>
     </div>
   </div>
 

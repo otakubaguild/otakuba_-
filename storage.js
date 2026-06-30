@@ -19,7 +19,8 @@ window.GuildStorage = (() => {
     return {id:m.id || GuildUtils.uid('enemy'), name:m.name || `敵${i+1}`, stage:m.stage || '草原',
       hp:Number.isFinite(Number(m.hp)) ? Math.max(0,Number(m.hp)) : hpMax, maxHp:hpMax,
       bg:m.bg || m.background || 'grass.png', background:m.bg || m.background || 'grass.png',
-      image:m.image || 'slime.png', bgm:m.bgm || 'slime', sort:Number(m.sort || i)};
+      image:m.image || 'slime.png', bgm:m.bgm || 'slime', sort:Number(m.sort || i),
+      scale:Number.isFinite(Number(m.scale))?Number(m.scale):100, offsetX:Number.isFinite(Number(m.offsetX))?Number(m.offsetX):0, offsetY:Number.isFinite(Number(m.offsetY))?Number(m.offsetY):0};
   }
 
   function normalizeMenu(p,i){
@@ -110,8 +111,18 @@ window.GuildStorage = (() => {
         // 戦闘中の現在HPは端末側を尊重（メニュー定義だけ同期したい場合の保険）
         if(typeof curHp==='number' && data.monsters[idx]) data.monsters[idx].hp=curHp;
       }
-      if(Array.isArray(remote.customers)){ data.customers=remote.customers; }
-      if(Array.isArray(remote.sales)){ data.sales=remote.sales; }
+      if(Array.isArray(remote.customers)){
+        // IDで突合してマージ。両方にあれば来店回数が多い方（=新しい記録）を残す
+        const byId={}; (data.customers||[]).forEach(c=>{ if(c&&c.id) byId[c.id]=c; });
+        remote.customers.forEach(rc=>{ if(!rc||!rc.id){ return; } const local=byId[rc.id]; if(!local){ byId[rc.id]=rc; } else { const lv=(Number(local.visits)||0), rv=(Number(rc.visits)||0); byId[rc.id]=(rv>=lv)?rc:local; } });
+        data.customers=Object.keys(byId).map(k=>byId[k]);
+      }
+      if(Array.isArray(remote.sales)){
+        // 売上IDで重複を除いて統合（消さずに足す）
+        const seen={}; const merged=[];
+        (data.sales||[]).concat(remote.sales).forEach(s=>{ if(!s) return; const id=s.id||JSON.stringify(s); if(!seen[id]){ seen[id]=1; merged.push(s); } });
+        data.sales=merged;
+      }
       data.currentEnemyIndex=GuildUtils.clamp(data.currentEnemyIndex,0,Math.max(0,data.monsters.length-1));
       set(keys.state,data);
       return true;

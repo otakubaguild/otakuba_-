@@ -1,14 +1,14 @@
 .battlefield{position:relative;overflow:hidden;flex:1;min-height:180px;border-radius:16px;border:2px solid rgba(255,246,223,.8);background:center/cover no-repeat;box-shadow:inset 0 0 80px rgba(0,0,0,.45);order:1}
 .battlefield:after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.05),rgba(0,0,0,.35));pointer-events:none}
-.enemy{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;text-align:center;filter:drop-shadow(0 16px 18px rgba(0,0,0,.75));font-size:88px;animation:enemyIdle 1.8s ease-in-out infinite}
-.enemy img{width:min(72vw,230px);height:min(42dvh,230px);max-width:230px;max-height:230px;object-fit:contain;display:block}
-.enemy[data-enemy-id*="orc"] img,.enemy[data-enemy-id*="minotaur"] img{width:min(82vw,270px);height:min(47dvh,270px);max-width:270px;max-height:270px}
+.enemy{position:absolute;left:50%;top:50%;--enemy-scale:1;--enemy-ox:0%;--enemy-oy:0%;transform:translate(calc(-50% + var(--enemy-ox)),calc(-50% + var(--enemy-oy))) scale(var(--enemy-scale));z-index:2;text-align:center;filter:drop-shadow(0 16px 18px rgba(0,0,0,.75));font-size:88px;animation:enemyIdle 1.8s ease-in-out infinite}
+.enemy img{width:auto;height:auto;max-width:min(72vw,230px);max-height:min(40dvh,230px);object-fit:contain;display:block;margin:0 auto}
+.enemy[data-enemy-id*="orc"] img,.enemy[data-enemy-id*="minotaur"] img{max-width:min(80vw,260px);max-height:min(44dvh,260px)}
 .enemy.hit{animation:battleHit .36s ease!important}.enemy.defeated{animation:battleDefeat .8s ease forwards!important}
 .damage{position:absolute;left:50%;top:24%;transform:translateX(-50%);z-index:5;font-size:28px;color:#fff;text-shadow:0 0 10px #f00,3px 3px #000;opacity:0;font-weight:900}
 .damage.on{animation:damage 1.3s ease}
 .defeat{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:6;font-size:48px;color:var(--gold);text-shadow:4px 4px #000,0 0 22px var(--gold);font-weight:900}
 .defeat.on{display:flex;animation:pop .35s ease}
-@keyframes enemyIdle{0%,100%{transform:translate(-50%,-50%)}50%{transform:translate(-50%,calc(-50% - 5px))}}
+@keyframes enemyIdle{0%,100%{transform:translate(calc(-50% + var(--enemy-ox)),calc(-50% + var(--enemy-oy))) scale(var(--enemy-scale))}50%{transform:translate(calc(-50% + var(--enemy-ox)),calc(-50% + var(--enemy-oy) - 5px)) scale(var(--enemy-scale))}}
 @keyframes battleHit{0%,100%{transform:translate(-50%,-50%)}20%{transform:translate(calc(-50% - 12px),calc(-50% - 4px))}40%{transform:translate(calc(-50% + 12px),calc(-50% + 2px))}60%{transform:translate(calc(-50% - 7px),-50%)}80%{transform:translate(calc(-50% + 5px),-50%)}}
 @keyframes battleDefeat{0%{opacity:1;transform:translate(-50%,-50%) scale(1)}45%{opacity:.85;transform:translate(-50%,-50%) scale(1.08)}100%{opacity:0;transform:translate(-50%,calc(-50% + 20px)) scale(.7)}}
 @keyframes damage{0%{opacity:0;transform:translate(-50%,20px) scale(.8)}20%{opacity:1;transform:translate(-50%,0) scale(1.2)}100%{opacity:0;transform:translate(-50%,-55px) scale(.95)}}
