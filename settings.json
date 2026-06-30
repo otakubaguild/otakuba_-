@@ -4,7 +4,7 @@
   "levelStep": 3000,
   "adminPassword": "OTAKU",
   "notifyOn": true,
-  "gasUrl": "",
+  "gasUrl": "https://script.google.com/macros/s/AKfycbzGMB8qWGRFiEapNpX6n5BpBFXZGUG7JljnZ38IjBucArvTqgEFGwjA34vj1yfk_ZJ42Q/exec",
   "discordWebhookUrl": "",
   "categories": [
     {
