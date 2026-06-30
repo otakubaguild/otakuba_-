@@ -1,6 +1,6 @@
 [
   {
-    "id": "menu_001_c041753c",
+    "id": "menu_001_d3ba89f9",
     "cat": "beer_sour",
     "category": "beer_sour",
     "name": "アサヒ生ビール グラス",
@@ -10,10 +10,14 @@
     "icon": "🍺",
     "image": "",
     "hidden": false,
-    "sort": 1
+    "sort": 1,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_002_1d8bcef1",
+    "id": "menu_002_853e5660",
     "cat": "beer_sour",
     "category": "beer_sour",
     "name": "アサヒ生ビール メガジョッキ",
@@ -23,10 +27,14 @@
     "icon": "🍺",
     "image": "",
     "hidden": false,
-    "sort": 2
+    "sort": 2,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_003_71c72fc3",
+    "id": "menu_003_f036687c",
     "cat": "beer_sour",
     "category": "beer_sour",
     "name": "アサヒ生ビール 特大ジョッキ",
@@ -36,166 +44,218 @@
     "icon": "🍺",
     "image": "",
     "hidden": false,
-    "sort": 3
+    "sort": 3,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_004_87294854",
+    "id": "menu_004_a942564b",
     "cat": "beer_sour",
     "category": "beer_sour",
     "name": "レモンサワー",
     "desc": "割り物（サワー）",
     "price": 500,
-    "emoji": "🍋",
-    "icon": "🍋",
+    "emoji": "🍹",
+    "icon": "🍹",
     "image": "",
     "hidden": false,
-    "sort": 4
+    "sort": 4,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_005_3835860d",
+    "id": "menu_005_7660ebb8",
     "cat": "beer_sour",
     "category": "beer_sour",
     "name": "カシスサワー",
     "desc": "割り物（サワー）",
     "price": 500,
-    "emoji": "🍋",
-    "icon": "🍋",
+    "emoji": "🍹",
+    "icon": "🍹",
     "image": "",
     "hidden": false,
-    "sort": 5
+    "sort": 5,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_006_fde41f74",
+    "id": "menu_006_004bae2a",
     "cat": "beer_sour",
     "category": "beer_sour",
     "name": "巨峰サワー",
     "desc": "割り物（サワー）",
     "price": 500,
-    "emoji": "🍋",
-    "icon": "🍋",
+    "emoji": "🍹",
+    "icon": "🍹",
     "image": "",
     "hidden": false,
-    "sort": 6
+    "sort": 6,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_007_16b87365",
+    "id": "menu_007_79ce71d0",
     "cat": "beer_sour",
     "category": "beer_sour",
     "name": "うめサワー",
     "desc": "割り物（サワー）",
     "price": 500,
-    "emoji": "🍋",
-    "icon": "🍋",
+    "emoji": "🍹",
+    "icon": "🍹",
     "image": "",
     "hidden": false,
-    "sort": 7
+    "sort": 7,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_008_03ea20ce",
+    "id": "menu_008_0f417f60",
     "cat": "beer_sour",
     "category": "beer_sour",
     "name": "ピーチサワー",
     "desc": "割り物（サワー）",
     "price": 500,
-    "emoji": "🍋",
-    "icon": "🍋",
+    "emoji": "🍹",
+    "icon": "🍹",
     "image": "",
     "hidden": false,
-    "sort": 8
+    "sort": 8,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_009_382c93a5",
+    "id": "menu_009_9b3b303b",
     "cat": "beer_sour",
     "category": "beer_sour",
     "name": "グレープフルーツサワー",
     "desc": "割り物（サワー）",
     "price": 500,
-    "emoji": "🍋",
-    "icon": "🍋",
+    "emoji": "🍹",
+    "icon": "🍹",
     "image": "",
     "hidden": false,
-    "sort": 9
+    "sort": 9,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_010_93495938",
+    "id": "menu_010_27be9ad1",
     "cat": "beer_sour",
     "category": "beer_sour",
     "name": "カルピスサワー",
     "desc": "割り物（サワー）",
     "price": 500,
-    "emoji": "🍋",
-    "icon": "🍋",
+    "emoji": "🍹",
+    "icon": "🍹",
     "image": "",
     "hidden": false,
-    "sort": 10
+    "sort": 10,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_011_5e0cbde5",
+    "id": "menu_011_9bf4f186",
     "cat": "beer_sour",
     "category": "beer_sour",
     "name": "ライムサワー",
     "desc": "割り物（サワー）",
     "price": 500,
-    "emoji": "🍋",
-    "icon": "🍋",
+    "emoji": "🍹",
+    "icon": "🍹",
     "image": "",
     "hidden": false,
-    "sort": 11
+    "sort": 11,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_012_890f0e3a",
+    "id": "menu_012_f7eba072",
     "cat": "beer_sour",
     "category": "beer_sour",
     "name": "ライチサワー",
     "desc": "割り物（サワー）",
     "price": 500,
-    "emoji": "🍋",
-    "icon": "🍋",
+    "emoji": "🍹",
+    "icon": "🍹",
     "image": "",
     "hidden": false,
-    "sort": 12
+    "sort": 12,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_013_cdf28850",
+    "id": "menu_013_463a5df9",
     "cat": "beer_sour",
     "category": "beer_sour",
     "name": "マスカットサワー",
     "desc": "割り物（サワー）",
     "price": 500,
-    "emoji": "🍋",
-    "icon": "🍋",
+    "emoji": "🍹",
+    "icon": "🍹",
     "image": "",
     "hidden": false,
-    "sort": 13
+    "sort": 13,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_014_623b1862",
+    "id": "menu_014_eaec56a5",
     "cat": "beer_sour",
     "category": "beer_sour",
-    "name": "林檎サワー",
+    "name": "桃太郎サワー",
     "desc": "割り物（サワー）",
     "price": 500,
-    "emoji": "🍋",
-    "icon": "🍋",
+    "emoji": "🍹",
+    "icon": "🍹",
     "image": "",
     "hidden": false,
-    "sort": 14
+    "sort": 14,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_015_14c9180a",
+    "id": "menu_015_bf37bca7",
     "cat": "beer_sour",
     "category": "beer_sour",
     "name": "パインサワー",
     "desc": "割り物（サワー）",
     "price": 500,
-    "emoji": "🍋",
-    "icon": "🍋",
+    "emoji": "🍹",
+    "icon": "🍹",
     "image": "",
     "hidden": false,
-    "sort": 15
+    "sort": 15,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_016_00fc8c63",
+    "id": "menu_016_10a228df",
     "cat": "shochu_cocktail",
     "category": "shochu_cocktail",
     "name": "焼酎（そるじ）",
@@ -205,10 +265,14 @@
     "icon": "🥃",
     "image": "",
     "hidden": false,
-    "sort": 16
+    "sort": 16,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_017_98267c07",
+    "id": "menu_017_8661683d",
     "cat": "shochu_cocktail",
     "category": "shochu_cocktail",
     "name": "麦焼酎",
@@ -218,10 +282,14 @@
     "icon": "🥃",
     "image": "",
     "hidden": false,
-    "sort": 17
+    "sort": 17,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_018_48995713",
+    "id": "menu_018_aaf5e699",
     "cat": "shochu_cocktail",
     "category": "shochu_cocktail",
     "name": "芋焼酎",
@@ -231,10 +299,14 @@
     "icon": "🥃",
     "image": "",
     "hidden": false,
-    "sort": 18
+    "sort": 18,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_019_84c879dd",
+    "id": "menu_019_e3ac96c6",
     "cat": "shochu_cocktail",
     "category": "shochu_cocktail",
     "name": "ウイスキー（ブラックニッカ）",
@@ -244,10 +316,14 @@
     "icon": "🥃",
     "image": "",
     "hidden": false,
-    "sort": 19
+    "sort": 19,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_020_4f7725d7",
+    "id": "menu_020_3fa9be24",
     "cat": "shochu_cocktail",
     "category": "shochu_cocktail",
     "name": "ブランデー（V.O）",
@@ -257,10 +333,14 @@
     "icon": "🥃",
     "image": "",
     "hidden": false,
-    "sort": 20
+    "sort": 20,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_021_4621eaed",
+    "id": "menu_021_858c550e",
     "cat": "shochu_cocktail",
     "category": "shochu_cocktail",
     "name": "うめ酒",
@@ -270,10 +350,14 @@
     "icon": "🥃",
     "image": "",
     "hidden": false,
-    "sort": 21
+    "sort": 21,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_022_3e7a67ac",
+    "id": "menu_022_9806360a",
     "cat": "shochu_cocktail",
     "category": "shochu_cocktail",
     "name": "ゆず酒",
@@ -283,10 +367,14 @@
     "icon": "🥃",
     "image": "",
     "hidden": false,
-    "sort": 22
+    "sort": 22,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_023_9e686d6e",
+    "id": "menu_023_2f936f85",
     "cat": "shochu_cocktail",
     "category": "shochu_cocktail",
     "name": "あんず酒",
@@ -296,10 +384,14 @@
     "icon": "🥃",
     "image": "",
     "hidden": false,
-    "sort": 23
+    "sort": 23,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_024_611d967e",
+    "id": "menu_024_62002b62",
     "cat": "shochu_cocktail",
     "category": "shochu_cocktail",
     "name": "ライチ酒",
@@ -309,10 +401,14 @@
     "icon": "🥃",
     "image": "",
     "hidden": false,
-    "sort": 24
+    "sort": 24,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_025_cd9ced36",
+    "id": "menu_025_7e752cf9",
     "cat": "shochu_cocktail",
     "category": "shochu_cocktail",
     "name": "りんご酒",
@@ -322,10 +418,14 @@
     "icon": "🥃",
     "image": "",
     "hidden": false,
-    "sort": 25
+    "sort": 25,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_026_a19770a1",
+    "id": "menu_026_39f8b27c",
     "cat": "shochu_cocktail",
     "category": "shochu_cocktail",
     "name": "レッドアイ",
@@ -335,10 +435,14 @@
     "icon": "🍸",
     "image": "",
     "hidden": false,
-    "sort": 26
+    "sort": 26,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_027_ec46c42b",
+    "id": "menu_027_ba74fdf5",
     "cat": "shochu_cocktail",
     "category": "shochu_cocktail",
     "name": "ゴッドファーザー",
@@ -348,10 +452,14 @@
     "icon": "🍸",
     "image": "",
     "hidden": false,
-    "sort": 27
+    "sort": 27,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_028_40248aa4",
+    "id": "menu_028_78eddee1",
     "cat": "shochu_cocktail",
     "category": "shochu_cocktail",
     "name": "カルーアミルク",
@@ -361,10 +469,14 @@
     "icon": "🍸",
     "image": "",
     "hidden": false,
-    "sort": 28
+    "sort": 28,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_029_0e5714c6",
+    "id": "menu_029_dc81adc7",
     "cat": "shochu_cocktail",
     "category": "shochu_cocktail",
     "name": "カシスミルク",
@@ -374,10 +486,14 @@
     "icon": "🍸",
     "image": "",
     "hidden": false,
-    "sort": 29
+    "sort": 29,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_030_fbb611bc",
+    "id": "menu_030_60b49f44",
     "cat": "shochu_cocktail",
     "category": "shochu_cocktail",
     "name": "マリブミルク",
@@ -387,10 +503,14 @@
     "icon": "🍸",
     "image": "",
     "hidden": false,
-    "sort": 30
+    "sort": 30,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_031_fd741fee",
+    "id": "menu_031_92cb2438",
     "cat": "shochu_cocktail",
     "category": "shochu_cocktail",
     "name": "バナナミルク",
@@ -400,10 +520,14 @@
     "icon": "🍸",
     "image": "",
     "hidden": false,
-    "sort": 31
+    "sort": 31,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_032_356447a3",
+    "id": "menu_032_37d8d10c",
     "cat": "shochu_cocktail",
     "category": "shochu_cocktail",
     "name": "マンゴーオレンジ",
@@ -413,10 +537,14 @@
     "icon": "🍸",
     "image": "",
     "hidden": false,
-    "sort": 32
+    "sort": 32,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_033_a7756ac2",
+    "id": "menu_033_af0abafd",
     "cat": "shochu_cocktail",
     "category": "shochu_cocktail",
     "name": "マンゴーソーダ",
@@ -426,10 +554,14 @@
     "icon": "🍸",
     "image": "",
     "hidden": false,
-    "sort": 33
+    "sort": 33,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_034_f099694d",
+    "id": "menu_034_f7ca119b",
     "cat": "shochu_cocktail",
     "category": "shochu_cocktail",
     "name": "カシスオレンジ",
@@ -439,10 +571,14 @@
     "icon": "🍸",
     "image": "",
     "hidden": false,
-    "sort": 34
+    "sort": 34,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_035_051d6514",
+    "id": "menu_035_9e3c099d",
     "cat": "shochu_cocktail",
     "category": "shochu_cocktail",
     "name": "カシスソーダ",
@@ -452,10 +588,14 @@
     "icon": "🍸",
     "image": "",
     "hidden": false,
-    "sort": 35
+    "sort": 35,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_036_fedaa84e",
+    "id": "menu_036_20d4e022",
     "cat": "shochu_cocktail",
     "category": "shochu_cocktail",
     "name": "カシスウーロン",
@@ -465,10 +605,14 @@
     "icon": "🍸",
     "image": "",
     "hidden": false,
-    "sort": 36
+    "sort": 36,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_037_9419d122",
+    "id": "menu_037_e4621179",
     "cat": "shochu_cocktail",
     "category": "shochu_cocktail",
     "name": "レゲエパンチ",
@@ -478,23 +622,31 @@
     "icon": "🍸",
     "image": "",
     "hidden": false,
-    "sort": 37
+    "sort": 37,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_038_3f93e321",
+    "id": "menu_038_99025f79",
     "cat": "shochu_cocktail",
     "category": "shochu_cocktail",
-    "name": "ブラッディーメープル",
+    "name": "ブランデーティーメープル",
     "desc": "カクテル",
     "price": 500,
     "emoji": "🍸",
     "icon": "🍸",
     "image": "",
     "hidden": false,
-    "sort": 38
+    "sort": 38,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_039_c141ff05",
+    "id": "menu_039_92326ed5",
     "cat": "shochu_cocktail",
     "category": "shochu_cocktail",
     "name": "ウォッカトニック",
@@ -504,10 +656,14 @@
     "icon": "🍸",
     "image": "",
     "hidden": false,
-    "sort": 39
+    "sort": 39,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_040_04684961",
+    "id": "menu_040_4b3b6745",
     "cat": "shochu_cocktail",
     "category": "shochu_cocktail",
     "name": "モスコミュール",
@@ -517,10 +673,14 @@
     "icon": "🍸",
     "image": "",
     "hidden": false,
-    "sort": 40
+    "sort": 40,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_041_c66b3076",
+    "id": "menu_041_dd0f38ca",
     "cat": "shochu_cocktail",
     "category": "shochu_cocktail",
     "name": "ジントニック",
@@ -530,10 +690,14 @@
     "icon": "🍸",
     "image": "",
     "hidden": false,
-    "sort": 41
+    "sort": 41,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_042_01aefd6f",
+    "id": "menu_042_9f88c330",
     "cat": "shochu_cocktail",
     "category": "shochu_cocktail",
     "name": "ジンバック",
@@ -543,10 +707,14 @@
     "icon": "🍸",
     "image": "",
     "hidden": false,
-    "sort": 42
+    "sort": 42,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_043_4f0b9b75",
+    "id": "menu_043_1ba835f0",
     "cat": "shochu_cocktail",
     "category": "shochu_cocktail",
     "name": "ジンオレンジ",
@@ -556,10 +724,14 @@
     "icon": "🍸",
     "image": "",
     "hidden": false,
-    "sort": 43
+    "sort": 43,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_044_f95b896d",
+    "id": "menu_044_86610a93",
     "cat": "shochu_cocktail",
     "category": "shochu_cocktail",
     "name": "酒ナミンC",
@@ -569,10 +741,14 @@
     "icon": "🍸",
     "image": "",
     "hidden": false,
-    "sort": 44
+    "sort": 44,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_045_92bbe77f",
+    "id": "menu_045_79e96309",
     "cat": "shot_bottle",
     "category": "shot_bottle",
     "name": "テキーラ",
@@ -582,10 +758,14 @@
     "icon": "🥃",
     "image": "",
     "hidden": false,
-    "sort": 45
+    "sort": 45,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_046_20abb3de",
+    "id": "menu_046_654b656c",
     "cat": "shot_bottle",
     "category": "shot_bottle",
     "name": "テキーラローズ",
@@ -595,23 +775,31 @@
     "icon": "🥃",
     "image": "",
     "hidden": false,
-    "sort": 46
+    "sort": 46,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_047_ea732536",
+    "id": "menu_047_c6aa82fd",
     "cat": "shot_bottle",
     "category": "shot_bottle",
-    "name": "イエガーマイスター",
+    "name": "イエーガーマイスター",
     "desc": "ショット",
     "price": 600,
     "emoji": "🥃",
     "icon": "🥃",
     "image": "",
     "hidden": false,
-    "sort": 47
+    "sort": 47,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_048_0b5bf6fb",
+    "id": "menu_048_dd980135",
     "cat": "shot_bottle",
     "category": "shot_bottle",
     "name": "クライナー",
@@ -621,10 +809,14 @@
     "icon": "🥃",
     "image": "",
     "hidden": false,
-    "sort": 48
+    "sort": 48,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_049_65b577c2",
+    "id": "menu_049_8a17e5da",
     "cat": "shot_bottle",
     "category": "shot_bottle",
     "name": "コカボム",
@@ -634,49 +826,65 @@
     "icon": "🥃",
     "image": "",
     "hidden": false,
-    "sort": 49
+    "sort": 49,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_050_7529ad35",
+    "id": "menu_050_0c039b7c",
     "cat": "shot_bottle",
     "category": "shot_bottle",
     "name": "カフェドパリ",
-    "desc": "その他 / ボトル（シャンパンは15,000G〜）",
+    "desc": "その他 / ボトル",
     "price": 6000,
     "emoji": "🍾",
     "icon": "🍾",
     "image": "",
     "hidden": false,
-    "sort": 50
+    "sort": 50,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_051_0f8cf6ba",
+    "id": "menu_051_b8a6071c",
     "cat": "shot_bottle",
     "category": "shot_bottle",
     "name": "シャンパン",
-    "desc": "その他 / ボトル（シャンパンは15,000G〜）",
+    "desc": "その他 / ボトル",
     "price": 15000,
     "emoji": "🍾",
     "icon": "🍾",
     "image": "",
     "hidden": false,
-    "sort": 51
+    "sort": 51,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_052_1db0c690",
+    "id": "menu_052_6f243201",
     "cat": "shot_bottle",
     "category": "shot_bottle",
     "name": "オリシャン",
-    "desc": "その他 / ボトル（シャンパンは15,000G〜）",
+    "desc": "その他 / ボトル",
     "price": 15000,
     "emoji": "🍾",
     "icon": "🍾",
     "image": "",
     "hidden": false,
-    "sort": 52
+    "sort": 52,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_053_217a9a77",
+    "id": "menu_053_abd4a08b",
     "cat": "soft",
     "category": "soft",
     "name": "赤コーラ",
@@ -686,10 +894,14 @@
     "icon": "🥤",
     "image": "",
     "hidden": false,
-    "sort": 53
+    "sort": 53,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_054_d8b8ed30",
+    "id": "menu_054_a2ccb337",
     "cat": "soft",
     "category": "soft",
     "name": "黒コーラ",
@@ -699,10 +911,14 @@
     "icon": "🥤",
     "image": "",
     "hidden": false,
-    "sort": 54
+    "sort": 54,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_055_eaafc353",
+    "id": "menu_055_dd8d58a7",
     "cat": "soft",
     "category": "soft",
     "name": "アセロラ",
@@ -712,10 +928,14 @@
     "icon": "🥤",
     "image": "",
     "hidden": false,
-    "sort": 55
+    "sort": 55,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_056_fe4cdd5f",
+    "id": "menu_056_e0b4039f",
     "cat": "soft",
     "category": "soft",
     "name": "アップル",
@@ -725,10 +945,14 @@
     "icon": "🥤",
     "image": "",
     "hidden": false,
-    "sort": 56
+    "sort": 56,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_057_dfd4018b",
+    "id": "menu_057_a75e378b",
     "cat": "soft",
     "category": "soft",
     "name": "オレンジ",
@@ -738,10 +962,14 @@
     "icon": "🥤",
     "image": "",
     "hidden": false,
-    "sort": 57
+    "sort": 57,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_058_f1961904",
+    "id": "menu_058_4be50593",
     "cat": "soft",
     "category": "soft",
     "name": "カルピス",
@@ -751,10 +979,14 @@
     "icon": "🥤",
     "image": "",
     "hidden": false,
-    "sort": 58
+    "sort": 58,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_059_a7d4a4c5",
+    "id": "menu_059_09cf7e79",
     "cat": "soft",
     "category": "soft",
     "name": "ジンジャーエール",
@@ -764,10 +996,14 @@
     "icon": "🥤",
     "image": "",
     "hidden": false,
-    "sort": 59
+    "sort": 59,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_060_270b5e72",
+    "id": "menu_060_5eb5fa16",
     "cat": "soft",
     "category": "soft",
     "name": "ドクターペッパー",
@@ -777,10 +1013,14 @@
     "icon": "🥤",
     "image": "",
     "hidden": false,
-    "sort": 60
+    "sort": 60,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_061_71a75d9d",
+    "id": "menu_061_301d469d",
     "cat": "soft",
     "category": "soft",
     "name": "アイスティー（無糖）",
@@ -790,10 +1030,14 @@
     "icon": "🥤",
     "image": "",
     "hidden": false,
-    "sort": 61
+    "sort": 61,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_062_86738c52",
+    "id": "menu_062_2337f713",
     "cat": "soft",
     "category": "soft",
     "name": "炭酸水（ウィルキンソン）",
@@ -803,10 +1047,14 @@
     "icon": "🥤",
     "image": "",
     "hidden": false,
-    "sort": 62
+    "sort": 62,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_063_bca1e5c3",
+    "id": "menu_063_f2856376",
     "cat": "soft",
     "category": "soft",
     "name": "緑茶",
@@ -816,10 +1064,14 @@
     "icon": "🥤",
     "image": "",
     "hidden": false,
-    "sort": 63
+    "sort": 63,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_064_e1e26c31",
+    "id": "menu_064_d5f54f4b",
     "cat": "soft",
     "category": "soft",
     "name": "烏龍茶",
@@ -829,10 +1081,14 @@
     "icon": "🥤",
     "image": "",
     "hidden": false,
-    "sort": 64
+    "sort": 64,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_065_12570126",
+    "id": "menu_065_0b04b735",
     "cat": "soft",
     "category": "soft",
     "name": "カシスウーロン",
@@ -842,10 +1098,14 @@
     "icon": "🍹",
     "image": "",
     "hidden": false,
-    "sort": 65
+    "sort": 65,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_066_a84dc597",
+    "id": "menu_066_325be1a3",
     "cat": "soft",
     "category": "soft",
     "name": "ピーチウーロン",
@@ -855,10 +1115,14 @@
     "icon": "🍹",
     "image": "",
     "hidden": false,
-    "sort": 66
+    "sort": 66,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_067_01ef25d5",
+    "id": "menu_067_81c8d15d",
     "cat": "soft",
     "category": "soft",
     "name": "カシスオレンジ",
@@ -868,10 +1132,14 @@
     "icon": "🍹",
     "image": "",
     "hidden": false,
-    "sort": 67
+    "sort": 67,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_068_bc6cc02e",
+    "id": "menu_068_3708d3cb",
     "cat": "soft",
     "category": "soft",
     "name": "ピーチオレンジ",
@@ -881,10 +1149,14 @@
     "icon": "🍹",
     "image": "",
     "hidden": false,
-    "sort": 68
+    "sort": 68,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_069_67c8413d",
+    "id": "menu_069_be5caecd",
     "cat": "soft",
     "category": "soft",
     "name": "パインオレンジ",
@@ -894,10 +1166,14 @@
     "icon": "🍹",
     "image": "",
     "hidden": false,
-    "sort": 69
+    "sort": 69,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_070_2a91c8f5",
+    "id": "menu_070_4c2b6d34",
     "cat": "soft",
     "category": "soft",
     "name": "マンゴーオレンジ",
@@ -907,10 +1183,14 @@
     "icon": "🍹",
     "image": "",
     "hidden": false,
-    "sort": 70
+    "sort": 70,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_071_28b91e00",
+    "id": "menu_071_524b3ab7",
     "cat": "soft",
     "category": "soft",
     "name": "カシスミルク",
@@ -920,10 +1200,14 @@
     "icon": "🍹",
     "image": "",
     "hidden": false,
-    "sort": 71
+    "sort": 71,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_072_8773576e",
+    "id": "menu_072_13030c8f",
     "cat": "soft",
     "category": "soft",
     "name": "バナナミルク",
@@ -933,10 +1217,14 @@
     "icon": "🍹",
     "image": "",
     "hidden": false,
-    "sort": 72
+    "sort": 72,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_073_d3267033",
+    "id": "menu_073_0572ee91",
     "cat": "soft",
     "category": "soft",
     "name": "カシスソーダ",
@@ -946,10 +1234,14 @@
     "icon": "🍹",
     "image": "",
     "hidden": false,
-    "sort": 73
+    "sort": 73,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_074_2091e4c5",
+    "id": "menu_074_779d955c",
     "cat": "soft",
     "category": "soft",
     "name": "巨峰ソーダ",
@@ -959,10 +1251,14 @@
     "icon": "🍹",
     "image": "",
     "hidden": false,
-    "sort": 74
+    "sort": 74,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_075_01a545c8",
+    "id": "menu_075_274774ed",
     "cat": "soft",
     "category": "soft",
     "name": "うめソーダ",
@@ -972,23 +1268,31 @@
     "icon": "🍹",
     "image": "",
     "hidden": false,
-    "sort": 75
+    "sort": 75,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_076_b659f2be",
+    "id": "menu_076_732ae4b9",
     "cat": "soft",
     "category": "soft",
-    "name": "春：始まりの柑、降り立つ槍",
+    "name": "春：始まりの柑、降り立つ槌",
     "desc": "オリジナル",
     "price": 400,
     "emoji": "✨",
     "icon": "✨",
     "image": "",
     "hidden": false,
-    "sort": 76
+    "sort": 76,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_077_673370eb",
+    "id": "menu_077_5aa68e2b",
     "cat": "soft",
     "category": "soft",
     "name": "夏：試練の先の希望の柑",
@@ -998,10 +1302,14 @@
     "icon": "✨",
     "image": "",
     "hidden": false,
-    "sort": 77
+    "sort": 77,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_078_8d09accb",
+    "id": "menu_078_52166fed",
     "cat": "soft",
     "category": "soft",
     "name": "秋：希望の贈り物が届く頃",
@@ -1011,10 +1319,14 @@
     "icon": "✨",
     "image": "",
     "hidden": false,
-    "sort": 78
+    "sort": 78,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_079_3b3de311",
+    "id": "menu_079_f3e19ba0",
     "cat": "soft",
     "category": "soft",
     "name": "冬：氷の妖精が溶ける頃",
@@ -1024,10 +1336,14 @@
     "icon": "✨",
     "image": "",
     "hidden": false,
-    "sort": 79
+    "sort": 79,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_080_0f517b3d",
+    "id": "menu_080_2305c84d",
     "cat": "soft",
     "category": "soft",
     "name": "カルピス牛乳",
@@ -1037,10 +1353,14 @@
     "icon": "✨",
     "image": "",
     "hidden": false,
-    "sort": 80
+    "sort": 80,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_081_9bd7b2a2",
+    "id": "menu_081_e924ded3",
     "cat": "soft",
     "category": "soft",
     "name": "ウーロンラス",
@@ -1050,10 +1370,14 @@
     "icon": "✨",
     "image": "",
     "hidden": false,
-    "sort": 81
+    "sort": 81,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_082_e0a67a43",
+    "id": "menu_082_9f7f8032",
     "cat": "food",
     "category": "food",
     "name": "ポテトフライ",
@@ -1063,10 +1387,14 @@
     "icon": "🍟",
     "image": "",
     "hidden": false,
-    "sort": 82
+    "sort": 82,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_083_8b1f501f",
+    "id": "menu_083_dca40d45",
     "cat": "food",
     "category": "food",
     "name": "ナゲット",
@@ -1076,10 +1404,14 @@
     "icon": "🍟",
     "image": "",
     "hidden": false,
-    "sort": 83
+    "sort": 83,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_084_818874e5",
+    "id": "menu_084_427b2b29",
     "cat": "food",
     "category": "food",
     "name": "えだまめ",
@@ -1089,10 +1421,14 @@
     "icon": "🍟",
     "image": "",
     "hidden": false,
-    "sort": 84
+    "sort": 84,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_085_376355d6",
+    "id": "menu_085_832a51a1",
     "cat": "food",
     "category": "food",
     "name": "揚げたこ焼き",
@@ -1102,23 +1438,31 @@
     "icon": "🍟",
     "image": "",
     "hidden": false,
-    "sort": 85
+    "sort": 85,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_086_ea086fba",
+    "id": "menu_086_70998259",
     "cat": "food",
     "category": "food",
-    "name": "極太トマ",
+    "name": "極太トマト",
     "desc": "各種300G",
     "price": 300,
     "emoji": "🍟",
     "icon": "🍟",
     "image": "",
     "hidden": false,
-    "sort": 86
+    "sort": 86,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_087_083de095",
+    "id": "menu_087_75acc3cc",
     "cat": "food",
     "category": "food",
     "name": "玉子とうふ",
@@ -1128,10 +1472,14 @@
     "icon": "🍟",
     "image": "",
     "hidden": false,
-    "sort": 87
+    "sort": 87,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_088_e67412ed",
+    "id": "menu_088_adf48ba7",
     "cat": "food",
     "category": "food",
     "name": "焼きおにぎり（2ヶ）",
@@ -1141,36 +1489,48 @@
     "icon": "🍟",
     "image": "",
     "hidden": false,
-    "sort": 88
+    "sort": 88,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_089_0dce1989",
+    "id": "menu_089_a405a62a",
     "cat": "food",
     "category": "food",
     "name": "ふかふか肉まん",
     "desc": "各種200G",
     "price": 200,
-    "emoji": "🍜",
-    "icon": "🍜",
+    "emoji": "🥟",
+    "icon": "🥟",
     "image": "",
     "hidden": false,
-    "sort": 89
+    "sort": 89,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_090_eb95ae06",
+    "id": "menu_090_bf29bb5b",
     "cat": "food",
     "category": "food",
     "name": "ブタメン",
     "desc": "各種200G",
     "price": 200,
-    "emoji": "🍜",
-    "icon": "🍜",
+    "emoji": "🥟",
+    "icon": "🥟",
     "image": "",
     "hidden": false,
-    "sort": 90
+    "sort": 90,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   },
   {
-    "id": "menu_091_29b7a42a",
+    "id": "menu_091_9e801b9d",
     "cat": "food",
     "category": "food",
     "name": "ピッツァ",
@@ -1180,6 +1540,10 @@
     "icon": "🍕",
     "image": "",
     "hidden": false,
-    "sort": 91
+    "sort": 91,
+    "soldOut": false,
+    "recommended": false,
+    "limited": false,
+    "stock": ""
   }
 ]
