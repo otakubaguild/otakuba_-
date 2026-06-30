@@ -85,7 +85,8 @@ window.GuildStorage = (() => {
     const legacy = !existing && !old ? migrateLegacy(get(keys.legacy, null)) : null;
     data = Object.assign({}, defaults, existing || old || legacy || {});
     data.settings = Object.assign({}, defaults.settings, data.settings || {});
-    data.menu = (Array.isArray(data.menu)&&data.menu.length?data.menu:defaults.menu).map(normalizeMenu);
+    const hasFullMenu = Array.isArray(data.menu) && data.menu.length >= 20;
+    data.menu = (hasFullMenu ? data.menu : defaults.menu).map(normalizeMenu);
     data.monsters = (Array.isArray(data.monsters)&&data.monsters.length?data.monsters:defaults.monsters).map(normalizeMonster);
     data.customers = Array.isArray(data.customers)?data.customers:[];
     data.sales = Array.isArray(data.sales)?data.sales:[];
