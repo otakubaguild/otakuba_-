@@ -2,7 +2,7 @@ window.GuildAudio = (() => {
   let settings = {}; let bgmAudio = null; let currentKey = ''; let enabled = true;
   function init(s){ settings = s || {}; }
   function volume(type){ return Number(settings[type === 'bgm' ? 'bgmVolume' : 'seVolume'] ?? (type==='bgm'?0.45:0.9)); }
-  function path(type, key){ return settings.audioFiles && settings.audioFiles[type] && settings.audioFiles[type][key]; }
+  function path(type, key){ const f=settings.audioFiles||{}; if(f[type]&&f[type][key]) return f[type][key]; if(f[key]) return f[key]; return ''; }
   function stopBgm(){ if(bgmAudio){ try{ bgmAudio.pause(); bgmAudio.currentTime=0; }catch(e){} } bgmAudio=null; currentKey=''; }
   function playBgm(key){
     if(!enabled || !key) return;

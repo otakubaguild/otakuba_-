@@ -9,7 +9,7 @@ window.GuildStorage = (() => {
     old:'otakubaGuildApp.v1.complete'
   };
   const files = {
-    settings:'data/settings.json', menu:'data/menu.json', monsters:'data/monsters.json', customers:'data/customers.json', sales:'data/sales.json'
+    settings:'settings.json', menu:'menu.json', monsters:'monsters.json', customers:'customers.json', sales:'sales.json'
   };
   let data = {settings:{}, menu:[], monsters:[], customers:[], sales:[], currentCustomer:'', activeBill:[], currentEnemyIndex:0};
   async function fetchJson(path, fallback){
@@ -20,7 +20,7 @@ window.GuildStorage = (() => {
   function set(key, value){ localStorage.setItem(key, JSON.stringify(value)); }
   function normalizeMonster(m, i){
     m = m || {}; const hpMax = Number(m.maxHp || m.hp || 500) || 500;
-    return {id:m.id || GuildUtils.uid('enemy'), name:m.name || `敵${i+1}`, stage:m.stage || '草原', hp:Number.isFinite(Number(m.hp))?Math.max(0,Number(m.hp)):hpMax, maxHp:hpMax, bg:m.bg || m.background || 'assets/bg/grass.png', image:m.image || 'assets/monsters/slime.png', bgm:m.bgm || 'slime'};
+    return {id:m.id || GuildUtils.uid('enemy'), name:m.name || `敵${i+1}`, stage:m.stage || '草原', hp:Number.isFinite(Number(m.hp))?Math.max(0,Number(m.hp)):hpMax, maxHp:hpMax, bg:m.bg || m.background || 'grass.png', image:m.image || 'slime.png', bgm:m.bgm || 'slime'};
   }
   function migrateLegacy(legacy){
     if(!legacy || typeof legacy !== 'object') return null;

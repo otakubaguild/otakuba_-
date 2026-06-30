@@ -1,44 +1,74 @@
 {
-  "version":"3.0-stable-direct",
-  "guildName":"おたく場ギルド",
-  "currency":"G",
-  "discordWebhookUrl":"",
-  "gasUrl":"",
-  "notifyOn":true,
-  "adminPassword":"OTAKU",
-  "defaultBg":"assets/bg/background.jpg",
-  "levelStep":3000,
-  "categories":[
-    {"id":"food","name":"フード","icon":"🍖"},
-    {"id":"drink","name":"ドリンク","icon":"🥤"},
-    {"id":"alcohol","name":"酒","icon":"🍺"},
-    {"id":"dessert","name":"デザート","icon":"🍰"},
-    {"id":"event","name":"イベント","icon":"🎉"}
-  ],
-  "notice":{"enabled":false,"title":"本日のお知らせ","body":"","position":"top"},
-  "audioFiles":{
-    "bgm":{
-      "title":"assets/bgm/title.mp3",
-      "slime":"assets/bgm/slime.mp3",
-      "goblin":"assets/bgm/goblin.mp3",
-      "orc":"assets/bgm/orc.mp3",
-      "cave":"assets/bgm/cave.mp3",
-      "ruins":"assets/bgm/ruins.mp3",
-      "maou":"assets/bgm/maou.mp3",
-      "ending":"assets/bgm/ending.mp3"
-    },
-    "se":{
-      "ok":"assets/se/ok.mp3",
-      "cancel":"assets/se/cancel.mp3",
-      "bad":"assets/se/cancel.mp3",
-      "add":"assets/se/add.mp3",
-      "confirm":"assets/se/ok.mp3",
-      "damage":"assets/se/damage.mp3",
-      "defeat":"assets/se/cancel.mp3",
-      "levelup":"assets/se/levelup.mp3",
-      "victory":"assets/se/victory.mp3"
-    }
+  "guildName": "おたく場ギルド",
+  "currency": "G",
+  "discordWebhookUrl": "",
+  "gasUrl": "",
+  "notifyOn": true,
+  "battleMode": "continue",
+  "adminPassword": "OTAKU",
+  "levelStep": 3000,
+  "notice": {
+    "enabled": false,
+    "title": "本日のお知らせ",
+    "body": "",
+    "position": "top"
   },
-  "bgmVolume":0.45,
-  "seVolume":0.9
+  "categories": [
+    {
+      "id": "all",
+      "name": "全部",
+      "icon": "📜"
+    },
+    {
+      "id": "drink",
+      "name": "ドリンク",
+      "icon": "🥤"
+    },
+    {
+      "id": "alcohol",
+      "name": "酒",
+      "icon": "🍺"
+    },
+    {
+      "id": "food",
+      "name": "フード",
+      "icon": "🍖"
+    },
+    {
+      "id": "dessert",
+      "name": "デザート",
+      "icon": "🍰"
+    },
+    {
+      "id": "event",
+      "name": "イベント",
+      "icon": "🎉"
+    }
+  ],
+  "bgmVolume": 0.45,
+  "seVolume": 0.9,
+  "audioFiles": {
+    "bgm": {
+      "title": "title.mp3",
+      "slime": "slime.mp3",
+      "goblin": "goblin.mp3",
+      "orc": "orc.mp3",
+      "cave": "cave.mp3",
+      "ruins": "ruins.mp3",
+      "maou": "maou.mp3",
+      "ending": "ending.mp3"
+    },
+    "se": {
+      "ok": "ok.mp3",
+      "cancel": "cancel.mp3",
+      "bad": "cancel.mp3",
+      "add": "add.mp3",
+      "confirm": "ok.mp3",
+      "damage": "damage.mp3",
+      "hit": "damage.mp3",
+      "defeat": "cancel.mp3",
+      "levelup": "levelup.mp3",
+      "victory": "victory.mp3"
+    }
+  }
 }

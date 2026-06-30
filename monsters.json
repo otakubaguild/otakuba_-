@@ -1,18 +1,162 @@
 [
-  {"id":"slime_1","name":"スライム","stage":"草原","hp":500,"maxHp":500,"bg":"assets/bg/grass.png","image":"assets/monsters/slime.png","bgm":"slime"},
-  {"id":"goblin_1","name":"ゴブリン 1/2","stage":"森","hp":750,"maxHp":750,"bg":"assets/bg/forest.png","image":"assets/monsters/goblin.png","bgm":"goblin"},
-  {"id":"goblin_2","name":"ゴブリン 2/2","stage":"森","hp":750,"maxHp":750,"bg":"assets/bg/forest.png","image":"assets/monsters/goblin.png","bgm":"goblin"},
-  {"id":"orc_1","name":"オーク","stage":"森","hp":1500,"maxHp":1500,"bg":"assets/bg/forest.png","image":"assets/monsters/orc.png","bgm":"orc"},
-  {"id":"skeleton_1","name":"スケルトン 1/3","stage":"洞窟","hp":1000,"maxHp":1000,"bg":"assets/bg/cave.png","image":"assets/monsters/skeleton.png","bgm":"cave"},
-  {"id":"skeleton_2","name":"スケルトン 2/3","stage":"洞窟","hp":1000,"maxHp":1000,"bg":"assets/bg/cave.png","image":"assets/monsters/skeleton.png","bgm":"cave"},
-  {"id":"skeleton_3","name":"スケルトン 3/3","stage":"洞窟","hp":1000,"maxHp":1000,"bg":"assets/bg/cave.png","image":"assets/monsters/skeleton.png","bgm":"cave"},
-  {"id":"mimic_1","name":"ミミック","stage":"洞窟","hp":1500,"maxHp":1500,"bg":"assets/bg/cave.png","image":"assets/monsters/mimic.png","bgm":"cave"},
-  {"id":"minotaur_1","name":"ミノタウロス","stage":"洞窟","hp":3000,"maxHp":3000,"bg":"assets/bg/cave.png","image":"assets/monsters/minotaur.png","bgm":"goblin"},
-  {"id":"gargoyle_1","name":"ガーゴイル 1/3","stage":"遺跡","hp":2500,"maxHp":2500,"bg":"assets/bg/ruins.png","image":"assets/monsters/gargoyle.png","bgm":"ruins"},
-  {"id":"gargoyle_2","name":"ガーゴイル 2/3","stage":"遺跡","hp":2500,"maxHp":2500,"bg":"assets/bg/ruins.png","image":"assets/monsters/gargoyle.png","bgm":"ruins"},
-  {"id":"gargoyle_3","name":"ガーゴイル 3/3","stage":"遺跡","hp":2500,"maxHp":2500,"bg":"assets/bg/ruins.png","image":"assets/monsters/gargoyle.png","bgm":"ruins"},
-  {"id":"dragon_1","name":"ドラゴン","stage":"火山","hp":10000,"maxHp":10000,"bg":"assets/bg/volcano.png","image":"assets/monsters/dragon.png","bgm":"orc"},
-  {"id":"dark_wizard_1","name":"ダークウィザード 1/2","stage":"魔王城","hp":2500,"maxHp":2500,"bg":"assets/bg/castle.png","image":"assets/monsters/dark_wizard.png","bgm":"maou"},
-  {"id":"dark_wizard_2","name":"ダークウィザード 2/2","stage":"魔王城","hp":2500,"maxHp":2500,"bg":"assets/bg/castle.png","image":"assets/monsters/dark_wizard.png","bgm":"maou"},
-  {"id":"maou_1","name":"魔王","stage":"魔王城","hp":15000,"maxHp":15000,"bg":"assets/bg/castle.png","image":"assets/monsters/maou.png","bgm":"maou"}
+  {
+    "id": "slime_1",
+    "name": "スライム",
+    "stage": "草原",
+    "hp": 500,
+    "maxHp": 500,
+    "bg": "grass.png",
+    "image": "slime.png",
+    "bgm": "slime"
+  },
+  {
+    "id": "goblin_1",
+    "name": "ゴブリン 1/2",
+    "stage": "森",
+    "hp": 750,
+    "maxHp": 750,
+    "bg": "forest.png",
+    "image": "goblin.png",
+    "bgm": "goblin"
+  },
+  {
+    "id": "goblin_2",
+    "name": "ゴブリン 2/2",
+    "stage": "森",
+    "hp": 750,
+    "maxHp": 750,
+    "bg": "forest.png",
+    "image": "goblin.png",
+    "bgm": "goblin"
+  },
+  {
+    "id": "orc_1",
+    "name": "オーク",
+    "stage": "森",
+    "hp": 1500,
+    "maxHp": 1500,
+    "bg": "forest.png",
+    "image": "orc.png",
+    "bgm": "orc"
+  },
+  {
+    "id": "skeleton_1",
+    "name": "スケルトン 1/3",
+    "stage": "洞窟",
+    "hp": 1000,
+    "maxHp": 1000,
+    "bg": "cave.png",
+    "image": "skeleton.png",
+    "bgm": "cave"
+  },
+  {
+    "id": "skeleton_2",
+    "name": "スケルトン 2/3",
+    "stage": "洞窟",
+    "hp": 1000,
+    "maxHp": 1000,
+    "bg": "cave.png",
+    "image": "skeleton.png",
+    "bgm": "cave"
+  },
+  {
+    "id": "skeleton_3",
+    "name": "スケルトン 3/3",
+    "stage": "洞窟",
+    "hp": 1000,
+    "maxHp": 1000,
+    "bg": "cave.png",
+    "image": "skeleton.png",
+    "bgm": "cave"
+  },
+  {
+    "id": "mimic_1",
+    "name": "ミミック",
+    "stage": "洞窟",
+    "hp": 1500,
+    "maxHp": 1500,
+    "bg": "cave.png",
+    "image": "mimic.png",
+    "bgm": "cave"
+  },
+  {
+    "id": "minotaur_1",
+    "name": "ミノタウロス",
+    "stage": "山岳",
+    "hp": 3000,
+    "maxHp": 3000,
+    "bg": "mountain.png",
+    "image": "minotaur.png",
+    "bgm": "orc"
+  },
+  {
+    "id": "gargoyle_1",
+    "name": "ガーゴイル 1/3",
+    "stage": "遺跡",
+    "hp": 2500,
+    "maxHp": 2500,
+    "bg": "ruins.png",
+    "image": "gargoyle.png",
+    "bgm": "ruins"
+  },
+  {
+    "id": "gargoyle_2",
+    "name": "ガーゴイル 2/3",
+    "stage": "遺跡",
+    "hp": 2500,
+    "maxHp": 2500,
+    "bg": "ruins.png",
+    "image": "gargoyle.png",
+    "bgm": "ruins"
+  },
+  {
+    "id": "gargoyle_3",
+    "name": "ガーゴイル 3/3",
+    "stage": "遺跡",
+    "hp": 2500,
+    "maxHp": 2500,
+    "bg": "ruins.png",
+    "image": "gargoyle.png",
+    "bgm": "ruins"
+  },
+  {
+    "id": "dragon_1",
+    "name": "ドラゴン",
+    "stage": "火山",
+    "hp": 10000,
+    "maxHp": 10000,
+    "bg": "volcano.png",
+    "image": "dragon.png",
+    "bgm": "orc"
+  },
+  {
+    "id": "dark_wizard_1",
+    "name": "ダークウィザード 1/2",
+    "stage": "魔王城",
+    "hp": 2500,
+    "maxHp": 2500,
+    "bg": "castle.png",
+    "image": "dark_wizard.png",
+    "bgm": "maou"
+  },
+  {
+    "id": "dark_wizard_2",
+    "name": "ダークウィザード 2/2",
+    "stage": "魔王城",
+    "hp": 2500,
+    "maxHp": 2500,
+    "bg": "castle.png",
+    "image": "dark_wizard.png",
+    "bgm": "maou"
+  },
+  {
+    "id": "maou_1",
+    "name": "魔王",
+    "stage": "魔王城",
+    "hp": 15000,
+    "maxHp": 15000,
+    "bg": "castle.png",
+    "image": "maou.png",
+    "bgm": "maou"
+  }
 ]
