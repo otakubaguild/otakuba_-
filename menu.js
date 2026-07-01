@@ -22,7 +22,7 @@ window.GuildMenu = (() => {
       const isSoldOut = p.soldOut || (stockNum !== null && stockNum <= 0);
       const badges = `${p.recommended?'<span class="menu-badge">⭐おすすめ</span>':''}${p.limited?'<span class="menu-badge">👑限定</span>':''}${isSoldOut?'<span class="menu-badge sold">❌売切れ</span>':''}${stockNum!==null && !isSoldOut?`<span class="menu-badge">残${stockNum}</span>`:''}`;
       el.className = 'panel product' + (isSoldOut ? ' sold-out' : '');
-      el.innerHTML=`<div class="product-info"><div class="product-name">${p.image?`<img src="${esc(p.image)}" alt="" class="menu-thumb">`:esc(p.emoji||p.icon||'🍽️')} ${esc(p.name)}</div><div class="menu-badges">${badges}</div><div class="product-desc">${esc(p.desc||'')}</div><div class="product-price">${yen(p.price,data.settings.currency)}</div></div>
+      el.innerHTML=`<div class="product-info"><div class="product-name">${p.image?`<img src="${esc(GuildUtils.driveImg(p.image))}" alt="" class="menu-thumb">`:esc(p.emoji||p.icon||'🍽️')} ${esc(p.name)}</div><div class="menu-badges">${badges}</div><div class="product-desc">${esc(p.desc||'')}</div><div class="product-price">${yen(p.price,data.settings.currency)}</div></div>
       <div class="product-controls"><div class="qty-row"><button class="btn small" type="button" data-minus ${isSoldOut?'disabled':''}>−</button><span class="qty-num">${qtyMap[id]}</span><button class="btn small" type="button" data-plus ${isSoldOut?'disabled':''}>＋</button></div><button type="button" class="btn gold small" data-order ${isSoldOut?'disabled':''}>${isSoldOut?'売切れ':'注文'}</button></div>`;
       const num=el.querySelector('.qty-num');
       el.querySelector('[data-minus]').onclick=()=>{ qtyMap[id]=Math.max(1,(qtyMap[id]||1)-1); num.textContent=qtyMap[id]; };

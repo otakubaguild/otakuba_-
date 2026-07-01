@@ -21,7 +21,7 @@ window.GuildBattle = (() => {
     const sprite=$('enemySprite'); sprite.classList.remove('hit','defeated'); sprite.dataset.enemyId = e.id || '';
     const sc=(Number(e.scale)||100)/100, ox=Number(e.offsetX)||0, oy=Number(e.offsetY)||0;
     sprite.style.setProperty('--enemy-scale', sc); sprite.style.setProperty('--enemy-ox', ox+'%'); sprite.style.setProperty('--enemy-oy', oy+'%');
-    sprite.innerHTML = e.image ? `<img src="${esc(e.image)}" alt="${esc(e.name)}" onload="this.parentNode && this.parentNode.classList.add('loaded')" onerror="this.replaceWith(document.createTextNode('👾'))">` : '👾';
+    sprite.innerHTML = e.image ? `<img src="${esc(GuildUtils.driveImg(e.image))}" alt="${esc(e.name)}" onload="this.parentNode && this.parentNode.classList.add('loaded')" onerror="this.replaceWith(document.createTextNode('👾'))">` : '👾';
     GuildUI.renderNotice(data.settings); GuildStorage.save();
   }
   async function applyDamage(total, done){
@@ -50,8 +50,7 @@ window.GuildBattle = (() => {
         defeatedAny=true; const finalBoss=isFinalEnemy(e); if(finalBoss) finalDefeated=true; sprite.classList.add('defeated');
         const defeatPop=$('defeatPop'); defeatPop.textContent=finalBoss?'魔王討伐！':'撃破！'; defeatPop.classList.add('on');
         if(finalBoss){ suppressBgm=true; GuildAudio.stopBgm(); GuildAudio.playSe('victory');
-          setTimeout(()=>{ GuildAudio.playEnding(); }, 700);
-          setTimeout(()=>{ if(window.GuildApp && GuildApp.showVictoryClear) GuildApp.showVictoryClear(); }, 900);
+          setTimeout(()=>{ defeatPop.classList.remove('on'); if(window.GuildApp && GuildApp.showVictoryClear) GuildApp.showVictoryClear(); }, 1600);
         } else { GuildAudio.playSe('defeat'); }
         await sleep(finalBoss?2600:1350); defeatPop.classList.remove('on');
         if(finalBoss){ done&&done(defeatedAny,finalDefeated); }else{ nextEnemy(); await sleep(650); return step(); }
