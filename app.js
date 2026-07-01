@@ -1,8 +1,7 @@
-window.GuildApp = {VERSION:'4.0'};
+window.GuildApp = {VERSION:'4.0.4'};
 (async function(){
   const {$}=GuildUtils; const data=await GuildStorage.init();
   GuildAudio.init(data.settings); GuildBattle.init(data); GuildMenu.init(data); GuildUI.renderNotice(data.settings);
-  GuildApp.onSynced=function(){ try{ GuildMenu.init(data); GuildUI.renderNotice(data.settings); GuildBattle.render(); if(typeof renderParty==='function') renderParty(); }catch(e){} };
   if(data.currentCustomer) $('nameInput').value=data.currentCustomer;
   function welcomeText(text){ const sub=document.querySelector('#screenWelcome .subtitle'); if(sub) sub.textContent=text||'メニューを開きますか？'; }
   function showMasterMessage(text){ let box=$('masterMessageBox'); if(!box){ const panel=document.querySelector('#screenWelcome .panel.window'); box=document.createElement('div'); box.id='masterMessageBox'; box.className='panel master-box'; box.innerHTML=`<div class="master-grid"><div class="master-face"><img src="master.png" alt="ギルドマスター" onerror="this.replaceWith(document.createTextNode('🧙'))"></div><div><div class="master-name">ギルドマスター</div><div id="masterMessageText">冷やかしか？さっさとメニューを開け</div></div></div>`; panel.appendChild(box); } $('masterMessageText').textContent=text||'冷やかしか？さっさとメニューを開け'; box.style.display='block'; }
@@ -13,7 +12,15 @@ window.GuildApp = {VERSION:'4.0'};
   GuildApp.showWelcomeBack=function(){ welcomeText('おかえりなさい、冒険者。次のクエストを受けますか？'); GuildUI.show('screenWelcome'); GuildAudio.playBgm('title'); };
   GuildApp.showLevelUp=function(oldLevel,newLevel){ const o=$('levelUpOverlay'); $('levelUpText').textContent=`Lv.${oldLevel} → Lv.${newLevel}`; o.classList.add('show'); };
   GuildApp.showVictoryClear=function(){ const o=$('victoryClearOverlay'); if(o) o.classList.add('show'); };
-  if($('victoryClearClose')) $('victoryClearClose').onclick=()=>{ const o=$('victoryClearOverlay'); if(o) o.classList.remove('show'); GuildAudio.stopBgm(); if(GuildStorage.resetProgress) GuildStorage.resetProgress(); GuildBattle.render(); if(GuildApp.showWelcomeBack) GuildApp.showWelcomeBack(); else GuildUI.show('screenWelcome'); };
+  if($('victoryClearClose')) $('victoryClearClose').onclick=()=>{
+    const o=$('victoryClearOverlay'); if(o) o.classList.remove('show');
+    GuildAudio.stopBgm();
+    // 魔王討伐後はタイトルへ戻さず、討伐進行だけ最初の敵へ戻す。
+    // save()経由でGASへ送信し、別端末も次回同期時にこのリセットだけ反映される。
+    if(GuildStorage.resetProgress) GuildStorage.resetProgress({sync:true});
+    GuildUI.show('screenMain');
+    GuildBattle.render();
+  };
   $('levelUpClose').onclick=()=>$('levelUpOverlay').classList.remove('show');
   $('btnStartYes').onclick=()=>{ GuildAudio.playSe('ok'); GuildAudio.playBgm('title'); hideMasterMessage(); GuildUI.show('screenName'); };
   $('btnStartNo').onclick=()=>{ GuildAudio.playSe('cancel'); showMasterMessage('冷やかしか？さっさとメニューを開け'); };

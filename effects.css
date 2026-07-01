@@ -1,3 +1,23 @@
 .fade-out-ui{animation:uiFadeOut .22s ease forwards}.fade-in-ui{animation:uiFadeIn .22s ease forwards}
 @keyframes uiFadeOut{to{opacity:0;filter:blur(2px);transform:scale(.99)}}
 @keyframes uiFadeIn{from{opacity:0;filter:blur(2px);transform:scale(.99)}to{opacity:1;filter:blur(0);transform:scale(1)}}
+
+.victory-clear-overlay{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  gap:18px;
+  padding:18px;
+  background:rgba(0,0,0,.78);
+}
+.victory-clear-overlay.show{display:flex}
+.victory-clear-img{
+  width:min(92vw,520px);
+  max-height:78dvh;
+  object-fit:contain;
+  filter:drop-shadow(0 12px 24px rgba(0,0,0,.85));
+}

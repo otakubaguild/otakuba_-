@@ -50,16 +50,36 @@ window.GuildStorage = (() => {
     };
   }
 
-  function fixedCategories(){
-    return [
-      {id:'beer_sour', name:'ビール・サワー', icon:'🍺'},
-      {id:'shochu_cocktail', name:'焼酎・カクテル', icon:'🍸'},
-      {id:'shot_bottle', name:'ショット・ボトル', icon:'🥂'},
-      {id:'soft', name:'ソフトドリンク', icon:'🥤'},
-      {id:'food', name:'フード', icon:'🍟'}
-    ];
+
+
+  function ensureMenuCategories(){
+    const names = {
+      beer_sour:{name:'ビール・サワー', icon:'🍺'},
+      shochu_cocktail:{name:'焼酎・カクテル', icon:'🍸'},
+      shot_bottle:{name:'ショット・ボトル', icon:'🥂'},
+      soft:{name:'ソフトドリンク', icon:'🥤'},
+      food:{name:'フード', icon:'🍟'},
+      charge:{name:'席料', icon:'💰'}
+    };
+    const current = Array.isArray(data.settings.categories) ? data.settings.categories : [];
+    const byId = {};
+    current.forEach(c=>{ if(c && c.id) byId[c.id] = {id:c.id, name:c.name||c.id, icon:c.icon||'🍽️'}; });
+    (data.menu||[]).forEach(p=>{
+      const id = p && (p.cat || p.category);
+      if(!id || id === 'charge') return;
+      if(!byId[id]){
+        const preset = names[id] || {name:id, icon:p.emoji||p.icon||'🍽️'};
+        byId[id] = {id, name:preset.name, icon:preset.icon};
+      }
+    });
+    const order = ['beer_sour','shochu_cocktail','shot_bottle','soft','food'];
+    const ordered = [];
+    order.forEach(id=>{ if(byId[id]) ordered.push(byId[id]); });
+    Object.keys(byId).forEach(id=>{ if(!order.includes(id)) ordered.push(byId[id]); });
+    data.settings.categories = ordered;
   }
-  function forceCategories(){ data.settings.categories = fixedCategories(); }
+
+
   function menuCategorySet(menu){
     const set = new Set();
     (Array.isArray(menu)?menu:[]).forEach(p=>{ const id=p && (p.cat || p.category); if(id && id !== 'charge') set.add(id); });
@@ -69,14 +89,14 @@ window.GuildStorage = (() => {
     const set = menuCategorySet(menu);
     return ['beer_sour','shochu_cocktail','shot_bottle','soft','food'].every(id=>set.has(id));
   }
-  function pickBestMenu(fileMenu, savedMenu){
+  function betterMenu(fileMenu, savedMenu){
     const f = Array.isArray(fileMenu) ? fileMenu : [];
     const s = Array.isArray(savedMenu) ? savedMenu : [];
+    // 本番menu.jsonは5カテゴリ入り。保存/GAS側がフードだけ等なら必ずmenu.jsonを採用する。
     if(menuLooksComplete(f) && !menuLooksComplete(s)) return f;
-    if(menuLooksComplete(f) && f.length >= s.length) return f;
+    if(menuLooksComplete(f) && f.length > s.length) return f;
     return s.length ? s : f;
   }
-
 
   async function init(){
     const defaults = {
@@ -113,9 +133,12 @@ window.GuildStorage = (() => {
     const legacy = !existing && !old ? migrateLegacy(get(keys.legacy, null)) : null;
     data = Object.assign({}, defaults, existing || old || legacy || {});
     data.settings = Object.assign({}, defaults.settings, data.settings || {});
-    forceCategories();
-    const pickedMenu = pickBestMenu(defaults.menu, Array.isArray(data.menu) ? data.menu : []);
+    // menu.json（本番メニュー）が保存済み/GASメニューより完全なら、menu.jsonを正として復旧する
+    // これでlocalStorage/GASに残った「フードだけ」の古いメニューに引っ張られない
+    const beforeMenu = (Array.isArray(data.menu) && data.menu.length) ? data.menu : [];
+    const pickedMenu = betterMenu(defaults.menu, beforeMenu);
     data.menu = (Array.isArray(pickedMenu) ? pickedMenu : []).map(normalizeMenu);
+    ensureMenuCategories();
     data.monsters = (Array.isArray(data.monsters)&&data.monsters.length?data.monsters:defaults.monsters).map(normalizeMonster);
     data.customers = Array.isArray(data.customers)?data.customers:[];
     data.sales = Array.isArray(data.sales)?data.sales:[];
@@ -132,8 +155,13 @@ window.GuildStorage = (() => {
     data.currentEnemyIndex = GuildUtils.clamp(data.currentEnemyIndex,0,Math.max(0,data.monsters.length-1));
     data.partyCount = Math.max(1, Math.min(20, Number(data.partyCount || 1) || 1));
     set(keys.state,data);
-    // 画面を待たせない：GAS同期はバックグラウンドで実行し、終わったらUIを更新
-    setTimeout(()=>{ pullCloud().then(ok=>{ if(ok && window.GuildApp && GuildApp.onSynced) GuildApp.onSynced(); }); }, 50);
+    // GAS同期は裏で実行する。初期画面の「はい／いいえ」を待たせないため、ここでは待たない。
+    pullCloud().then(()=>{
+      ensureMenuCategories();
+      set(keys.state,data);
+      try{ if(window.GuildMenu && GuildMenu.renderCategoryButtons) GuildMenu.renderCategoryButtons(); }catch(e){}
+      try{ if(window.GuildUI && GuildUI.renderNotice) GuildUI.renderNotice(data.settings); }catch(e){}
+    }).catch(()=>{});
     return data;
   }
   // --- クラウド同期（GAS）---
@@ -142,7 +170,7 @@ window.GuildStorage = (() => {
   // 共有すべき管理データだけを送る（戦闘の一時状態は端末ローカルのまま）
   function saleKey(s){ return s && (s.id || s.saleId || (String(s.time||'')+'|'+String(s.customer||'')+'|'+String(s.total||'')+'|'+JSON.stringify(s.items||[]))); }
   function sharedPayload(){
-    return {action:'saveAll', settings:data.settings, menu:data.menu, monsters:data.monsters, customers:data.customers, sales:data.sales, deletedSaleIds:data.deletedSaleIds||[], salesSettings:data.salesSettings};
+    return {action:'saveAll', settings:data.settings, menu:data.menu, monsters:data.monsters, customers:data.customers, sales:data.sales, deletedSaleIds:data.deletedSaleIds||[], salesSettings:data.salesSettings, currentEnemyIndex:data.currentEnemyIndex, progressResetAt:data.progressResetAt||'', monsters:data.monsters};
   }
   function pushCloud(){
     const url=gasUrl(); if(!url) return;
@@ -157,20 +185,31 @@ window.GuildStorage = (() => {
       const res=await fetch(url+(url.includes('?')?'&':'?')+'action=sync&v='+Date.now(),{cache:'no-store'});
       const remote=await res.json(); if(!remote||typeof remote!=='object') return false;
       if(remote.settings && Object.keys(remote.settings).length){ data.settings=Object.assign({},data.settings,remote.settings); }
-      if(Array.isArray(remote.menu) && remote.menu.length){
+      if(Array.isArray(remote.menu)&&remote.menu.length){
         const remoteMenu = remote.menu.map(normalizeMenu);
         const localMenu = Array.isArray(data.menu) ? data.menu : [];
-        // GASの古いdrink/foodメニューやfoodだけメニューは採用しない。menu.jsonの本番5カテゴリを正とする。
-        if(menuLooksComplete(remoteMenu) && remoteMenu.length >= localMenu.length){
+        // GAS側がフードだけ等の不完全メニューなら取り込まず、現在の本番メニューをGASへ戻す
+        if(menuLooksComplete(localMenu) && !menuLooksComplete(remoteMenu)){
+          schedulePush();
+        } else if(!localMenu.length || (menuLooksComplete(remoteMenu) && remoteMenu.length >= localMenu.length)){
           data.menu = remoteMenu;
-        } else if(!menuLooksComplete(localMenu)){
-          const fileMenu = await fetchJson(files.menu, []);
-          data.menu = pickBestMenu(fileMenu, remoteMenu).map(normalizeMenu);
+        } else if(remoteMenu.length > localMenu.length && !menuLooksComplete(localMenu)){
+          data.menu = remoteMenu;
         } else {
           schedulePush();
         }
+        ensureMenuCategories();
       }
-      forceCategories();
+      if(remote.progressResetAt && remote.progressResetAt !== data.progressResetAt){
+        data.progressResetAt = remote.progressResetAt;
+        data.currentEnemyIndex = Number(remote.currentEnemyIndex)||0;
+        if(Array.isArray(remote.monsters)&&remote.monsters.length){
+          data.monsters = remote.monsters.map(normalizeMonster);
+        }else{
+          data.monsters.forEach(m=>m.hp=m.maxHp);
+        }
+        data.activeBill=[];
+      }
       if(Array.isArray(remote.monsters)&&remote.monsters.length){
         const idx=data.currentEnemyIndex, curHp=(data.monsters[idx]||{}).hp;
         data.monsters=remote.monsters.map(normalizeMonster);
@@ -195,7 +234,6 @@ window.GuildStorage = (() => {
         (data.sales||[]).concat(remote.sales).forEach(s=>{ if(!s) return; const id=saleKey(s); if(deleted.has(id)) return; if(!seen[id]){ seen[id]=1; merged.push(s); } });
         data.sales=merged;
       }
-      forceCategories();
       data.currentEnemyIndex=GuildUtils.clamp(data.currentEnemyIndex,0,Math.max(0,data.monsters.length-1));
       set(keys.state,data);
       return true;
@@ -203,7 +241,14 @@ window.GuildStorage = (() => {
   }
 
   function save(){ set(keys.state,data); schedulePush(); }
-  function resetProgress(){ data.currentEnemyIndex=0; data.monsters.forEach(m=>m.hp=m.maxHp); data.activeBill=[]; save(); }
+  function resetProgress(opts){
+    data.currentEnemyIndex=0;
+    data.monsters.forEach(m=>m.hp=m.maxHp);
+    data.activeBill=[];
+    data.progressResetAt=new Date().toISOString();
+    save();
+    if(opts && opts.sync && typeof pushCloud==='function') pushCloud();
+  }
   function getData(){ return data; }
   function replace(part, value){ data[part]=value; save(); }
   function markSaleDeleted(s){ const id=saleKey(s); if(!id)return; data.deletedSaleIds=data.deletedSaleIds||[]; if(!data.deletedSaleIds.includes(id)) data.deletedSaleIds.push(id); }
