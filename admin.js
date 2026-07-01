@@ -2,7 +2,7 @@
   const {$, esc, yen} = GuildUtils;
   const data = await GuildStorage.init();
   const SESSION='otakuba.v3.final.admin.session';
-  const tabs=[['dash','📊 概要'],['business','🟢 営業'],['menu','🍴 メニュー'],['inventory','📦 在庫'],['monsters','⚔️ 討伐'],['settings','⚙️ 設定'],['customers','👤 顧客'],['sales','💰 売上管理'],['sync','☁️ 同期'],['reset','🧹 reset']];
+  const tabs=[['dash','📊 概要'],['business','🟢 営業'],['menu','🍴 メニュー'],['inventory','📦 在庫'],['monsters','⚔️ 討伐'],['settings','⚙️ 設定'],['customers','👤 顧客'],['sales','💰 売上管理'],['upload','🖼️ 画像/音源'],['sync','☁️ 同期'],['reset','🧹 reset']];
   let current='dash', customerQuery='', salesQuery='';
   function loginOk(){return sessionStorage.getItem(SESSION)==='ok'} function showLogin(){$('adminLogin').classList.remove('hidden');$('adminApp').classList.add('hidden')} function showApp(){$('adminLogin').classList.add('hidden');$('adminApp').classList.remove('hidden');renderTabs();render();startAutoRefresh()}
   let autoTimer=null;
@@ -23,14 +23,103 @@
       {id:'shochu_cocktail',name:'焼酎・カクテル',icon:'🍸'},
       {id:'shot_bottle',name:'ショット・ボトル',icon:'🥂'},
       {id:'soft',name:'ソフトドリンク',icon:'🥤'},
-      {id:'food',name:'フード',icon:'🍟'}
+      {id:'food',name:'フード',icon:'🍟'},
+      {id:'dessert',name:'デザート',icon:'🍰'},
+      {id:'event',name:'イベント',icon:'🎉'}
     ];
     data.settings.categories=fixed;
     return fixed;
   }
   function normalizeProduct(p,i){p=p||{};p.id=p.id||GuildUtils.uid('menu');p.cat=p.cat||p.category||'food';p.category=p.cat;p.name=p.name||'商品';p.price=Number(p.price)||0;p.emoji=p.emoji||p.icon||'🍽️';p.icon=p.emoji;p.desc=p.desc||'';p.image=p.image||'';p.hidden=!!p.hidden;p.soldOut=!!p.soldOut;p.recommended=!!p.recommended;p.limited=!!p.limited;if(p.stock===null||typeof p.stock==='undefined')p.stock='';else if(p.stock!=='')p.stock=Math.max(0,Number(p.stock)||0);p.sort=Number(p.sort||i);return p}
-  function renderMenu(){data.menu=(data.menu||[]).map(normalizeProduct);const cs=cats();const opts=cs.map(c=>`<option value="${esc(c.id)}">${esc((c.icon?c.icon+' ':'')+c.name)}</option>`).join('');$('adminContent').innerHTML=`<h2>🍴 メニュー管理</h2><div class="toolbar"><button class="btn gold" id="addProduct">商品追加</button><button class="btn green" id="saveMenu">保存</button><button class="btn" id="openAll">全部開く</button><button class="btn" id="closeAll">全部閉じる</button><button class="btn" id="jsonMode">JSON</button></div><div class="category-list">${cs.map((c,ci)=>{const items=data.menu.map((p,i)=>({p,i})).filter(x=>x.p.cat===c.id);return `<section class="category-block ${ci===0?'open':''}"><button class="category-head"><span>${esc((c.icon?c.icon+' ':'')+c.name)} <b>(${items.length})</b></span><span class="category-toggle">${ci===0?'閉じる':'開く'}</span></button><div class="category-body">${items.length?items.map(({p,i})=>productCard(p,i,opts)).join(''):'<div class="empty">なし</div>'}</div></section>`}).join('')}</div>`;
-    document.querySelectorAll('.category-head').forEach(h=>h.onclick=()=>{const b=h.closest('.category-block');b.classList.toggle('open');h.querySelector('.category-toggle').textContent=b.classList.contains('open')?'閉じる':'開く'});document.querySelectorAll('[data-menu-index]').forEach(card=>{const p=data.menu[+card.dataset.menuIndex];card.querySelector('[data-field="cat"]').value=p.cat});document.querySelectorAll('[data-del-product]').forEach(btn=>btn.onclick=()=>{if(confirm('削除しますか？')){data.menu.splice(+btn.dataset.delProduct,1);save();renderMenu()}});$('addProduct').onclick=()=>{saveMenuForm();data.menu.push(normalizeProduct({name:'新商品',cat:cs[0].id},data.menu.length));save();renderMenu()};$('saveMenu').onclick=()=>{saveMenuForm();toast('保存しました')};$('openAll').onclick=()=>toggleCats(true);$('closeAll').onclick=()=>toggleCats(false);$('jsonMode').onclick=()=>textareaEditor('menu','menu.json')}
+  function renderMenu(){
+    data.menu=(data.menu||[]).map(normalizeProduct);
+    const cs=cats();
+    const opts=cs.map(c=>`<option value="${esc(c.id)}">${esc((c.icon?c.icon+' ':'')+c.name)}</option>`).join('');
+    $('adminContent').innerHTML=`<h2>🍴 メニュー管理</h2>
+      <div class="toolbar">
+        <button class="btn gold" id="addProduct">商品追加</button>
+        <button class="btn green" id="saveMenu">保存</button>
+        <button class="btn" id="openAll">全部開く</button>
+        <button class="btn" id="closeAll">全部閉じる</button>
+        <button class="btn" id="jsonMode">JSON</button>
+      </div>
+      <div id="newProductArea"></div>
+      <div class="category-list">${cs.map((c,ci)=>{
+        const items=data.menu.map((p,i)=>({p,i})).filter(x=>x.p.cat===c.id);
+        return `<section class="category-block ${ci===0?'open':''}">
+          <button class="category-head">
+            <span>${esc((c.icon?c.icon+' ':'')+c.name)} <b>(${items.length})</b></span>
+            <span class="category-toggle">${ci===0?'閉じる':'開く'}</span>
+          </button>
+          <div class="category-body">${items.length?items.map(({p,i})=>productCard(p,i,opts)).join(''):'<div class="empty">なし</div>'}</div>
+        </section>`;
+      }).join('')}</div>`;
+
+    document.querySelectorAll('.category-head').forEach(h=>h.onclick=()=>{
+      const b=h.closest('.category-block');
+      b.classList.toggle('open');
+      h.querySelector('.category-toggle').textContent=b.classList.contains('open')?'閉じる':'開く';
+    });
+    document.querySelectorAll('[data-menu-index]').forEach(card=>{
+      const p=data.menu[+card.dataset.menuIndex];
+      card.querySelector('[data-field="cat"]').value=p.cat;
+    });
+    document.querySelectorAll('[data-del-product]').forEach(btn=>btn.onclick=()=>{
+      if(confirm('削除しますか？')){
+        data.menu.splice(+btn.dataset.delProduct,1);
+        save();
+        renderMenu();
+      }
+    });
+
+    $('addProduct').onclick=()=>showNewProductForm(opts, cs[0].id);
+    $('saveMenu').onclick=()=>{saveMenuForm();toast('保存しました')};
+    $('openAll').onclick=()=>toggleCats(true);
+    $('closeAll').onclick=()=>toggleCats(false);
+    $('jsonMode').onclick=()=>textareaEditor('menu','menu.json');
+  }
+
+  function showNewProductForm(opts, defaultCat){
+    const area=$('newProductArea');
+    area.innerHTML=`<div class="admin-card new-product-card">
+      <div class="admin-card-title">✨ 新商品追加</div>
+      <div class="new-product-grid">
+        <label>ジャンル<select id="newProductCat">${opts}</select></label>
+        <label>商品名<input id="newProductName" placeholder="例：限定カクテル"></label>
+        <label>価格<input id="newProductPrice" type="number" value="0"></label>
+        <label>絵文字<input id="newProductEmoji" value="🍽️"></label>
+        <label>画像<input id="newProductImage" placeholder="画像ファイル名またはURL"></label>
+        <label>在庫<input id="newProductStock" type="number" min="0" placeholder="空欄=無制限"></label>
+        <label class="wide-label">説明<textarea id="newProductDesc" placeholder="説明"></textarea></label>
+      </div>
+      <div class="toolbar">
+        <button class="btn gold" id="saveNewProduct">追加して保存</button>
+        <button class="btn" id="cancelNewProduct">キャンセル</button>
+      </div>
+    </div>`;
+    $('newProductCat').value=defaultCat;
+    $('newProductName').focus();
+
+    $('cancelNewProduct').onclick=()=>{area.innerHTML='';};
+    $('saveNewProduct').onclick=()=>{
+      const name=$('newProductName').value.trim();
+      if(!name){toast('商品名を入力してください');$('newProductName').focus();return;}
+      const stockVal=$('newProductStock').value;
+      const p=normalizeProduct({
+        name,
+        cat:$('newProductCat').value,
+        price:+$('newProductPrice').value||0,
+        emoji:$('newProductEmoji').value||'🍽️',
+        image:$('newProductImage').value||'',
+        stock:stockVal===''?'':Math.max(0,+stockVal||0),
+        desc:$('newProductDesc').value||''
+      },data.menu.length);
+      data.menu.unshift(p);
+      save();
+      toast('新商品を追加しました');
+      renderMenu();
+    };
+  }
   function toggleCats(o){document.querySelectorAll('.category-block').forEach(b=>{b.classList.toggle('open',o);b.querySelector('.category-toggle').textContent=o?'閉じる':'開く'})}
   function productCard(p,i,opts){return `<div class="admin-card product-edit-card" data-menu-index="${i}"><div class="admin-card-title">#${i+1} ${esc(p.name)}</div><label>商品名<input data-field="name" value="${esc(p.name)}"></label><label>ジャンル<select data-field="cat">${opts}</select></label><label>価格<input data-field="price" type="number" value="${p.price}"></label><label>絵文字<input data-field="emoji" value="${esc(p.emoji)}"></label><label>画像<input data-field="image" value="${esc(p.image)}"></label><label>在庫<input data-field="stock" type="number" min="0" placeholder="空欄=無制限" value="${p.stock===''?'':p.stock}"></label><label>説明<textarea data-field="desc">${esc(p.desc)}</textarea></label><label class="check-row"><input data-field="recommended" type="checkbox" ${p.recommended?'checked':''}>⭐おすすめ</label><label class="check-row"><input data-field="limited" type="checkbox" ${p.limited?'checked':''}>👑限定</label><label class="check-row"><input data-field="soldOut" type="checkbox" ${p.soldOut?'checked':''}>❌売切れ</label><label class="check-row"><input data-field="hidden" type="checkbox" ${p.hidden?'checked':''}>非表示</label><button class="btn red small" data-del-product="${i}">削除</button></div>`}
   function saveMenuForm(){document.querySelectorAll('[data-menu-index]').forEach(card=>{const p=data.menu[+card.dataset.menuIndex];p.name=card.querySelector('[data-field="name"]').value;p.cat=card.querySelector('[data-field="cat"]').value;p.category=p.cat;p.price=+card.querySelector('[data-field="price"]').value||0;p.emoji=card.querySelector('[data-field="emoji"]').value||'🍽️';p.icon=p.emoji;p.image=card.querySelector('[data-field="image"]').value;p.desc=card.querySelector('[data-field="desc"]').value;p.stock=card.querySelector('[data-field="stock"]').value===''?'':Math.max(0,+card.querySelector('[data-field="stock"]').value||0);p.recommended=card.querySelector('[data-field="recommended"]').checked;p.limited=card.querySelector('[data-field="limited"]').checked;p.soldOut=card.querySelector('[data-field="soldOut"]').checked;p.hidden=card.querySelector('[data-field="hidden"]').checked});data.settings.menuPushedAt=new Date().toISOString();save();if(GuildStorage.pushCloud)GuildStorage.pushCloud();}
@@ -104,137 +193,56 @@
     document.querySelectorAll('[data-dup-monster]').forEach(function(b){b.onclick=function(){saveMonsterForm();var src=data.monsters[+b.dataset.dupMonster];var copy=JSON.parse(JSON.stringify(src));copy.id=GuildUtils.uid('enemy');copy.name=src.name+'（複製）';data.monsters.splice(+b.dataset.dupMonster+1,0,copy);save();renderMonsters();};});
     document.querySelectorAll('[data-del-monster]').forEach(function(b){b.onclick=function(){if(confirm('削除しますか？')){saveMonsterForm();data.monsters.splice(+b.dataset.delMonster,1);save();renderMonsters();}};});}
 
-
-  // ===== 素材アップロード（GAS Drive保存） =====
-  const BGM_KEYS=[
-    ['title','タイトルBGM'],
-    ['slime','スライム戦BGM'],
-    ['goblin','ゴブリン戦BGM'],
-    ['orc','オーク戦BGM'],
-    ['cave','洞窟BGM'],
-    ['ruins','遺跡BGM'],
-    ['maou','魔王戦BGM'],
-    ['ending','討伐完了BGM']
-  ];
-  const BG_SLOTS=[
-    ['grass.png','草原背景'],
-    ['forest.png','森背景'],
-    ['cave.png','洞窟背景'],
-    ['mountain.png','山背景'],
-    ['ruins.png','遺跡背景'],
-    ['volcano.png','火山背景'],
-    ['castle.png','魔王城背景']
-  ];
-  function assetOptionHtml(arr, currentMap){
-    currentMap=currentMap||{};
-    return arr.map(x=>`<option value="${esc(x[0])}">${esc(x[1])}${currentMap[x[0]]?' / 登録済み':''}</option>`).join('');
-  }
-  function readFileBase64(file){
-    return new Promise((resolve,reject)=>{
-      const r=new FileReader();
-      r.onload=()=>resolve(String(r.result||'').split(',')[1]||'');
-      r.onerror=reject;
-      r.readAsDataURL(file);
-    });
-  }
-  async function uploadAsset(kind, key, inputId){
-    const input=$(inputId);
-    const file=input && input.files && input.files[0];
-    if(!file){toast('ファイルを選択してください');return;}
-    const url=(data.settings.gasUrl||'').trim();
-    if(!url){toast('先にGAS URLを設定してください');return;}
-    toast('アップロード中...');
-    try{
-      const base64=await readFileBase64(file);
-      const payload={
-        action:'assetUpload',
-        kind,
-        key,
-        filename:file.name,
-        mimeType:file.type || (kind==='bgm'?'audio/mpeg':'application/octet-stream'),
-        base64
-      };
-      await fetch(url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)});
-      toast('送信しました。数秒後に反映確認します');
-      setTimeout(async()=>{
-        const ok=await GuildStorage.pullCloud();
-        if(ok){toast('素材設定を同期しました'); renderSettings();}
-        else toast('送信済み。反映は再読み込み後に確認してください');
-      },3500);
-    }catch(e){
-      toast('アップロード失敗');
-    }
-  }
-  function manualAssetSet(kind,key,value){
-    value=String(value||'').trim();
-    if(!value){toast('ファイル名またはURLを入力してください');return;}
-    if(kind==='bgm'){
-      data.settings.audioFiles=data.settings.audioFiles||{};
-      data.settings.audioFiles.bgm=data.settings.audioFiles.bgm||{};
-      data.settings.audioFiles.bgm[key]=value;
-    }else{
-      data.settings.backgroundFiles=data.settings.backgroundFiles||{};
-      data.settings.backgroundFiles[key]=value;
-      (data.monsters||[]).forEach(m=>{
-        if(m.bg===key||m.background===key){m.bg=value;m.background=value;}
-      });
-    }
-    save();
-    if(GuildStorage.pushCloud)GuildStorage.pushCloud();
-    toast('保存しました');
-  }
-
   // ===== 設定ボタン編集 =====
-  function renderSettings(){
-    var s=data.settings;
-    s.notice=Object.assign({enabled:true,title:'本日のお知らせ',body:'',position:'top'},s.notice||{});
-    s.audioFiles=s.audioFiles||{};
-    s.audioFiles.bgm=s.audioFiles.bgm||{};
-    s.backgroundFiles=s.backgroundFiles||{};
-    $('adminContent').innerHTML='<h2>⚙️ 設定</h2><div class="admin-card">'+
-      '<label>通貨単位<input id="setCurrency" value="'+esc(s.currency||'G')+'"></label>'+
-      '<label>チャージ（1人）<input id="setCover" type="number" value="'+(s.coverCharge??500)+'"></label>'+
-      '<label>管理パスワード<input id="setPass" value="'+esc(s.adminPassword||'OTAKU')+'"></label>'+
-      '<label class="check-row"><input id="setNotify" type="checkbox" '+(s.notifyOn!==false?'checked':'')+'>通知ON</label>'+
-      '<label>GAS URL<input id="setGas" value="'+esc(s.gasUrl||'')+'" placeholder="https://script.google.com/.../exec"></label>'+
-      '</div><div class="admin-card notice-admin"><div class="admin-card-title">📢 本日のお知らせ</div>'+
-      '<label class="check-row"><input id="noticeEnabled" type="checkbox" '+(s.notice.enabled!==false?'checked':'')+'>一般画面に表示する</label>'+
-      '<label>見出し<input id="noticeTitle" value="'+esc(s.notice.title||'本日のお知らせ')+'"></label>'+
-      '<label>本文<textarea id="noticeBody" placeholder="例：本日は20時からイベントクエスト開催！">'+esc(s.notice.body||'')+'</textarea></label>'+
-      '<label>表示位置<select id="noticePosition"><option value="top" '+(s.notice.position!=='bottom'?'selected':'')+'>上に表示</option><option value="bottom" '+(s.notice.position==='bottom'?'selected':'')+'>下に表示</option></select></label>'+
-      '</div>'+
-      '<div class="admin-card asset-admin"><div class="admin-card-title">🎵 各種BGMアップロード</div>'+
-      '<p class="tiny">GAS経由でGoogle Driveへ保存し、全端末へ同期します。GitHubを触らずに差し替えできます。</p>'+
-      '<label>差し替えるBGM<select id="assetBgmKey">'+assetOptionHtml(BGM_KEYS,s.audioFiles.bgm)+'</select></label>'+
-      '<label>mp3ファイル<input id="assetBgmFile" type="file" accept="audio/*"></label>'+
-      '<div class="toolbar"><button class="btn gold" id="uploadBgmAsset">BGMをアップロード</button></div>'+
-      '<label>またはファイル名/URLを直接指定<input id="manualBgmValue" placeholder="例：March_for__delightful_future.mp3"></label>'+
-      '<button class="btn" id="manualBgmSave">このBGM設定を保存</button>'+
-      '</div>'+
-      '<div class="admin-card asset-admin"><div class="admin-card-title">🖼️ 背景アップロード</div>'+
-      '<p class="tiny">既存の背景枠を差し替えます。例：魔王城背景を新画像へ変更。</p>'+
-      '<label>差し替える背景<select id="assetBgKey">'+assetOptionHtml(BG_SLOTS,s.backgroundFiles)+'</select></label>'+
-      '<label>画像ファイル<input id="assetBgFile" type="file" accept="image/*"></label>'+
-      '<div class="toolbar"><button class="btn gold" id="uploadBgAsset">背景をアップロード</button></div>'+
-      '<label>またはファイル名/URLを直接指定<input id="manualBgValue" placeholder="例：castle_new.png"></label>'+
-      '<button class="btn" id="manualBgSave">この背景設定を保存</button>'+
-      '</div>'+
-      '<div class="toolbar"><button class="btn green" id="saveSettings">保存</button><button class="btn" id="jsonSettings">詳細JSON</button></div>';
-
-    $('saveSettings').onclick=function(){
-      s.currency=$('setCurrency').value||'G';
-      s.coverCharge=+$('setCover').value||0;
-      s.adminPassword=$('setPass').value||'OTAKU';
-      s.notifyOn=$('setNotify').checked;
-      s.gasUrl=$('setGas').value.trim();
-      s.notice={enabled:$('noticeEnabled').checked,title:$('noticeTitle').value||'本日のお知らせ',body:$('noticeBody').value||'',position:$('noticePosition').value||'top'};
-      save();toast('保存しました');if(GuildStorage.pushCloud)GuildStorage.pushCloud();
-    };
-    $('jsonSettings').onclick=function(){textareaEditor('settings','settings.json');};
-    $('uploadBgmAsset').onclick=function(){uploadAsset('bgm',$('assetBgmKey').value,'assetBgmFile');};
-    $('uploadBgAsset').onclick=function(){uploadAsset('background',$('assetBgKey').value,'assetBgFile');};
-    $('manualBgmSave').onclick=function(){manualAssetSet('bgm',$('assetBgmKey').value,$('manualBgmValue').value);};
-    $('manualBgSave').onclick=function(){manualAssetSet('background',$('assetBgKey').value,$('manualBgValue').value);};
+  function renderSettings(){var s=data.settings;s.notice=Object.assign({enabled:true,title:'本日のお知らせ',body:'',position:'top'},s.notice||{});$('adminContent').innerHTML='<h2>⚙️ 設定</h2><div class="admin-card">'+
+    '<label>通貨単位<input id="setCurrency" value="'+esc(s.currency||'G')+'"></label>'+
+    '<label>チャージ（1人）<input id="setCover" type="number" value="'+(s.coverCharge??500)+'"></label>'+
+    '<label>管理パスワード<input id="setPass" value="'+esc(s.adminPassword||'OTAKU')+'"></label>'+
+    '<label class="check-row"><input id="setNotify" type="checkbox" '+(s.notifyOn!==false?'checked':'')+'>通知ON</label>'+
+    '<label>GAS URL<input id="setGas" value="'+esc(s.gasUrl||'')+'" placeholder="https://script.google.com/.../exec"></label>'+
+    '</div><div class="admin-card notice-admin"><div class="admin-card-title">📢 本日のお知らせ</div>'+
+    '<label class="check-row"><input id="noticeEnabled" type="checkbox" '+(s.notice.enabled!==false?'checked':'')+'>一般画面に表示する</label>'+
+    '<label>見出し<input id="noticeTitle" value="'+esc(s.notice.title||'本日のお知らせ')+'"></label>'+
+    '<label>本文<textarea id="noticeBody" placeholder="例：本日は20時からイベントクエスト開催！">'+esc(s.notice.body||'')+'</textarea></label>'+ 
+    '<label>表示位置<select id="noticePosition"><option value="top" '+(s.notice.position!=='bottom'?'selected':'')+'>上に表示</option><option value="bottom" '+(s.notice.position==='bottom'?'selected':'')+'>下に表示</option></select></label>'+ 
+    '</div><div class="toolbar"><button class="btn green" id="saveSettings">保存</button><button class="btn" id="jsonSettings">詳細JSON</button></div>';
+    $('saveSettings').onclick=function(){s.currency=$('setCurrency').value||'G';s.coverCharge=+$('setCover').value||0;s.adminPassword=$('setPass').value||'OTAKU';s.notifyOn=$('setNotify').checked;s.gasUrl=$('setGas').value.trim();s.notice={enabled:$('noticeEnabled').checked,title:$('noticeTitle').value||'本日のお知らせ',body:$('noticeBody').value||'',position:$('noticePosition').value||'top'};save();toast('保存しました');if(GuildStorage.pushCloud)GuildStorage.pushCloud();};
+    $('jsonSettings').onclick=function(){textareaEditor('settings','settings.json');};}
+  function renderUpload(){
+    $('adminContent').innerHTML=`<h2>🖼️ 画像 / 音源アップロード</h2>
+    <div class="admin-card"><div class="tiny">敵画像・背景・BGM・メニュー写真をここからアップできます。アップ後に出るURLを、各編集画面の「画像」欄や「BGM」欄に貼れば使えます。</div></div>
+    <div class="admin-card">
+      <label>ファイルを選択<input id="upFile" type="file" accept="image/*,audio/*"></label>
+      <label>用途メモ（任意・ファイル名に使います）<input id="upLabel" placeholder="例：slime2 / bgm_boss / menu_beer"></label>
+      <div class="toolbar"><button class="btn gold" id="upBtn">アップロード</button></div>
+      <div id="upProgress" class="tiny"></div>
+    </div>
+    <div id="upResult"></div>
+    <div class="admin-card"><div class="admin-card-title">アップ済み一覧（この端末の履歴）</div><div id="upHistory">${uploadHistoryHtml()}</div></div>`;
+    $('upBtn').onclick=doUpload;
+  }
+  function uploadHistoryHtml(){const h=(data.settings.uploadHistory||[]).slice().reverse();return h.length?h.map(u=>`<div class="billbox" style="margin:4px 0"><b>${esc(u.name)}</b><br><input readonly value="${esc(u.url)}" onclick="this.select()" style="width:100%;font-size:.8em"><button class="btn small" onclick="navigator.clipboard&&navigator.clipboard.writeText('${esc(u.url)}');GuildUI&&GuildUI.toast&&GuildUI.toast('コピーしました')">URLコピー</button></div>`).join(''):'<div class="tiny">まだありません</div>';}
+  async function doUpload(){
+    const f=$('upFile').files[0]; if(!f){toast('ファイルを選んでください');return;}
+    const url=(data.settings.gasUrl||'').trim(); if(!url){toast('先に同期タブでGAS URLを設定してください');return;}
+    if(f.size>8*1024*1024){ if(!confirm('8MBを超えています。GAS経由だと失敗しやすいですが試しますか？'))return; }
+    const label=($('upLabel').value.trim()||f.name.replace(/\.[^.]+$/,'')).replace(/[^\w\-]/g,'_');
+    const ext=(f.name.match(/\.[^.]+$/)||[''])[0]||(f.type.startsWith('audio')?'.mp3':'.png');
+    const filename=label+ext;
+    $('upProgress').textContent='読み込み中...';
+    try{
+      const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(f);});
+      $('upProgress').textContent='アップロード中...（GAS経由・数秒かかります）';
+      const res=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'uploadFile',filename,mimeType:f.type,data:b64})});
+      const j=await res.json();
+      if(j&&j.ok&&j.url){
+        data.settings.uploadHistory=data.settings.uploadHistory||[]; data.settings.uploadHistory.push({name:filename,url:j.url,at:new Date().toISOString()}); save();
+        $('upProgress').textContent='';
+        $('upResult').innerHTML=`<div class="admin-card"><div class="admin-card-title">✅ アップ完了</div><div class="tiny">このURLを画像欄/BGM欄に貼ってください</div><input readonly value="${esc(j.url)}" onclick="this.select()" style="width:100%"><div class="toolbar"><button class="btn gold" id="upCopy">URLをコピー</button></div><img src="${esc(j.url)}" style="max-width:100%;max-height:200px;margin-top:8px" onerror="this.style.display='none'"></div>`;
+        $('upCopy').onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(j.url);toast('コピーしました');};
+        renderUpload();
+      }else{ $('upProgress').textContent=''; $('upResult').innerHTML=`<div class="admin-card">❌ 失敗：${esc((j&&j.error)||'不明なエラー')}</div>`; }
+    }catch(e){ $('upProgress').textContent=''; $('upResult').innerHTML=`<div class="admin-card">❌ 通信失敗：${esc(String(e))}</div>`; }
   }
   async function renderSync(){const summary=`GAS URL: ${data.settings.gasUrl||'未設定'}`;$('adminContent').innerHTML=`<h2>☁️ GAS同期</h2><div class="admin-card"><label>GAS URL（/exec で終わるURL）<input id="syncGasUrl" value="${esc(data.settings.gasUrl||'')}" placeholder="https://script.google.com/.../exec"></label><div class="toolbar"><button class="btn gold" id="syncSaveUrl">URLを保存</button><button class="btn" id="syncTest">接続テスト</button></div></div><div class="billbox">${esc(summary)}</div><div class="toolbar"><button class="btn gold" id="syncPull">GASから全取得</button><button class="btn green" id="syncPushAll">全データ送信</button></div><div class="toolbar"><button class="btn" id="syncPushMenu">メニューのみ送信</button><button class="btn" id="syncPushMonsters">敵のみ送信</button></div><pre id="syncResult" class="json-box" style="min-height:24dvh"></pre>`;
     $('syncSaveUrl').onclick=()=>{data.settings.gasUrl=$('syncGasUrl').value.trim();save();toast('GAS URLを保存しました');renderSync();};
@@ -345,6 +353,6 @@
     $('resetDailyReports').onclick=resetDailyReports;
     $('resetAllLocal').onclick=resetAllLocal;
   }
-  function render(){if(current==='dash'){const ss=salesSettings();const monthList=activeSales().filter(x=>saleMonth(x)===ss.currentMonth);const total=sumSales(monthList);const cover=chargeTotal(monthList);const e=data.monsters[data.currentEnemyIndex]||{};$('adminContent').innerHTML=`<h2>概要</h2><div class="grid"><div class="admin-card"><div class="admin-card-title">現在の敵</div>${esc(e.name||'-')}<br>HP ${e.hp||0}/${e.maxHp||0}</div><div class="admin-card"><div class="admin-card-title">顧客数</div>${data.customers.length}</div><div class="admin-card"><div class="admin-card-title">今月売上</div>${yen(total,data.settings.currency)}<br><span class="tiny">${esc(ss.currentMonth)} / 席料 ${yen(cover,data.settings.currency)}</span></div><div class="admin-card"><div class="admin-card-title">状態</div>v4.0 店舗管理</div></div>`} if(current==='business')renderBusiness(); if(current==='menu')renderMenu(); if(current==='inventory')renderInventory(); if(current==='monsters')renderMonsters(); if(current==='settings')renderSettings(); if(current==='customers')renderCustomers(); if(current==='sales')renderSales(); if(current==='sync')renderSync(); if(current==='reset')renderReset();}
+  function render(){if(current==='dash'){const ss=salesSettings();const monthList=activeSales().filter(x=>saleMonth(x)===ss.currentMonth);const total=sumSales(monthList);const cover=chargeTotal(monthList);const e=data.monsters[data.currentEnemyIndex]||{};$('adminContent').innerHTML=`<h2>概要</h2><div class="grid"><div class="admin-card"><div class="admin-card-title">現在の敵</div>${esc(e.name||'-')}<br>HP ${e.hp||0}/${e.maxHp||0}</div><div class="admin-card"><div class="admin-card-title">顧客数</div>${data.customers.length}</div><div class="admin-card"><div class="admin-card-title">今月売上</div>${yen(total,data.settings.currency)}<br><span class="tiny">${esc(ss.currentMonth)} / 席料 ${yen(cover,data.settings.currency)}</span></div><div class="admin-card"><div class="admin-card-title">状態</div>v4.0 店舗管理</div></div>`} if(current==='business')renderBusiness(); if(current==='menu')renderMenu(); if(current==='inventory')renderInventory(); if(current==='monsters')renderMonsters(); if(current==='settings')renderSettings(); if(current==='customers')renderCustomers(); if(current==='sales')renderSales(); if(current==='upload')renderUpload(); if(current==='sync')renderSync(); if(current==='reset')renderReset();}
   loginOk()?showApp():showLogin();
 })();
