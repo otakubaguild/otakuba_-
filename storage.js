@@ -50,6 +50,34 @@ window.GuildStorage = (() => {
     };
   }
 
+  function fixedCategories(){
+    return [
+      {id:'beer_sour', name:'ビール・サワー', icon:'🍺'},
+      {id:'shochu_cocktail', name:'焼酎・カクテル', icon:'🍸'},
+      {id:'shot_bottle', name:'ショット・ボトル', icon:'🥂'},
+      {id:'soft', name:'ソフトドリンク', icon:'🥤'},
+      {id:'food', name:'フード', icon:'🍟'}
+    ];
+  }
+  function forceCategories(){ data.settings.categories = fixedCategories(); }
+  function menuCategorySet(menu){
+    const set = new Set();
+    (Array.isArray(menu)?menu:[]).forEach(p=>{ const id=p && (p.cat || p.category); if(id && id !== 'charge') set.add(id); });
+    return set;
+  }
+  function menuLooksComplete(menu){
+    const set = menuCategorySet(menu);
+    return ['beer_sour','shochu_cocktail','shot_bottle','soft','food'].every(id=>set.has(id));
+  }
+  function pickBestMenu(fileMenu, savedMenu){
+    const f = Array.isArray(fileMenu) ? fileMenu : [];
+    const s = Array.isArray(savedMenu) ? savedMenu : [];
+    if(menuLooksComplete(f) && !menuLooksComplete(s)) return f;
+    if(menuLooksComplete(f) && f.length >= s.length) return f;
+    return s.length ? s : f;
+  }
+
+
   async function init(){
     const defaults = {
       settings: await fetchJson(files.settings, {}),
@@ -85,8 +113,9 @@ window.GuildStorage = (() => {
     const legacy = !existing && !old ? migrateLegacy(get(keys.legacy, null)) : null;
     data = Object.assign({}, defaults, existing || old || legacy || {});
     data.settings = Object.assign({}, defaults.settings, data.settings || {});
-    const hasFullMenu = Array.isArray(data.menu) && data.menu.length >= 20;
-    data.menu = (hasFullMenu ? data.menu : defaults.menu).map(normalizeMenu);
+    forceCategories();
+    const pickedMenu = pickBestMenu(defaults.menu, Array.isArray(data.menu) ? data.menu : []);
+    data.menu = (Array.isArray(pickedMenu) ? pickedMenu : []).map(normalizeMenu);
     data.monsters = (Array.isArray(data.monsters)&&data.monsters.length?data.monsters:defaults.monsters).map(normalizeMonster);
     data.customers = Array.isArray(data.customers)?data.customers:[];
     data.sales = Array.isArray(data.sales)?data.sales:[];
@@ -127,18 +156,21 @@ window.GuildStorage = (() => {
     try{
       const res=await fetch(url+(url.includes('?')?'&':'?')+'action=sync&v='+Date.now(),{cache:'no-store'});
       const remote=await res.json(); if(!remote||typeof remote!=='object') return false;
-      if(remote.settings && Object.keys(remote.settings).length){
-        const keepCategories = data.settings.categories;
-        data.settings = Object.assign({}, data.settings, remote.settings);
-        if(Array.isArray(keepCategories) && keepCategories.length){
-          data.settings.categories = keepCategories;
+      if(remote.settings && Object.keys(remote.settings).length){ data.settings=Object.assign({},data.settings,remote.settings); }
+      if(Array.isArray(remote.menu) && remote.menu.length){
+        const remoteMenu = remote.menu.map(normalizeMenu);
+        const localMenu = Array.isArray(data.menu) ? data.menu : [];
+        // GASの古いdrink/foodメニューやfoodだけメニューは採用しない。menu.jsonの本番5カテゴリを正とする。
+        if(menuLooksComplete(remoteMenu) && remoteMenu.length >= localMenu.length){
+          data.menu = remoteMenu;
+        } else if(!menuLooksComplete(localMenu)){
+          const fileMenu = await fetchJson(files.menu, []);
+          data.menu = pickBestMenu(fileMenu, remoteMenu).map(normalizeMenu);
+        } else {
+          schedulePush();
         }
       }
-      // メニューは「管理画面で保存した正データ」がGASにある時だけ採用。
-      // remote.settings.menuPushedAt が無い＝昔の残骸とみなし、ローカルのmenu.jsonを優先（本番を壊さない）
-      if(Array.isArray(remote.menu)&&remote.menu.length && remote.settings && remote.settings.menuPushedAt){
-        data.menu=remote.menu.map(normalizeMenu);
-      }
+      forceCategories();
       if(Array.isArray(remote.monsters)&&remote.monsters.length){
         const idx=data.currentEnemyIndex, curHp=(data.monsters[idx]||{}).hp;
         data.monsters=remote.monsters.map(normalizeMonster);
@@ -163,6 +195,7 @@ window.GuildStorage = (() => {
         (data.sales||[]).concat(remote.sales).forEach(s=>{ if(!s) return; const id=saleKey(s); if(deleted.has(id)) return; if(!seen[id]){ seen[id]=1; merged.push(s); } });
         data.sales=merged;
       }
+      forceCategories();
       data.currentEnemyIndex=GuildUtils.clamp(data.currentEnemyIndex,0,Math.max(0,data.monsters.length-1));
       set(keys.state,data);
       return true;

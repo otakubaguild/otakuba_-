@@ -17,7 +17,17 @@
   function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),1500)}
   function save(){GuildStorage.save()}
   function renderTabs(){$('adminTabs').innerHTML=tabs.map(t=>`<button class="tab ${current===t[0]?'active':''}" data-tab="${t[0]}">${t[1]}</button>`).join('');document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{current=b.dataset.tab;renderTabs();render()})}
-  function cats(){const a=Array.isArray(data.settings.categories)?data.settings.categories:[];return a.length?a:[{id:'food',name:'フード',icon:'🍖'}]}
+  function cats(){
+    const fixed=[
+      {id:'beer_sour',name:'ビール・サワー',icon:'🍺'},
+      {id:'shochu_cocktail',name:'焼酎・カクテル',icon:'🍸'},
+      {id:'shot_bottle',name:'ショット・ボトル',icon:'🥂'},
+      {id:'soft',name:'ソフトドリンク',icon:'🥤'},
+      {id:'food',name:'フード',icon:'🍟'}
+    ];
+    data.settings.categories=fixed;
+    return fixed;
+  }
   function normalizeProduct(p,i){p=p||{};p.id=p.id||GuildUtils.uid('menu');p.cat=p.cat||p.category||'food';p.category=p.cat;p.name=p.name||'商品';p.price=Number(p.price)||0;p.emoji=p.emoji||p.icon||'🍽️';p.icon=p.emoji;p.desc=p.desc||'';p.image=p.image||'';p.hidden=!!p.hidden;p.soldOut=!!p.soldOut;p.recommended=!!p.recommended;p.limited=!!p.limited;if(p.stock===null||typeof p.stock==='undefined')p.stock='';else if(p.stock!=='')p.stock=Math.max(0,Number(p.stock)||0);p.sort=Number(p.sort||i);return p}
   function renderMenu(){data.menu=(data.menu||[]).map(normalizeProduct);const cs=cats();const opts=cs.map(c=>`<option value="${esc(c.id)}">${esc((c.icon?c.icon+' ':'')+c.name)}</option>`).join('');$('adminContent').innerHTML=`<h2>🍴 メニュー管理</h2><div class="toolbar"><button class="btn gold" id="addProduct">商品追加</button><button class="btn green" id="saveMenu">保存</button><button class="btn" id="openAll">全部開く</button><button class="btn" id="closeAll">全部閉じる</button><button class="btn" id="jsonMode">JSON</button></div><div class="category-list">${cs.map((c,ci)=>{const items=data.menu.map((p,i)=>({p,i})).filter(x=>x.p.cat===c.id);return `<section class="category-block ${ci===0?'open':''}"><button class="category-head"><span>${esc((c.icon?c.icon+' ':'')+c.name)} <b>(${items.length})</b></span><span class="category-toggle">${ci===0?'閉じる':'開く'}</span></button><div class="category-body">${items.length?items.map(({p,i})=>productCard(p,i,opts)).join(''):'<div class="empty">なし</div>'}</div></section>`}).join('')}</div>`;
     document.querySelectorAll('.category-head').forEach(h=>h.onclick=()=>{const b=h.closest('.category-block');b.classList.toggle('open');h.querySelector('.category-toggle').textContent=b.classList.contains('open')?'閉じる':'開く'});document.querySelectorAll('[data-menu-index]').forEach(card=>{const p=data.menu[+card.dataset.menuIndex];card.querySelector('[data-field="cat"]').value=p.cat});document.querySelectorAll('[data-del-product]').forEach(btn=>btn.onclick=()=>{if(confirm('削除しますか？')){data.menu.splice(+btn.dataset.delProduct,1);save();renderMenu()}});$('addProduct').onclick=()=>{saveMenuForm();data.menu.push(normalizeProduct({name:'新商品',cat:cs[0].id},data.menu.length));save();renderMenu()};$('saveMenu').onclick=()=>{saveMenuForm();toast('保存しました')};$('openAll').onclick=()=>toggleCats(true);$('closeAll').onclick=()=>toggleCats(false);$('jsonMode').onclick=()=>textareaEditor('menu','menu.json')}
