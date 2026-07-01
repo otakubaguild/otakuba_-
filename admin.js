@@ -167,7 +167,7 @@
   function optList(arr,sel){return arr.map(function(v){return '<option value="'+esc(v)+'"'+(v===sel?' selected':'')+'>'+esc(v)+'</option>';}).join('');}
   var BGM_LABELS={title:'タイトル',slime:'序盤・スライム系',goblin:'中盤・ゴブリン系',orc:'オーク系',cave:'洞窟',ruins:'遺跡',maou:'魔王',daimaou:'大魔王',ending:'ファンファーレ（クリア）'};
   function bgmOptList(arr,sel){return arr.map(function(v){var label=BGM_LABELS[v]||v;return '<option value="'+esc(v)+'"'+(v===sel?' selected':'')+'>'+esc(label)+'</option>';}).join('');}
-  function monsterCard(m,i){var thumb=m.image?('<img src="'+esc(m.image)+'" alt="" style="width:48px;height:48px;object-fit:contain;vertical-align:middle;margin-right:8px" onerror="this.style.display=\'none\'">'):'';return '<div class="admin-card" data-monster-index="'+i+'"><div class="admin-card-title">'+thumb+(i+1)+'. '+esc(m.name)+'<br><span style="font-size:.8em;opacity:.7">'+esc(m.stage)+' / HP '+(m.hp||0)+'/'+(m.maxHp||0)+'</span></div>'+
+  function monsterCard(m,i){var thumb=m.image?('<img src="'+esc(GuildUtils.driveImg(m.image))+'" alt="" style="width:48px;height:48px;object-fit:contain;vertical-align:middle;margin-right:8px" onerror="this.style.display=\'none\'">'):'';return '<div class="admin-card" data-monster-index="'+i+'"><div class="admin-card-title">'+thumb+(i+1)+'. '+esc(m.name)+'<br><span style="font-size:.8em;opacity:.7">'+esc(m.stage)+' / HP '+(m.hp||0)+'/'+(m.maxHp||0)+'</span></div>'+
     '<label>敵名<input data-field="name" value="'+esc(m.name)+'"></label>'+
     '<label>ステージ<input data-field="stage" value="'+esc(m.stage)+'"></label>'+
     '<label>BGM（一覧から選択）<select data-field="bgm">'+bgmOptList(BGM_LIST.concat(BGM_LIST.includes(m.bgm)||!m.bgm?[]:[m.bgm]),m.bgm)+'</select></label>'+
@@ -177,7 +177,7 @@
     '<label>背景<select data-field="bg">'+optList(BG_LIST,m.bg)+'</select></label>'+
     '<label>敵画像（一覧から選択）<select data-field="image">'+optList(IMG_LIST.concat(IMG_LIST.includes(m.image)||!m.image||/^https?:/i.test(m.image)?[]:[m.image]),m.image)+'</select></label>'+
     '<label>敵画像 URL（アップした画像を使う場合はここに貼る）<input data-field="imageUrl" value="'+esc(/^https?:/i.test(m.image)?m.image:'')+'" placeholder="https://drive.google.com/..."></label>'+
-    '<div class="enemy-preview" data-preview="'+i+'" style="position:relative;width:100%;height:180px;border:2px solid rgba(255,246,223,.5);border-radius:12px;overflow:hidden;margin:8px 0;background:#000 center/cover no-repeat;background-image:url('+esc(m.bg)+')"><img data-preview-img src="'+esc(m.image)+'" style="position:absolute;left:50%;top:50%;max-width:60%;max-height:80%;object-fit:contain;transform:translate(calc(-50% + '+(Number(m.offsetX)||0)+'%),calc(-50% + '+(Number(m.offsetY)||0)+'%)) scale('+((Number(m.scale)||100)/100)+')" onerror="this.style.display=\'none\'"></div>'+
+    '<div class="enemy-preview" data-preview="'+i+'" style="position:relative;width:100%;height:180px;border:2px solid rgba(255,246,223,.5);border-radius:12px;overflow:hidden;margin:8px 0;background:#000 center/cover no-repeat;background-image:url('+esc(GuildUtils.driveImg(m.bg))+')"><img data-preview-img src="'+esc(GuildUtils.driveImg(m.image))+'" style="position:absolute;left:50%;top:50%;max-width:60%;max-height:80%;object-fit:contain;transform:translate(calc(-50% + '+(Number(m.offsetX)||0)+'%),calc(-50% + '+(Number(m.offsetY)||0)+'%)) scale('+((Number(m.scale)||100)/100)+')" onerror="this.style.display=\'none\'"></div>'+
     '<label>大きさ <span data-scale-val>'+(Number(m.scale)||100)+'</span>%<input data-field="scale" type="range" min="30" max="250" value="'+(Number(m.scale)||100)+'"></label>'+
     '<label>左右 <span data-ox-val>'+(Number(m.offsetX)||0)+'</span>%<input data-field="offsetX" type="range" min="-60" max="60" value="'+(Number(m.offsetX)||0)+'"></label>'+
     '<label>上下 <span data-oy-val>'+(Number(m.offsetY)||0)+'</span>%<input data-field="offsetY" type="range" min="-60" max="60" value="'+(Number(m.offsetY)||0)+'"></label>'+
@@ -189,9 +189,9 @@
     $('addMonster').onclick=function(){saveMonsterForm();data.monsters.push(normalizeMonster({name:'新しい敵',maxHp:500},data.monsters.length));save();renderMonsters();};
     $('saveMonsters').onclick=function(){saveMonsterForm();toast('保存しました');if(GuildStorage.pushCloud)GuildStorage.pushCloud();};
     $('jsonMonsters').onclick=function(){textareaEditor('monsters','monsters.json');};}
-  function updatePreview(card){var img=card.querySelector('[data-preview-img]');var box=card.querySelector('[data-preview]');if(!img||!box)return;var sc=(+card.querySelector('[data-field=scale]').value||100)/100;var ox=+card.querySelector('[data-field=offsetX]').value||0;var oy=+card.querySelector('[data-field=offsetY]').value||0;var imgSrc=card.querySelector('[data-field=image]').value;var bgSrc=card.querySelector('[data-field=bg]').value;img.src=imgSrc;img.style.display='';box.style.backgroundImage='url('+bgSrc+')';img.style.transform='translate(calc(-50% + '+ox+'%),calc(-50% + '+oy+'%)) scale('+sc+')';var sv=card.querySelector('[data-scale-val]');if(sv)sv.textContent=+card.querySelector('[data-field=scale]').value||100;var oxv=card.querySelector('[data-ox-val]');if(oxv)oxv.textContent=ox;var oyv=card.querySelector('[data-oy-val]');if(oyv)oyv.textContent=oy;}
+  function updatePreview(card){var img=card.querySelector('[data-preview-img]');var box=card.querySelector('[data-preview]');if(!img||!box)return;var sc=(+card.querySelector('[data-field=scale]').value||100)/100;var ox=+card.querySelector('[data-field=offsetX]').value||0;var oy=+card.querySelector('[data-field=offsetY]').value||0;var imgSrc=card.querySelector('[data-field=image]').value;var imgUrlField=(card.querySelector('[data-field=imageUrl]')||{}).value||'';var finalImg=imgUrlField.trim()?imgUrlField.trim():imgSrc;var bgSrc=card.querySelector('[data-field=bg]').value;img.src=GuildUtils.driveImg(finalImg);img.style.display='';box.style.backgroundImage='url('+GuildUtils.driveImg(bgSrc)+')';img.style.transform='translate(calc(-50% + '+ox+'%),calc(-50% + '+oy+'%)) scale('+sc+')';var sv=card.querySelector('[data-scale-val]');if(sv)sv.textContent=+card.querySelector('[data-field=scale]').value||100;var oxv=card.querySelector('[data-ox-val]');if(oxv)oxv.textContent=ox;var oyv=card.querySelector('[data-oy-val]');if(oyv)oyv.textContent=oy;}
   function bindMonsterEvents(){
-    document.querySelectorAll('[data-monster-index]').forEach(function(card){['scale','offsetX','offsetY'].forEach(function(f){var el=card.querySelector('[data-field='+f+']');if(el)el.addEventListener('input',function(){updatePreview(card);});});var imgSel=card.querySelector('[data-field=image]');if(imgSel)imgSel.addEventListener('change',function(){updatePreview(card);});var bgSel=card.querySelector('[data-field=bg]');if(bgSel)bgSel.addEventListener('change',function(){updatePreview(card);});});
+    document.querySelectorAll('[data-monster-index]').forEach(function(card){['scale','offsetX','offsetY'].forEach(function(f){var el=card.querySelector('[data-field='+f+']');if(el)el.addEventListener('input',function(){updatePreview(card);});});var imgSel=card.querySelector('[data-field=image]');if(imgSel)imgSel.addEventListener('change',function(){updatePreview(card);});var imgUrlEl=card.querySelector('[data-field=imageUrl]');if(imgUrlEl)imgUrlEl.addEventListener('input',function(){updatePreview(card);});var bgSel=card.querySelector('[data-field=bg]');if(bgSel)bgSel.addEventListener('change',function(){updatePreview(card);});});
     document.querySelectorAll('[data-save-monster]').forEach(function(b){b.onclick=function(){var card=b.closest('[data-monster-index]');readMonsterCard(card);save();if(GuildStorage.pushCloud)GuildStorage.pushCloud();toast('保存しました');var orig=b.textContent;b.textContent='✓ 保存しました';b.classList.add('green');setTimeout(function(){b.textContent=orig;b.classList.remove('green');},1400);};});
     document.querySelectorAll('[data-current-monster]').forEach(function(b){b.onclick=function(){saveMonsterForm();data.currentEnemyIndex=+b.dataset.currentMonster;save();toast('現在の敵にしました');if(GuildStorage.pushCloud)GuildStorage.pushCloud();};});
     document.querySelectorAll('[data-dup-monster]').forEach(function(b){b.onclick=function(){saveMonsterForm();var src=data.monsters[+b.dataset.dupMonster];var copy=JSON.parse(JSON.stringify(src));copy.id=GuildUtils.uid('enemy');copy.name=src.name+'（複製）';data.monsters.splice(+b.dataset.dupMonster+1,0,copy);save();renderMonsters();};});
@@ -224,8 +224,20 @@
     <div id="upResult"></div>
     <div class="admin-card"><div class="admin-card-title">アップ済み一覧（この端末の履歴）</div><div id="upHistory">${uploadHistoryHtml()}</div></div>`;
     $('upBtn').onclick=doUpload;
+    bindUploadHistoryEvents();
   }
-  function uploadHistoryHtml(){const h=(data.settings.uploadHistory||[]).slice().reverse();return h.length?h.map(u=>`<div class="billbox" style="margin:4px 0"><b>${esc(u.name)}</b><br><input readonly value="${esc(u.url)}" onclick="this.select()" style="width:100%;font-size:.8em"><button class="btn small" onclick="navigator.clipboard&&navigator.clipboard.writeText('${esc(u.url)}');GuildUI&&GuildUI.toast&&GuildUI.toast('コピーしました')">URLコピー</button></div>`).join(''):'<div class="tiny">まだありません</div>';}
+  function uploadHistoryHtml(){const h=(data.settings.uploadHistory||[]).slice().reverse();return h.length?h.map((u,i)=>`<div class="billbox" style="margin:4px 0"><b>${esc(u.name)}</b><br><input readonly value="${esc(u.url)}" data-up-url="${i}" onclick="this.select();this.setSelectionRange(0,99999)" style="width:100%;font-size:.8em"><button class="btn small" data-copy-url="${i}">URLコピー</button></div>`).join(''):'<div class="tiny">まだありません</div>';}
+  function copyText(text,btn){
+    let ok=false;
+    try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text); ok=true; } }catch(e){}
+    if(!ok){ try{ const ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.focus(); ta.select(); ta.setSelectionRange(0,99999); document.execCommand('copy'); document.body.removeChild(ta); ok=true; }catch(e){} }
+    if(btn){ const o=btn.textContent; btn.textContent='✓ コピー済み'; setTimeout(()=>btn.textContent=o,1200); }
+    toast(ok?'コピーしました':'長押しで選択してコピーしてください');
+  }
+  function bindUploadHistoryEvents(){
+    const h=(data.settings.uploadHistory||[]).slice().reverse();
+    document.querySelectorAll('[data-copy-url]').forEach(b=>{ b.onclick=()=>{ const u=h[+b.dataset.copyUrl]; if(u) copyText(u.url,b); }; });
+  }
   async function doUpload(){
     const f=$('upFile').files[0]; if(!f){toast('ファイルを選んでください');return;}
     const url=(data.settings.gasUrl||'').trim(); if(!url){toast('先に同期タブでGAS URLを設定してください');return;}
@@ -242,8 +254,8 @@
       if(j&&j.ok&&j.url){
         data.settings.uploadHistory=data.settings.uploadHistory||[]; data.settings.uploadHistory.push({name:filename,url:j.url,at:new Date().toISOString()}); save();
         $('upProgress').textContent='';
-        $('upResult').innerHTML=`<div class="admin-card"><div class="admin-card-title">✅ アップ完了</div><div class="tiny">このURLを画像欄/BGM欄に貼ってください</div><input readonly value="${esc(j.url)}" onclick="this.select()" style="width:100%"><div class="toolbar"><button class="btn gold" id="upCopy">URLをコピー</button></div><img src="${esc(j.url)}" style="max-width:100%;max-height:200px;margin-top:8px" onerror="this.style.display='none'"></div>`;
-        $('upCopy').onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(j.url);toast('コピーしました');};
+        $('upResult').innerHTML=`<div class="admin-card"><div class="admin-card-title">✅ アップ完了</div><div class="tiny">このURLを画像欄/BGM欄に貼ってください</div><input readonly value="${esc(j.url)}" onclick="this.select();this.setSelectionRange(0,99999)" style="width:100%"><div class="toolbar"><button class="btn gold" id="upCopy">URLをコピー</button></div><img src="${esc(GuildUtils.driveImg(j.url))}" style="max-width:100%;max-height:200px;margin-top:8px" onerror="this.style.display='none'"></div>`;
+        $('upCopy').onclick=()=>copyText(j.url,$('upCopy'));
         renderUpload();
       }else{ $('upProgress').textContent=''; $('upResult').innerHTML=`<div class="admin-card">❌ 失敗：${esc((j&&j.error)||'不明なエラー')}</div>`; }
     }catch(e){ $('upProgress').textContent=''; $('upResult').innerHTML=`<div class="admin-card">❌ 通信失敗：${esc(String(e))}</div>`; }
