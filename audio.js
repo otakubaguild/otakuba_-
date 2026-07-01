@@ -1,6 +1,20 @@
 window.GuildAudio = (() => {
   let settings = {}; let bgmAudio = null; let currentKey = ''; let enabled = true;
-  function init(s){ settings = s || {}; }
+  let endingAudio = null;
+  function init(s){ settings = s || {}; preloadEnding(); }
+  function preloadEnding(){
+    try{ const src=path('bgm','ending'); if(src){ endingAudio=new Audio(src); endingAudio.loop=true; endingAudio.preload='auto'; endingAudio.load(); } }catch(e){}
+  }
+  // 魔王討伐ファンファーレ専用：事前ロード済みAudioを鳴らす（iOS制約回避）
+  function playEnding(){
+    if(!enabled) return;
+    stopBgm(); currentKey='ending';
+    if(!endingAudio){ preloadEnding(); }
+    const a = endingAudio || new Audio(path('bgm','ending'));
+    a.loop=true; a.volume=volume('bgm'); try{ a.currentTime=0; }catch(e){}
+    const tryPlay=(n)=>{ const p=a.play(); if(p&&p.catch) p.catch(()=>{ if(n>0) setTimeout(()=>tryPlay(n-1),350); }); };
+    tryPlay(4); bgmAudio=a;
+  }
   function volume(type){ return Number(settings[type === 'bgm' ? 'bgmVolume' : 'seVolume'] ?? (type==='bgm'?0.45:0.9)); }
   function path(type, key){
     if(!key) return '';
@@ -18,8 +32,9 @@ window.GuildAudio = (() => {
     const src = path('bgm', key); if(!src) return;
     stopBgm(); currentKey = key;
     const a = new Audio(src); a.loop=true; a.volume=volume('bgm'); a.preload='auto';
-    const p = a.play(); if(p && p.catch) p.catch(()=>{});
     bgmAudio = a;
+    const tryPlay=(retries)=>{ const p=a.play(); if(p&&p.catch) p.catch(()=>{ if(retries>0) setTimeout(()=>tryPlay(retries-1), 400); }); };
+    tryPlay(3);
   }
   const sePool={};
   function playSe(key){
@@ -34,5 +49,5 @@ window.GuildAudio = (() => {
   }
   function play(key){ const map={ok:'ok',bad:'bad',cancel:'cancel',add:'add',confirm:'confirm',hit:'damage',damage:'damage',defeat:'defeat',levelup:'levelup',victory:'victory'}; playSe(map[key]||key); }
   function mute(flag){ enabled = !flag; if(flag) stopBgm(); }
-  return {init, playBgm, stopBgm, playSe, play, mute};
+  return {init, playBgm, stopBgm, playSe, play, mute, playEnding};
 })();
