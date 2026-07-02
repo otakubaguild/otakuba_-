@@ -1,91 +1,556 @@
 {
   "_comment": "コンセプトのプリセット集。管理画面で選ぶと、そのプリセットの theme(文言・色)と敵設定が丸ごと適用されます。画像は presets/<id>/ フォルダに置くか、各enemyのimageにドライブURLを貼ってください。",
-
   "presets": [
     {
       "id": "rpg",
       "label": "⚔️ RPG（剣と魔法）",
       "theme": {
-        "brand": { "appName": "おたく場ギルド", "shopName": "おたく場ギルド", "masterName": "ギルドマスター", "masterImage": "master.png", "masterFallbackEmoji": "🧙" },
-        "color": { "gold": "#f6c84f", "green": "#73ff5f", "white": "#fff6df", "red": "#ff6767", "bgDark": "#0d0b1a" },
-        "words": { "customer": "冒険者", "customerRegister": "ギルド登録料（チャージ）", "guild": "ギルド", "quest": "クエスト", "questClear": "クエスト達成", "subjugation": "討伐", "boss": "魔王", "enemy": "敵", "battle": "戦闘", "defeat": "撃破", "party": "パーティ", "adventurerInfo": "冒険者情報", "stage": "ステージ" },
-        "messages": { "titleWelcome": "おたく場ギルドへ<br>ようこそ", "registerTitle": "冒険者登録", "selectTitle": "冒険者を選択", "partyTitle": "パーティ人数", "welcome": "ようこそ、いらっしゃいませ。", "welcomeBack": "おかえりなさい、冒険者。次のクエストを受けますか？", "openMenu": "メニューを開きますか？", "masterDefault": "冷やかしか？さっさとメニューを開け", "checkoutDone": "おかえりなさい。クエスト達成（会計）を送信しました", "peace": "魔王を倒し、平和が訪れた。" }
+        "brand": {
+          "appName": "おたく場ギルド",
+          "shopName": "おたく場ギルド",
+          "masterName": "ギルドマスター",
+          "masterImage": "master.png",
+          "masterFallbackEmoji": "🧙"
+        },
+        "color": {
+          "gold": "#f6c84f",
+          "green": "#73ff5f",
+          "white": "#fff6df",
+          "red": "#ff6767",
+          "bgDark": "#0d0b1a"
+        },
+        "words": {
+          "customer": "冒険者",
+          "customerRegister": "ギルド登録料（チャージ）",
+          "guild": "ギルド",
+          "quest": "クエスト",
+          "questClear": "クエスト達成",
+          "subjugation": "討伐",
+          "boss": "魔王",
+          "enemy": "敵",
+          "battle": "戦闘",
+          "defeat": "撃破",
+          "party": "パーティ",
+          "adventurerInfo": "冒険者情報",
+          "stage": "ステージ"
+        },
+        "messages": {
+          "titleWelcome": "おたく場ギルドへ<br>ようこそ",
+          "registerTitle": "冒険者登録",
+          "selectTitle": "冒険者を選択",
+          "partyTitle": "パーティ人数",
+          "welcome": "ようこそ、いらっしゃいませ。",
+          "welcomeBack": "おかえりなさい、冒険者。次のクエストを受けますか？",
+          "openMenu": "メニューを開きますか？",
+          "masterDefault": "冷やかしか？さっさとメニューを開け",
+          "checkoutDone": "おかえりなさい。クエスト達成（会計）を送信しました",
+          "peace": "魔王を倒し、平和が訪れた。"
+        },
+        "assets": {}
       },
       "enemies": [
-        { "name": "スライム", "stage": "草原", "maxHp": 500, "bg": "grass.png", "image": "slime.png", "bgm": "slime" },
-        { "name": "ゴブリン 1/2", "stage": "森", "maxHp": 750, "bg": "forest.png", "image": "goblin.png", "bgm": "goblin" },
-        { "name": "ゴブリン 2/2", "stage": "森", "maxHp": 750, "bg": "forest.png", "image": "goblin.png", "bgm": "goblin" },
-        { "name": "オーク", "stage": "森", "maxHp": 1500, "bg": "forest.png", "image": "orc.png", "bgm": "orc" },
-        { "name": "スケルトン 1/3", "stage": "洞窟", "maxHp": 1000, "bg": "cave.png", "image": "skeleton.png", "bgm": "cave" },
-        { "name": "スケルトン 2/3", "stage": "洞窟", "maxHp": 1000, "bg": "cave.png", "image": "skeleton.png", "bgm": "cave" },
-        { "name": "スケルトン 3/3", "stage": "洞窟", "maxHp": 1000, "bg": "cave.png", "image": "skeleton.png", "bgm": "cave" },
-        { "name": "ミミック", "stage": "洞窟", "maxHp": 1500, "bg": "cave.png", "image": "mimic.png", "bgm": "cave" },
-        { "name": "ミノタウロス", "stage": "洞窟", "maxHp": 3000, "bg": "cave.png", "image": "minotaur.png", "bgm": "cave" },
-        { "name": "ガーゴイル 1/3", "stage": "遺跡", "maxHp": 2500, "bg": "ruins.png", "image": "gargoyle.png", "bgm": "ruins" },
-        { "name": "ガーゴイル 2/3", "stage": "遺跡", "maxHp": 2500, "bg": "ruins.png", "image": "gargoyle.png", "bgm": "ruins" },
-        { "name": "ガーゴイル 3/3", "stage": "遺跡", "maxHp": 2500, "bg": "ruins.png", "image": "gargoyle.png", "bgm": "ruins" },
-        { "name": "ドラゴン", "stage": "火山", "maxHp": 10000, "bg": "volcano.png", "image": "dragon.png", "bgm": "orc" },
-        { "name": "ダークウィザード 1/2", "stage": "魔王城", "maxHp": 2500, "bg": "castle.png", "image": "dark_wizard.png", "bgm": "maou" },
-        { "name": "ダークウィザード 2/2", "stage": "魔王城", "maxHp": 2500, "bg": "castle.png", "image": "dark_wizard.png", "bgm": "maou" },
-        { "name": "魔王", "stage": "魔王城", "maxHp": 15000, "bg": "castle.png", "image": "maou.png", "bgm": "maou" }
+        {
+          "name": "スライム",
+          "stage": "草原",
+          "maxHp": 500,
+          "bg": "grass.png",
+          "image": "slime.png",
+          "bgm": "slime"
+        },
+        {
+          "name": "ゴブリン 1/2",
+          "stage": "森",
+          "maxHp": 750,
+          "bg": "forest.png",
+          "image": "goblin.png",
+          "bgm": "goblin"
+        },
+        {
+          "name": "ゴブリン 2/2",
+          "stage": "森",
+          "maxHp": 750,
+          "bg": "forest.png",
+          "image": "goblin.png",
+          "bgm": "goblin"
+        },
+        {
+          "name": "オーク",
+          "stage": "森",
+          "maxHp": 1500,
+          "bg": "forest.png",
+          "image": "orc.png",
+          "bgm": "orc"
+        },
+        {
+          "name": "スケルトン 1/3",
+          "stage": "洞窟",
+          "maxHp": 1000,
+          "bg": "cave.png",
+          "image": "skeleton.png",
+          "bgm": "cave"
+        },
+        {
+          "name": "スケルトン 2/3",
+          "stage": "洞窟",
+          "maxHp": 1000,
+          "bg": "cave.png",
+          "image": "skeleton.png",
+          "bgm": "cave"
+        },
+        {
+          "name": "スケルトン 3/3",
+          "stage": "洞窟",
+          "maxHp": 1000,
+          "bg": "cave.png",
+          "image": "skeleton.png",
+          "bgm": "cave"
+        },
+        {
+          "name": "ミミック",
+          "stage": "洞窟",
+          "maxHp": 1500,
+          "bg": "cave.png",
+          "image": "mimic.png",
+          "bgm": "cave"
+        },
+        {
+          "name": "ミノタウロス",
+          "stage": "洞窟",
+          "maxHp": 3000,
+          "bg": "cave.png",
+          "image": "minotaur.png",
+          "bgm": "cave"
+        },
+        {
+          "name": "ガーゴイル 1/3",
+          "stage": "遺跡",
+          "maxHp": 2500,
+          "bg": "ruins.png",
+          "image": "gargoyle.png",
+          "bgm": "ruins"
+        },
+        {
+          "name": "ガーゴイル 2/3",
+          "stage": "遺跡",
+          "maxHp": 2500,
+          "bg": "ruins.png",
+          "image": "gargoyle.png",
+          "bgm": "ruins"
+        },
+        {
+          "name": "ガーゴイル 3/3",
+          "stage": "遺跡",
+          "maxHp": 2500,
+          "bg": "ruins.png",
+          "image": "gargoyle.png",
+          "bgm": "ruins"
+        },
+        {
+          "name": "ドラゴン",
+          "stage": "火山",
+          "maxHp": 10000,
+          "bg": "volcano.png",
+          "image": "dragon.png",
+          "bgm": "orc"
+        },
+        {
+          "name": "ダークウィザード 1/2",
+          "stage": "魔王城",
+          "maxHp": 2500,
+          "bg": "castle.png",
+          "image": "dark_wizard.png",
+          "bgm": "maou"
+        },
+        {
+          "name": "ダークウィザード 2/2",
+          "stage": "魔王城",
+          "maxHp": 2500,
+          "bg": "castle.png",
+          "image": "dark_wizard.png",
+          "bgm": "maou"
+        },
+        {
+          "name": "魔王",
+          "stage": "魔王城",
+          "maxHp": 15000,
+          "bg": "castle.png",
+          "image": "maou.png",
+          "bgm": "maou"
+        }
       ]
     },
-
     {
       "id": "space",
       "label": "🚀 宇宙・SF",
       "theme": {
-        "brand": { "appName": "コズミック酒場ステーション", "shopName": "コズミック酒場", "masterName": "ステーション長", "masterImage": "presets/space/master.png", "masterFallbackEmoji": "🧑‍🚀" },
-        "color": { "gold": "#4fd0f6", "green": "#5fffcf", "white": "#e6f2ff", "red": "#ff6b9d", "bgDark": "#050818" },
-        "words": { "customer": "クルー", "customerRegister": "乗船登録料", "guild": "ステーション", "quest": "ミッション", "questClear": "ミッション完了", "subjugation": "撃墜", "boss": "宇宙海賊王", "enemy": "敵艦", "battle": "戦闘", "defeat": "撃墜", "party": "クルー", "adventurerInfo": "クルー情報", "stage": "宙域" },
-        "messages": { "titleWelcome": "コズミック酒場<br>ステーションへようこそ", "registerTitle": "クルー登録", "selectTitle": "クルーを選択", "partyTitle": "クルー人数", "welcome": "ようこそ、宇宙の旅人よ。", "welcomeBack": "おかえり、クルー。次のミッションを受けるか？", "openMenu": "メニューを開きますか？", "masterDefault": "ようこそステーションへ。何を注文する？", "checkoutDone": "また会おう。ミッション完了（会計）を送信しました", "peace": "宇宙海賊王を撃墜し、銀河に平和が戻った。" }
+        "brand": {
+          "appName": "コズミック酒場ステーション",
+          "shopName": "コズミック酒場",
+          "masterName": "ステーション長",
+          "masterImage": "presets/space/master.png",
+          "masterFallbackEmoji": "🧑‍🚀"
+        },
+        "color": {
+          "gold": "#4fd0f6",
+          "green": "#5fffcf",
+          "white": "#e6f2ff",
+          "red": "#ff6b9d",
+          "bgDark": "#050818"
+        },
+        "words": {
+          "customer": "クルー",
+          "customerRegister": "乗船登録料",
+          "guild": "ステーション",
+          "quest": "ミッション",
+          "questClear": "ミッション完了",
+          "subjugation": "撃墜",
+          "boss": "宇宙海賊王",
+          "enemy": "敵艦",
+          "battle": "戦闘",
+          "defeat": "撃墜",
+          "party": "クルー",
+          "adventurerInfo": "クルー情報",
+          "stage": "宙域"
+        },
+        "messages": {
+          "titleWelcome": "コズミック酒場<br>ステーションへようこそ",
+          "registerTitle": "クルー登録",
+          "selectTitle": "クルーを選択",
+          "partyTitle": "クルー人数",
+          "welcome": "ようこそ、宇宙の旅人よ。",
+          "welcomeBack": "おかえり、クルー。次のミッションを受けるか？",
+          "openMenu": "メニューを開きますか？",
+          "masterDefault": "ようこそステーションへ。何を注文する？",
+          "checkoutDone": "また会おう。ミッション完了（会計）を送信しました",
+          "peace": "宇宙海賊王を撃墜し、銀河に平和が戻った。",
+          "victoryTitle": "SECTOR SAVED",
+          "victorySubtitle": "任務完了。帰還を許可する。"
+        },
+        "assets": {
+          "startBg": "start.png",
+          "startBgm": "title",
+          "victoryBg": "clear.png",
+          "victoryImage": "",
+          "victoryBgm": "ending",
+          "masterImage": "pirate.png"
+        }
       },
       "enemies": [
-        { "name": "偵察ドローン", "stage": "低軌道", "maxHp": 500, "bg": "presets/space/bg_orbit.png", "image": "presets/space/drone.png", "bgm": "slime" },
-        { "name": "小型戦闘機 1/2", "stage": "小惑星帯", "maxHp": 750, "bg": "presets/space/bg_belt.png", "image": "presets/space/fighter.png", "bgm": "goblin" },
-        { "name": "小型戦闘機 2/2", "stage": "小惑星帯", "maxHp": 750, "bg": "presets/space/bg_belt.png", "image": "presets/space/fighter.png", "bgm": "goblin" },
-        { "name": "重装砲艦", "stage": "小惑星帯", "maxHp": 1500, "bg": "presets/space/bg_belt.png", "image": "presets/space/gunship.png", "bgm": "orc" },
-        { "name": "エイリアン兵 1/3", "stage": "廃棄コロニー", "maxHp": 1000, "bg": "presets/space/bg_colony.png", "image": "presets/space/alien.png", "bgm": "cave" },
-        { "name": "エイリアン兵 2/3", "stage": "廃棄コロニー", "maxHp": 1000, "bg": "presets/space/bg_colony.png", "image": "presets/space/alien.png", "bgm": "cave" },
-        { "name": "エイリアン兵 3/3", "stage": "廃棄コロニー", "maxHp": 1000, "bg": "presets/space/bg_colony.png", "image": "presets/space/alien.png", "bgm": "cave" },
-        { "name": "擬態機雷", "stage": "廃棄コロニー", "maxHp": 1500, "bg": "presets/space/bg_colony.png", "image": "presets/space/mine.png", "bgm": "cave" },
-        { "name": "殲滅ロボ", "stage": "廃棄コロニー", "maxHp": 3000, "bg": "presets/space/bg_colony.png", "image": "presets/space/robot.png", "bgm": "cave" },
-        { "name": "防衛衛星 1/3", "stage": "宇宙要塞", "maxHp": 2500, "bg": "presets/space/bg_fortress.png", "image": "presets/space/satellite.png", "bgm": "ruins" },
-        { "name": "防衛衛星 2/3", "stage": "宇宙要塞", "maxHp": 2500, "bg": "presets/space/bg_fortress.png", "image": "presets/space/satellite.png", "bgm": "ruins" },
-        { "name": "防衛衛星 3/3", "stage": "宇宙要塞", "maxHp": 2500, "bg": "presets/space/bg_fortress.png", "image": "presets/space/satellite.png", "bgm": "ruins" },
-        { "name": "宇宙怪獣", "stage": "恒星付近", "maxHp": 10000, "bg": "presets/space/bg_star.png", "image": "presets/space/kaiju.png", "bgm": "orc" },
-        { "name": "海賊幹部 1/2", "stage": "海賊母艦", "maxHp": 2500, "bg": "presets/space/bg_mothership.png", "image": "presets/space/pirate.png", "bgm": "maou" },
-        { "name": "海賊幹部 2/2", "stage": "海賊母艦", "maxHp": 2500, "bg": "presets/space/bg_mothership.png", "image": "presets/space/pirate.png", "bgm": "maou" },
-        { "name": "宇宙海賊王", "stage": "海賊母艦", "maxHp": 15000, "bg": "presets/space/bg_mothership.png", "image": "presets/space/pirate_king.png", "bgm": "maou" }
+        {
+          "name": "偵察ドローン",
+          "stage": "低軌道",
+          "maxHp": 500,
+          "bg": "presets/space/bg_orbit.png",
+          "image": "presets/space/drone.png",
+          "bgm": "slime"
+        },
+        {
+          "name": "小型戦闘機 1/2",
+          "stage": "小惑星帯",
+          "maxHp": 750,
+          "bg": "presets/space/bg_belt.png",
+          "image": "presets/space/fighter.png",
+          "bgm": "goblin"
+        },
+        {
+          "name": "小型戦闘機 2/2",
+          "stage": "小惑星帯",
+          "maxHp": 750,
+          "bg": "presets/space/bg_belt.png",
+          "image": "presets/space/fighter.png",
+          "bgm": "goblin"
+        },
+        {
+          "name": "重装砲艦",
+          "stage": "小惑星帯",
+          "maxHp": 1500,
+          "bg": "presets/space/bg_belt.png",
+          "image": "presets/space/gunship.png",
+          "bgm": "orc"
+        },
+        {
+          "name": "エイリアン兵 1/3",
+          "stage": "廃棄コロニー",
+          "maxHp": 1000,
+          "bg": "presets/space/bg_colony.png",
+          "image": "presets/space/alien.png",
+          "bgm": "cave"
+        },
+        {
+          "name": "エイリアン兵 2/3",
+          "stage": "廃棄コロニー",
+          "maxHp": 1000,
+          "bg": "presets/space/bg_colony.png",
+          "image": "presets/space/alien.png",
+          "bgm": "cave"
+        },
+        {
+          "name": "エイリアン兵 3/3",
+          "stage": "廃棄コロニー",
+          "maxHp": 1000,
+          "bg": "presets/space/bg_colony.png",
+          "image": "presets/space/alien.png",
+          "bgm": "cave"
+        },
+        {
+          "name": "擬態機雷",
+          "stage": "廃棄コロニー",
+          "maxHp": 1500,
+          "bg": "presets/space/bg_colony.png",
+          "image": "presets/space/mine.png",
+          "bgm": "cave"
+        },
+        {
+          "name": "殲滅ロボ",
+          "stage": "廃棄コロニー",
+          "maxHp": 3000,
+          "bg": "presets/space/bg_colony.png",
+          "image": "presets/space/robot.png",
+          "bgm": "cave"
+        },
+        {
+          "name": "防衛衛星 1/3",
+          "stage": "宇宙要塞",
+          "maxHp": 2500,
+          "bg": "presets/space/bg_fortress.png",
+          "image": "presets/space/satellite.png",
+          "bgm": "ruins"
+        },
+        {
+          "name": "防衛衛星 2/3",
+          "stage": "宇宙要塞",
+          "maxHp": 2500,
+          "bg": "presets/space/bg_fortress.png",
+          "image": "presets/space/satellite.png",
+          "bgm": "ruins"
+        },
+        {
+          "name": "防衛衛星 3/3",
+          "stage": "宇宙要塞",
+          "maxHp": 2500,
+          "bg": "presets/space/bg_fortress.png",
+          "image": "presets/space/satellite.png",
+          "bgm": "ruins"
+        },
+        {
+          "name": "宇宙怪獣",
+          "stage": "恒星付近",
+          "maxHp": 10000,
+          "bg": "presets/space/bg_star.png",
+          "image": "presets/space/kaiju.png",
+          "bgm": "orc"
+        },
+        {
+          "name": "海賊幹部 1/2",
+          "stage": "海賊母艦",
+          "maxHp": 2500,
+          "bg": "presets/space/bg_mothership.png",
+          "image": "presets/space/pirate.png",
+          "bgm": "maou"
+        },
+        {
+          "name": "海賊幹部 2/2",
+          "stage": "海賊母艦",
+          "maxHp": 2500,
+          "bg": "presets/space/bg_mothership.png",
+          "image": "presets/space/pirate.png",
+          "bgm": "maou"
+        },
+        {
+          "name": "宇宙海賊王",
+          "stage": "海賊母艦",
+          "maxHp": 15000,
+          "bg": "presets/space/bg_mothership.png",
+          "image": "presets/space/pirate_king.png",
+          "bgm": "maou"
+        }
       ]
     },
-
     {
       "id": "magic",
       "label": "🪄 魔法学校",
       "theme": {
-        "brand": { "appName": "魔法学院の食堂", "shopName": "魔法学院食堂", "masterName": "学院長", "masterImage": "presets/magic/master.png", "masterFallbackEmoji": "🧙‍♂️" },
-        "color": { "gold": "#c9a0ff", "green": "#8affd0", "white": "#f3ecff", "red": "#ff8fb0", "bgDark": "#120a1f" },
-        "words": { "customer": "生徒", "customerRegister": "入学登録料", "guild": "学院", "quest": "課題", "questClear": "課題クリア", "subjugation": "討伐", "boss": "闇の魔導師", "enemy": "魔物", "battle": "試練", "defeat": "撃退", "party": "クラス", "adventurerInfo": "生徒情報", "stage": "教室" },
-        "messages": { "titleWelcome": "魔法学院の食堂へ<br>ようこそ", "registerTitle": "生徒登録", "selectTitle": "生徒を選択", "partyTitle": "クラス人数", "welcome": "ようこそ、新入生。", "welcomeBack": "おかえりなさい。次の課題に挑みますか？", "openMenu": "メニューを開きますか？", "masterDefault": "ふむ、何を注文するのかね？", "checkoutDone": "お疲れ様。課題クリア（会計）を送信しました", "peace": "闇の魔導師を撃退し、学院に平和が戻った。" }
+        "brand": {
+          "appName": "魔法学院の食堂",
+          "shopName": "魔法学院食堂",
+          "masterName": "学院長",
+          "masterImage": "presets/magic/master.png",
+          "masterFallbackEmoji": "🧙‍♂️"
+        },
+        "color": {
+          "gold": "#c9a0ff",
+          "green": "#8affd0",
+          "white": "#f3ecff",
+          "red": "#ff8fb0",
+          "bgDark": "#120a1f"
+        },
+        "words": {
+          "customer": "生徒",
+          "customerRegister": "入学登録料",
+          "guild": "学院",
+          "quest": "課題",
+          "questClear": "課題クリア",
+          "subjugation": "討伐",
+          "boss": "闇の魔導師",
+          "enemy": "魔物",
+          "battle": "試練",
+          "defeat": "撃退",
+          "party": "クラス",
+          "adventurerInfo": "生徒情報",
+          "stage": "教室"
+        },
+        "messages": {
+          "titleWelcome": "魔法学院の食堂へ<br>ようこそ",
+          "registerTitle": "生徒登録",
+          "selectTitle": "生徒を選択",
+          "partyTitle": "クラス人数",
+          "welcome": "ようこそ、新入生。",
+          "welcomeBack": "おかえりなさい。次の課題に挑みますか？",
+          "openMenu": "メニューを開きますか？",
+          "masterDefault": "ふむ、何を注文するのかね？",
+          "checkoutDone": "お疲れ様。課題クリア（会計）を送信しました",
+          "peace": "闇の魔導師を撃退し、学院に平和が戻った。",
+          "victoryTitle": "ゲームクリア",
+          "victorySubtitle": "魔法学院の危機を救った。"
+        },
+        "assets": {
+          "startBg": "start.png",
+          "startBgm": "title",
+          "victoryBg": "clear.png",
+          "victoryImage": "",
+          "victoryBgm": "ending",
+          "masterImage": "master.png"
+        }
       },
       "enemies": [
-        { "name": "使い魔スライム", "stage": "中庭", "maxHp": 500, "bg": "presets/magic/bg_yard.png", "image": "presets/magic/familiar.png", "bgm": "slime" },
-        { "name": "いたずら妖精 1/2", "stage": "温室", "maxHp": 750, "bg": "presets/magic/bg_greenhouse.png", "image": "presets/magic/fairy.png", "bgm": "goblin" },
-        { "name": "いたずら妖精 2/2", "stage": "温室", "maxHp": 750, "bg": "presets/magic/bg_greenhouse.png", "image": "presets/magic/fairy.png", "bgm": "goblin" },
-        { "name": "動く鎧", "stage": "温室", "maxHp": 1500, "bg": "presets/magic/bg_greenhouse.png", "image": "presets/magic/armor.png", "bgm": "orc" },
-        { "name": "図書の亡霊 1/3", "stage": "図書館", "maxHp": 1000, "bg": "presets/magic/bg_library.png", "image": "presets/magic/ghost.png", "bgm": "cave" },
-        { "name": "図書の亡霊 2/3", "stage": "図書館", "maxHp": 1000, "bg": "presets/magic/bg_library.png", "image": "presets/magic/ghost.png", "bgm": "cave" },
-        { "name": "図書の亡霊 3/3", "stage": "図書館", "maxHp": 1000, "bg": "presets/magic/bg_library.png", "image": "presets/magic/ghost.png", "bgm": "cave" },
-        { "name": "呪いの宝箱", "stage": "図書館", "maxHp": 1500, "bg": "presets/magic/bg_library.png", "image": "presets/magic/cursed_chest.png", "bgm": "cave" },
-        { "name": "石像ゴーレム", "stage": "図書館", "maxHp": 3000, "bg": "presets/magic/bg_library.png", "image": "presets/magic/golem.png", "bgm": "cave" },
-        { "name": "闇の従者 1/3", "stage": "禁書庫", "maxHp": 2500, "bg": "presets/magic/bg_vault.png", "image": "presets/magic/servant.png", "bgm": "ruins" },
-        { "name": "闇の従者 2/3", "stage": "禁書庫", "maxHp": 2500, "bg": "presets/magic/bg_vault.png", "image": "presets/magic/servant.png", "bgm": "ruins" },
-        { "name": "闇の従者 3/3", "stage": "禁書庫", "maxHp": 2500, "bg": "presets/magic/bg_vault.png", "image": "presets/magic/servant.png", "bgm": "ruins" },
-        { "name": "召喚されし竜", "stage": "地下儀式場", "maxHp": 10000, "bg": "presets/magic/bg_ritual.png", "image": "presets/magic/summoned_dragon.png", "bgm": "orc" },
-        { "name": "堕ちた教師 1/2", "stage": "学院塔", "maxHp": 2500, "bg": "presets/magic/bg_tower.png", "image": "presets/magic/fallen_teacher.png", "bgm": "maou" },
-        { "name": "堕ちた教師 2/2", "stage": "学院塔", "maxHp": 2500, "bg": "presets/magic/bg_tower.png", "image": "presets/magic/fallen_teacher.png", "bgm": "maou" },
-        { "name": "闇の魔導師", "stage": "学院塔", "maxHp": 15000, "bg": "presets/magic/bg_tower.png", "image": "presets/magic/dark_mage.png", "bgm": "maou" }
+        {
+          "name": "使い魔スライム",
+          "stage": "中庭",
+          "maxHp": 500,
+          "bg": "presets/magic/bg_yard.png",
+          "image": "presets/magic/familiar.png",
+          "bgm": "slime"
+        },
+        {
+          "name": "いたずら妖精 1/2",
+          "stage": "温室",
+          "maxHp": 750,
+          "bg": "presets/magic/bg_greenhouse.png",
+          "image": "presets/magic/fairy.png",
+          "bgm": "goblin"
+        },
+        {
+          "name": "いたずら妖精 2/2",
+          "stage": "温室",
+          "maxHp": 750,
+          "bg": "presets/magic/bg_greenhouse.png",
+          "image": "presets/magic/fairy.png",
+          "bgm": "goblin"
+        },
+        {
+          "name": "動く鎧",
+          "stage": "温室",
+          "maxHp": 1500,
+          "bg": "presets/magic/bg_greenhouse.png",
+          "image": "presets/magic/armor.png",
+          "bgm": "orc"
+        },
+        {
+          "name": "図書の亡霊 1/3",
+          "stage": "図書館",
+          "maxHp": 1000,
+          "bg": "presets/magic/bg_library.png",
+          "image": "presets/magic/ghost.png",
+          "bgm": "cave"
+        },
+        {
+          "name": "図書の亡霊 2/3",
+          "stage": "図書館",
+          "maxHp": 1000,
+          "bg": "presets/magic/bg_library.png",
+          "image": "presets/magic/ghost.png",
+          "bgm": "cave"
+        },
+        {
+          "name": "図書の亡霊 3/3",
+          "stage": "図書館",
+          "maxHp": 1000,
+          "bg": "presets/magic/bg_library.png",
+          "image": "presets/magic/ghost.png",
+          "bgm": "cave"
+        },
+        {
+          "name": "呪いの宝箱",
+          "stage": "図書館",
+          "maxHp": 1500,
+          "bg": "presets/magic/bg_library.png",
+          "image": "presets/magic/cursed_chest.png",
+          "bgm": "cave"
+        },
+        {
+          "name": "石像ゴーレム",
+          "stage": "図書館",
+          "maxHp": 3000,
+          "bg": "presets/magic/bg_library.png",
+          "image": "presets/magic/golem.png",
+          "bgm": "cave"
+        },
+        {
+          "name": "闇の従者 1/3",
+          "stage": "禁書庫",
+          "maxHp": 2500,
+          "bg": "presets/magic/bg_vault.png",
+          "image": "presets/magic/servant.png",
+          "bgm": "ruins"
+        },
+        {
+          "name": "闇の従者 2/3",
+          "stage": "禁書庫",
+          "maxHp": 2500,
+          "bg": "presets/magic/bg_vault.png",
+          "image": "presets/magic/servant.png",
+          "bgm": "ruins"
+        },
+        {
+          "name": "闇の従者 3/3",
+          "stage": "禁書庫",
+          "maxHp": 2500,
+          "bg": "presets/magic/bg_vault.png",
+          "image": "presets/magic/servant.png",
+          "bgm": "ruins"
+        },
+        {
+          "name": "召喚されし竜",
+          "stage": "地下儀式場",
+          "maxHp": 10000,
+          "bg": "presets/magic/bg_ritual.png",
+          "image": "presets/magic/summoned_dragon.png",
+          "bgm": "orc"
+        },
+        {
+          "name": "堕ちた教師 1/2",
+          "stage": "学院塔",
+          "maxHp": 2500,
+          "bg": "presets/magic/bg_tower.png",
+          "image": "presets/magic/fallen_teacher.png",
+          "bgm": "maou"
+        },
+        {
+          "name": "堕ちた教師 2/2",
+          "stage": "学院塔",
+          "maxHp": 2500,
+          "bg": "presets/magic/bg_tower.png",
+          "image": "presets/magic/fallen_teacher.png",
+          "bgm": "maou"
+        },
+        {
+          "name": "闇の魔導師",
+          "stage": "学院塔",
+          "maxHp": 15000,
+          "bg": "presets/magic/bg_tower.png",
+          "image": "presets/magic/dark_mage.png",
+          "bgm": "maou"
+        }
       ]
     }
   ]
