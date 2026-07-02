@@ -162,14 +162,16 @@
 
   // ===== 討伐（モンスター）ボタン編集 =====
   var BG_LIST=[
+    'presets/rpg/background.jpg','presets/rpg/grass.png','presets/rpg/forest.png','presets/rpg/cave.png','presets/rpg/mountain.png','presets/rpg/ruins.png','presets/rpg/volcano.png','presets/rpg/castle.png','presets/rpg/victory_clear.PNG',
     'grass.png','forest.png','cave.png','mountain.png','ruins.png','volcano.png','castle.png',
-    'presets/space/start.png','presets/space/clear.png','presets/space/bg_orbit.png','presets/space/bg_belt.png','presets/space/bg_colony.png','presets/space/bg_fortress.png','presets/space/bg_star.png','presets/space/bg_mothership.png',
-    'presets/magic/start.png','presets/magic/clear.png','presets/magic/bg_yard.png','presets/magic/bg_greenhouse.png','presets/magic/bg_library.png','presets/magic/bg_vault.png','presets/magic/bg_ritual.png','presets/magic/bg_tower.png'
+    'presets/space/start.jpeg','presets/space/clear(1).jpeg','presets/space/bg_orbit.jpeg','presets/space/bg_belt.jpeg','presets/space/bg_colony.jpeg','presets/space/bg_fortress.jpeg','presets/space/bg_star.jpeg','presets/space/bg_mothership.jpeg',
+    'presets/magic/start_gate.jpeg','presets/magic/clear.jpeg','presets/magic/bg_yard.jpeg','presets/magic/bg_greenhouse.jpeg','presets/magic/library.jpeg','presets/magic/bg_vault.png','presets/magic/bg_ritual.jpeg','presets/magic/bg_tower.png'
   ];
   var IMG_LIST=[
+    'presets/rpg/slime.png','presets/rpg/goblin.png','presets/rpg/orc.png','presets/rpg/skeleton.png','presets/rpg/gargoyle.png','presets/rpg/minotaur.png','presets/rpg/mimic.png','presets/rpg/dragon.png','presets/rpg/dark_wizard.png','presets/rpg/maou.png','presets/rpg/maou new.png',
     'slime.png','goblin.png','orc.png','skeleton.png','gargoyle.png','minotaur.png','mimic.png','dragon.png','dark_wizard.png','maou.png','maou_new.png',
-    'presets/space/drone.png','presets/space/fighter.png','presets/space/gunship.png','presets/space/alien.png','presets/space/mine.png','presets/space/robot.png','presets/space/satellite.png','presets/space/kaiju.png','presets/space/pirate.png','presets/space/pirate_king.png',
-    'presets/magic/magic_slime.png','presets/magic/fairy.png','presets/magic/Wight.png','presets/magic/armor.png','presets/magic/golem.png','presets/magic/ghost.png','presets/magic/cursed_book.png','presets/magic/vampire.png','presets/magic/dark_mage.png','presets/magic/summoned_dragon.png','presets/magic/master.png'
+    'presets/space/drone(1).png','presets/space/fighter(1).png','presets/space/gunship.png','presets/space/alien(1).png','presets/space/mine.png','presets/space/ancient_sentinel(1).png','presets/space/satellite(1).png','presets/space/kaiju.png','presets/space/pirate(1).png','presets/space/pirate_king(1).png','presets/space/mother_ai.png',
+    'presets/magic/magic_slime(1).png','presets/magic/fairy.png','presets/magic/Wight(2).png','presets/magic/armor.jpeg','presets/magic/golem.png','presets/magic/ghost.jpeg','presets/magic/cursed_book(1).png','presets/magic/vampire(1).png','presets/magic/dark_mage(1).png','presets/magic/summoned_dragon.png','presets/magic/master.jpeg'
   ];
   var BGM_LIST=['title','slime','goblin','orc','cave','ruins','maou','daimaou','ending'];
   function normalizeMonster(m,i){m=m||{};var hpMax=Number(m.maxHp||m.hp||500)||500;m.id=m.id||GuildUtils.uid('enemy');m.name=m.name||('敵'+(i+1));m.stage=m.stage||'草原';m.maxHp=hpMax;m.hp=Number.isFinite(Number(m.hp))?Number(m.hp):hpMax;m.bg=m.bg||m.background||'grass.png';m.background=m.bg;m.image=m.image||'slime.png';m.bgm=m.bgm||'slime';m.sort=Number(m.sort||i);return m;}
