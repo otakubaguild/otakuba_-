@@ -10,7 +10,11 @@
           "shopName": "おたく場ギルド",
           "masterName": "ギルドマスター",
           "masterImage": "master.png",
-          "masterFallbackEmoji": "🧙"
+          "masterFallbackEmoji": "🧙",
+          "titleBg": "",
+          "victoryImage": "victory_clear.PNG",
+          "victoryTitle": "🏆 魔王討伐！",
+          "victorySubtitle": "魔王を倒し、平和が訪れた。"
         },
         "color": {
           "gold": "#f6c84f",
@@ -45,8 +49,7 @@
           "masterDefault": "冷やかしか？さっさとメニューを開け",
           "checkoutDone": "おかえりなさい。クエスト達成（会計）を送信しました",
           "peace": "魔王を倒し、平和が訪れた。"
-        },
-        "assets": {}
+        }
       },
       "enemies": [
         {
@@ -188,7 +191,11 @@
           "shopName": "コズミック酒場",
           "masterName": "ステーション長",
           "masterImage": "presets/space/master.png",
-          "masterFallbackEmoji": "🧑‍🚀"
+          "masterFallbackEmoji": "🧑‍🚀",
+          "titleBg": "presets/space/cockpit.png",
+          "victoryImage": "presets/space/victory_space.png",
+          "victoryTitle": "🏆 セクター防衛完了！",
+          "victorySubtitle": "宇宙海賊王を撃墜し、銀河に平和が戻った。"
         },
         "color": {
           "gold": "#4fd0f6",
@@ -222,17 +229,7 @@
           "openMenu": "メニューを開きますか？",
           "masterDefault": "ようこそステーションへ。何を注文する？",
           "checkoutDone": "また会おう。ミッション完了（会計）を送信しました",
-          "peace": "宇宙海賊王を撃墜し、銀河に平和が戻った。",
-          "victoryTitle": "SECTOR SAVED",
-          "victorySubtitle": "任務完了。帰還を許可する。"
-        },
-        "assets": {
-          "startBg": "start.png",
-          "startBgm": "title",
-          "victoryBg": "clear.png",
-          "victoryImage": "",
-          "victoryBgm": "ending",
-          "masterImage": "pirate.png"
+          "peace": "宇宙海賊王を撃墜し、銀河に平和が戻った。"
         }
       },
       "enemies": [
@@ -375,7 +372,11 @@
           "shopName": "魔法学院食堂",
           "masterName": "学院長",
           "masterImage": "presets/magic/master.png",
-          "masterFallbackEmoji": "🧙‍♂️"
+          "masterFallbackEmoji": "🧙‍♂️",
+          "titleBg": "presets/magic/title.png",
+          "victoryImage": "presets/magic/victory_magic.png",
+          "victoryTitle": "🏆 ゲームクリア",
+          "victorySubtitle": "魔法学園の危機を救った。"
         },
         "color": {
           "gold": "#c9a0ff",
@@ -409,17 +410,7 @@
           "openMenu": "メニューを開きますか？",
           "masterDefault": "ふむ、何を注文するのかね？",
           "checkoutDone": "お疲れ様。課題クリア（会計）を送信しました",
-          "peace": "闇の魔導師を撃退し、学院に平和が戻った。",
-          "victoryTitle": "ゲームクリア",
-          "victorySubtitle": "魔法学院の危機を救った。"
-        },
-        "assets": {
-          "startBg": "start.png",
-          "startBgm": "title",
-          "victoryBg": "clear.png",
-          "victoryImage": "",
-          "victoryBgm": "ending",
-          "masterImage": "master.png"
+          "peace": "闇の魔導師を撃退し、学院に平和が戻った。"
         }
       },
       "enemies": [

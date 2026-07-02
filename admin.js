@@ -384,6 +384,15 @@
             data.currentEnemyIndex=0;
           }
           if(p.theme&&p.theme.brand&&p.theme.brand.shopName){ data.settings.shopName=p.theme.brand.shopName; }
+          // コンセプト別の勝利画面・タイトル背景を反映
+          if(p.theme&&p.theme.brand){
+            var pb=p.theme.brand;
+            data.settings.themeCustom=data.settings.themeCustom||{};
+            if(pb.victoryImage!==undefined) data.settings.themeCustom.victoryImage=pb.victoryImage;
+            if(pb.victoryTitle!==undefined) data.settings.themeCustom.victoryTitle=pb.victoryTitle;
+            if(pb.victorySubtitle!==undefined) data.settings.themeCustom.victorySubtitle=pb.victorySubtitle;
+            if(pb.titleBg!==undefined) data.settings.themeCustom.startBg=pb.titleBg;
+          }
           save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
           toast('「'+(p.label||p.id)+'」に切り替えました');
         };
