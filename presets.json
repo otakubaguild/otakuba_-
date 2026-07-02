@@ -435,7 +435,7 @@
           "stage": "中庭",
           "maxHp": 500,
           "bg": "presets/magic/bg_yard.png",
-          "image": "presets/magic/familiar.png",
+          "image": "presets/magic/ magic_slime.png",
           "bgm": "slime"
         },
         {
@@ -491,7 +491,7 @@
           "stage": "図書館",
           "maxHp": 1500,
           "bg": "presets/magic/bg_library.png",
-          "image": "presets/magic/cursed_chest.png",
+          "image": "presets/magic/cursed_book.png",
           "bgm": "cave"
         },
         {
@@ -539,7 +539,7 @@
           "stage": "学院塔",
           "maxHp": 2500,
           "bg": "presets/magic/bg_tower.png",
-          "image": "presets/magic/fallen_teacher.png",
+          "image": "presets/magic/dark_mage.png",
           "bgm": "maou"
         },
         {
@@ -547,7 +547,7 @@
           "stage": "学院塔",
           "maxHp": 2500,
           "bg": "presets/magic/bg_tower.png",
-          "image": "presets/magic/fallen_teacher.png",
+          "image": "presets/magic/dark_mage.png",
           "bgm": "maou"
         },
         {
@@ -555,7 +555,7 @@
           "stage": "学院塔",
           "maxHp": 15000,
           "bg": "presets/magic/bg_tower.png",
-          "image": "presets/magic/dark_mage.png",
+          "image": "presets/magic/master.png",
           "bgm": "maou"
         }
       ]
