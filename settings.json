@@ -36,26 +36,26 @@
   "seVolume": 0.9,
   "audioFiles": {
     "bgm": {
-      "title": "title.mp3",
-      "slime": "slime.mp3",
-      "goblin": "goblin.mp3",
-      "orc": "orc.mp3",
-      "cave": "cave.mp3",
-      "ruins": "ruins.mp3",
-      "maou": "maou.mp3",
-      "ending": "ending.mp3",
-      "daimaou": "daimaou.mp3"
+      "title": "bgm_4.mp3",
+      "slime": "bgm_10.mp3",
+      "goblin": "bgm_1.mp3",
+      "orc": "bgm_2.mp3",
+      "cave": "bgm_5.mp3",
+      "ruins": "bgm_7.mp3",
+      "maou": "bgm_16.mp3",
+      "ending": "bgm_17.mp3",
+      "daimaou": "bgm_9.mp3"
     },
     "se": {
-      "ok": "ok.mp3",
-      "cancel": "cancel.mp3",
-      "bad": "cancel.mp3",
-      "add": "add.mp3",
-      "confirm": "ok.mp3",
-      "damage": "damage.mp3",
-      "defeat": "defeat.mp3",
-      "victory": "victory.mp3",
-      "levelup": "levelup.mp3"
+      "ok": "se_1.mp3",
+      "cancel": "se_6.mp3",
+      "bad": "se_5.mp3",
+      "add": "se_8.mp3",
+      "confirm": "se_3.mp3",
+      "damage": "se_4.mp3",
+      "defeat": "se_7.mp3",
+      "victory": "se_2.mp3",
+      "levelup": "se_9.mp3"
     }
   },
   "notice": {

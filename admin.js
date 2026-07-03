@@ -624,8 +624,12 @@
   function renderThemeBgm(){
     const c=ensureThemeCustom();
     const s=data.settings;
-    s.audioFiles=s.audioFiles||{}; s.audioFiles.bgm=Object.assign({title:'title.mp3',slime:'slime.mp3',goblin:'goblin.mp3',orc:'orc.mp3',cave:'cave.mp3',ruins:'ruins.mp3',maou:'maou.mp3',ending:'ending.mp3',daimaou:'daimaou.mp3'},s.audioFiles.bgm||{});
+    s.audioFiles=s.audioFiles||{};
+    s.audioFiles.bgm=Object.assign({title:'bgm_4.mp3',slime:'bgm_10.mp3',goblin:'bgm_1.mp3',orc:'bgm_2.mp3',cave:'bgm_5.mp3',ruins:'bgm_7.mp3',maou:'bgm_16.mp3',ending:'bgm_17.mp3',daimaou:'bgm_9.mp3'},s.audioFiles.bgm||{});
+    s.audioFiles.se=Object.assign({ok:'se_1.mp3',cancel:'se_6.mp3',bad:'se_5.mp3',add:'se_8.mp3',confirm:'se_3.mp3',damage:'se_4.mp3',defeat:'se_7.mp3',victory:'se_2.mp3',levelup:'se_9.mp3'},s.audioFiles.se||{});
     const bgmMap=s.audioFiles.bgm;
+    const seMap=s.audioFiles.se;
+    const SE_LABELS={ok:'決定',cancel:'キャンセル',bad:'エラー・売切れ',add:'注文追加',confirm:'確認',damage:'ダメージ',defeat:'撃破',victory:'会計・勝利',levelup:'レベルアップ'};
     $('themeSubContent').innerHTML=
       '<div class="admin-card"><div class="admin-card-title">🎬 場面BGM</div>'+
       '<label>スタート画面BGM（キー or URL）<input id="tcStartBgm" value="'+esc(c.startBgm||'title')+'" placeholder="例：title / https://...mp3"></label>'+
@@ -635,12 +639,17 @@
       '<p class="tiny">キャラクター編集画面のBGM欄に、ここで決めたキー名（例：slime）を入れると自動で使われます。空欄にすると既定のBGMのまま動きます。</p>'+
       Object.keys(bgmMap).map(k=>`<label>${esc(k)}<input data-bgm-key="${esc(k)}" value="${esc(bgmMap[k]||'')}" placeholder="ファイル名 / https://...mp3"></label>`).join('')+
       '</div>'+
-      '<div class="toolbar"><button class="btn gold" id="saveThemeBgm">BGM設定を保存</button><button class="btn" id="clearThemeCustom">場面BGMを初期化</button></div>'+
+      '<div class="admin-card"><div class="admin-card-title">🔔 効果音（SE）</div>'+
+      '<p class="tiny">ボタン操作や攻撃・撃破などの短い効果音です。ファイル名またはURLを指定できます。</p>'+
+      Object.keys(seMap).map(k=>`<label>${esc(SE_LABELS[k]||k)}<input data-se-key="${esc(k)}" value="${esc(seMap[k]||'')}" placeholder="ファイル名 / https://...mp3"></label>`).join('')+
+      '</div>'+
+      '<div class="toolbar"><button class="btn gold" id="saveThemeBgm">BGM・SE設定を保存</button><button class="btn" id="clearThemeCustom">場面BGMを初期化</button></div>'+
       '<h3>音源をアップロードする</h3>'+uploadWidgetHtml();
     $('saveThemeBgm').onclick=function(){
       Object.assign(c,{ startBgm:$('tcStartBgm').value.trim()||'title', victoryBgm:$('tcVictoryBgm').value.trim()||'ending' });
       document.querySelectorAll('[data-bgm-key]').forEach(inp=>{ bgmMap[inp.dataset.bgmKey]=inp.value.trim()||bgmMap[inp.dataset.bgmKey]; });
-      save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud(); toast('BGM設定を保存しました');
+      document.querySelectorAll('[data-se-key]').forEach(inp=>{ seMap[inp.dataset.seKey]=inp.value.trim()||seMap[inp.dataset.seKey]; });
+      save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud(); toast('BGM・SE設定を保存しました');
     };
     bindThemeCustomReset();
     bindUploadWidget();
