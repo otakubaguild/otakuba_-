@@ -36,26 +36,26 @@
   "seVolume": 0.9,
   "audioFiles": {
     "bgm": {
-      "title": "bgm_4.mp3",
-      "slime": "bgm_10.mp3",
-      "goblin": "bgm_1.mp3",
-      "orc": "bgm_2.mp3",
-      "cave": "bgm_5.mp3",
-      "ruins": "bgm_7.mp3",
-      "maou": "bgm_16.mp3",
-      "ending": "bgm_17.mp3",
-      "daimaou": "bgm_9.mp3"
+      "title": "bgm/bgm_4.mp3",
+      "slime": "bgm/bgm_10.mp3",
+      "goblin": "bgm/bgm_1.mp3",
+      "orc": "bgm/bgm_2.mp3",
+      "cave": "bgm/bgm_5.mp3",
+      "ruins": "bgm/bgm_7.mp3",
+      "maou": "bgm/bgm_16.mp3",
+      "ending": "bgm/bgm_17.mp3",
+      "daimaou": "bgm/bgm_9.mp3"
     },
     "se": {
-      "ok": "se_1.mp3",
-      "cancel": "se_6.mp3",
-      "bad": "se_5.mp3",
-      "add": "se_8.mp3",
-      "confirm": "se_3.mp3",
-      "damage": "se_4.mp3",
-      "defeat": "se_7.mp3",
-      "victory": "se_2.mp3",
-      "levelup": "se_9.mp3"
+      "ok": "se/se_1.mp3",
+      "cancel": "se/se_6.mp3",
+      "bad": "se/se_5.mp3",
+      "add": "se/se_8.mp3",
+      "confirm": "se/se_3.mp3",
+      "damage": "se/se_4.mp3",
+      "defeat": "se/se_7.mp3",
+      "victory": "se/se_2.mp3",
+      "levelup": "se/se_9.mp3"
     }
   },
   "notice": {

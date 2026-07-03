@@ -176,8 +176,8 @@ window.GuildStorage = (() => {
         {id:'food', name:'フード', icon:'🍟'}
       ],
       audioFiles:{
-        bgm:{title:'bgm_4.mp3',slime:'bgm_10.mp3',goblin:'bgm_1.mp3',orc:'bgm_2.mp3',cave:'bgm_5.mp3',ruins:'bgm_7.mp3',maou:'bgm_16.mp3',ending:'bgm_17.mp3',daimaou:'bgm_9.mp3'},
-        se:{ok:'se_1.mp3',cancel:'se_6.mp3',bad:'se_5.mp3',add:'se_8.mp3',confirm:'se_3.mp3',damage:'se_4.mp3',defeat:'se_7.mp3',victory:'se_2.mp3',levelup:'se_9.mp3'}
+        bgm:{title:'bgm/bgm_4.mp3',slime:'bgm/bgm_10.mp3',goblin:'bgm/bgm_1.mp3',orc:'bgm/bgm_2.mp3',cave:'bgm/bgm_5.mp3',ruins:'bgm/bgm_7.mp3',maou:'bgm/bgm_16.mp3',ending:'bgm/bgm_17.mp3',daimaou:'bgm/bgm_9.mp3'},
+        se:{ok:'se/se_1.mp3',cancel:'se/se_6.mp3',bad:'se/se_5.mp3',add:'se/se_8.mp3',confirm:'se/se_3.mp3',damage:'se/se_4.mp3',defeat:'se/se_7.mp3',victory:'se/se_2.mp3',levelup:'se/se_9.mp3'}
       },
       bgmVolume:0.45,seVolume:0.9,
       notice:{enabled:true,title:'本日のお知らせ',body:'',position:'top'},
@@ -226,24 +226,24 @@ window.GuildStorage = (() => {
     // さらに、開発初期の日本語ファイル名(存在しないファイル)が保存済み設定に残っている場合は、
     // 「保存済みだから触らない」の対象外として強制的に正しいファイル名へ補修する（スライム等のBGM無音バグ対策）
     const LEGACY_BGM_FIX = {
-      '冒険への誘い.mp3':'bgm_4.mp3','maou_bgm_fantasy15.mp3':'bgm_10.mp3','Baring_Their_Fangs.mp3':'bgm_1.mp3',
-      '反撃の一矢.mp3':'bgm_2.mp3','Rumbling.mp3':'bgm_5.mp3','龍太鼓.mp3':'bgm_7.mp3','Extinguish.mp3':'bgm_16.mp3',
-      'March_for__delightful_future.mp3':'bgm_17.mp3',
-      'title.mp3':'bgm_4.mp3','slime.mp3':'bgm_10.mp3','goblin.mp3':'bgm_1.mp3','orc.mp3':'bgm_2.mp3',
-      'cave.mp3':'bgm_5.mp3','ruins.mp3':'bgm_7.mp3','maou.mp3':'bgm_16.mp3','ending.mp3':'bgm_17.mp3','daimaou.mp3':'bgm_9.mp3'
+      '冒険への誘い.mp3':'bgm/bgm_4.mp3','maou_bgm_fantasy15.mp3':'bgm/bgm_10.mp3','Baring_Their_Fangs.mp3':'bgm/bgm_1.mp3',
+      '反撃の一矢.mp3':'bgm/bgm_2.mp3','Rumbling.mp3':'bgm/bgm_5.mp3','龍太鼓.mp3':'bgm/bgm_7.mp3','Extinguish.mp3':'bgm/bgm_16.mp3',
+      'March_for__delightful_future.mp3':'bgm/bgm_17.mp3',
+      'title.mp3':'bgm/bgm_4.mp3','slime.mp3':'bgm/bgm_10.mp3','goblin.mp3':'bgm/bgm_1.mp3','orc.mp3':'bgm/bgm_2.mp3',
+      'cave.mp3':'bgm/bgm_5.mp3','ruins.mp3':'bgm/bgm_7.mp3','maou.mp3':'bgm/bgm_16.mp3','ending.mp3':'bgm/bgm_17.mp3','daimaou.mp3':'bgm/bgm_9.mp3'
     };
     function repairLegacyBgm(bgmMap){ Object.keys(bgmMap||{}).forEach(k=>{ const fix=LEGACY_BGM_FIX[bgmMap[k]]; if(fix) bgmMap[k]=fix; }); return bgmMap; }
     data.settings.audioFiles = data.settings.audioFiles || {};
     data.settings.audioFiles.bgm = repairLegacyBgm(Object.assign({
-      title:'bgm_4.mp3', slime:'bgm_10.mp3', goblin:'bgm_1.mp3', orc:'bgm_2.mp3',
-      cave:'bgm_5.mp3', ruins:'bgm_7.mp3', maou:'bgm_16.mp3', daimaou:'bgm_9.mp3',
-      ending:'bgm_17.mp3'
+      title:'bgm/bgm_4.mp3', slime:'bgm/bgm_10.mp3', goblin:'bgm/bgm_1.mp3', orc:'bgm/bgm_2.mp3',
+      cave:'bgm/bgm_5.mp3', ruins:'bgm/bgm_7.mp3', maou:'bgm/bgm_16.mp3', daimaou:'bgm/bgm_9.mp3',
+      ending:'bgm/bgm_17.mp3'
     }, data.settings.audioFiles.bgm || {}));
     // daimaouは特に、古い未登録状態を確実に上書きする
-    if(!data.settings.audioFiles.bgm.daimaou) data.settings.audioFiles.bgm.daimaou='bgm_9.mp3';
+    if(!data.settings.audioFiles.bgm.daimaou) data.settings.audioFiles.bgm.daimaou='bgm/bgm_9.mp3';
     data.settings.audioFiles.se = Object.assign({
-      ok:'se_1.mp3', cancel:'se_6.mp3', bad:'se_5.mp3', add:'se_8.mp3', confirm:'se_3.mp3',
-      damage:'se_4.mp3', defeat:'se_7.mp3', victory:'se_2.mp3', levelup:'se_9.mp3'
+      ok:'se/se_1.mp3', cancel:'se/se_6.mp3', bad:'se/se_5.mp3', add:'se/se_8.mp3', confirm:'se/se_3.mp3',
+      damage:'se/se_4.mp3', defeat:'se/se_7.mp3', victory:'se/se_2.mp3', levelup:'se/se_9.mp3'
     }, data.settings.audioFiles.se || {});
     set(keys.state,data);
     pullCloud().then(()=>{
@@ -251,11 +251,11 @@ window.GuildStorage = (() => {
       // クラウドの古い設定で上書きされても、必須BGM(特にdaimaou)と、壊れたレガシーファイル名を再補修
       data.settings.audioFiles = data.settings.audioFiles || {};
       data.settings.audioFiles.bgm = repairLegacyBgm(Object.assign({
-        title:'bgm_4.mp3', slime:'bgm_10.mp3', goblin:'bgm_1.mp3', orc:'bgm_2.mp3',
-        cave:'bgm_5.mp3', ruins:'bgm_7.mp3', maou:'bgm_16.mp3', daimaou:'bgm_9.mp3',
-        ending:'bgm_17.mp3'
+        title:'bgm/bgm_4.mp3', slime:'bgm/bgm_10.mp3', goblin:'bgm/bgm_1.mp3', orc:'bgm/bgm_2.mp3',
+        cave:'bgm/bgm_5.mp3', ruins:'bgm/bgm_7.mp3', maou:'bgm/bgm_16.mp3', daimaou:'bgm/bgm_9.mp3',
+        ending:'bgm/bgm_17.mp3'
       }, data.settings.audioFiles.bgm || {}));
-      if(!data.settings.audioFiles.bgm.daimaou) data.settings.audioFiles.bgm.daimaou='bgm_9.mp3';
+      if(!data.settings.audioFiles.bgm.daimaou) data.settings.audioFiles.bgm.daimaou='bgm/bgm_9.mp3';
       set(keys.state,data);
       try{ if(window.GuildMenu && GuildMenu.renderCategoryButtons) GuildMenu.renderCategoryButtons(); }catch(e){}
       try{ if(window.GuildUI && GuildUI.renderNotice) GuildUI.renderNotice(data.settings); }catch(e){}

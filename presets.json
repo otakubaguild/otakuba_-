@@ -6,8 +6,8 @@
       "label": "⚔️ RPG（剣と魔法）",
       "theme": {
         "brand": {
-          "appName": "おたく場ギルド",
-          "shopName": "おたく場ギルド",
+          "appName": "冒険者ギルド",
+          "shopName": "冒険者ギルド",
           "masterName": "ギルドマスター",
           "masterImage": "presets/rpg/maou.png",
           "masterFallbackEmoji": "🧙",
@@ -39,7 +39,7 @@
           "stage": "ステージ"
         },
         "messages": {
-          "titleWelcome": "おたく場ギルドへ<br>ようこそ",
+          "titleWelcome": "ギルドへ<br>ようこそ",
           "registerTitle": "冒険者登録",
           "selectTitle": "冒険者を選択",
           "partyTitle": "パーティ人数",

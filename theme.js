@@ -2,10 +2,10 @@
 // 辞書に無い項目はフォールバック(既定の言葉)を返すので、壊れない。
 window.GuildTheme = (() => {
   const FALLBACK = {
-    brand:{ appName:'おたく場ギルド', shopName:'おたく場ギルド', masterName:'ギルドマスター', masterImage:'master.png', masterFallbackEmoji:'🧙' },
+    brand:{ appName:'冒険者ギルド', shopName:'冒険者ギルド', masterName:'ギルドマスター', masterImage:'master.png', masterFallbackEmoji:'🧙' },
     color:{ gold:'#f6c84f', green:'#7bd88f', white:'#fff6df', red:'#e26d6d', bgDark:'#0d0b1a' },
     words:{ customer:'冒険者', customerRegister:'ギルド登録料（チャージ）', guild:'ギルド', quest:'クエスト', questClear:'クエスト達成', subjugation:'討伐', boss:'魔王', enemy:'敵', battle:'戦闘', defeat:'撃破', party:'パーティ', adventurerInfo:'冒険者情報', stage:'ステージ', hpLabel:'HP', checkoutButton:'クエスト達成（会計）', bossDefeatText:'魔王討伐！', menuTitleDefault:'メニュー', awakenText:'魔王が覚醒する——！' },
-    messages:{ titleWelcome:'おたく場ギルドへ<br>ようこそ', registerTitle:'冒険者登録', selectTitle:'冒険者を選択', partyTitle:'パーティ人数', welcome:'ようこそ、いらっしゃいませ。', welcomeBack:'おかえりなさい、冒険者。次のクエストを受けますか？', openMenu:'メニューを開きますか？', masterDefault:'冷やかしか？さっさとメニューを開け', checkoutDone:'おかえりなさい。クエスト達成（会計）を送信しました', peace:'魔王を倒し、平和が訪れた。' },
+    messages:{ titleWelcome:'ギルドへ<br>ようこそ', registerTitle:'冒険者登録', selectTitle:'冒険者を選択', partyTitle:'パーティ人数', welcome:'ようこそ、いらっしゃいませ。', welcomeBack:'おかえりなさい、冒険者。次のクエストを受けますか？', openMenu:'メニューを開きますか？', masterDefault:'冷やかしか？さっさとメニューを開け', checkoutDone:'おかえりなさい。クエスト達成（会計）を送信しました', peace:'魔王を倒し、平和が訪れた。' },
     // フォント（Phase4-4追記）：空なら既定のフォントのまま。mode は管理画面が「一括/詳細」どちらの入力欄を出すかの表示用メモ
     fonts:{ mode:'bulk', base:'', brand:'', battle:'', button:'' }
   };

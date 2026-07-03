@@ -625,8 +625,8 @@
     const c=ensureThemeCustom();
     const s=data.settings;
     s.audioFiles=s.audioFiles||{};
-    s.audioFiles.bgm=Object.assign({title:'bgm_4.mp3',slime:'bgm_10.mp3',goblin:'bgm_1.mp3',orc:'bgm_2.mp3',cave:'bgm_5.mp3',ruins:'bgm_7.mp3',maou:'bgm_16.mp3',ending:'bgm_17.mp3',daimaou:'bgm_9.mp3'},s.audioFiles.bgm||{});
-    s.audioFiles.se=Object.assign({ok:'se_1.mp3',cancel:'se_6.mp3',bad:'se_5.mp3',add:'se_8.mp3',confirm:'se_3.mp3',damage:'se_4.mp3',defeat:'se_7.mp3',victory:'se_2.mp3',levelup:'se_9.mp3'},s.audioFiles.se||{});
+    s.audioFiles.bgm=Object.assign({title:'bgm/bgm_4.mp3',slime:'bgm/bgm_10.mp3',goblin:'bgm/bgm_1.mp3',orc:'bgm/bgm_2.mp3',cave:'bgm/bgm_5.mp3',ruins:'bgm/bgm_7.mp3',maou:'bgm/bgm_16.mp3',ending:'bgm/bgm_17.mp3',daimaou:'bgm/bgm_9.mp3'},s.audioFiles.bgm||{});
+    s.audioFiles.se=Object.assign({ok:'se/se_1.mp3',cancel:'se/se_6.mp3',bad:'se/se_5.mp3',add:'se/se_8.mp3',confirm:'se/se_3.mp3',damage:'se/se_4.mp3',defeat:'se/se_7.mp3',victory:'se/se_2.mp3',levelup:'se/se_9.mp3'},s.audioFiles.se||{});
     const bgmMap=s.audioFiles.bgm;
     const seMap=s.audioFiles.se;
     const SE_LABELS={ok:'決定',cancel:'キャンセル',bad:'エラー・売切れ',add:'注文追加',confirm:'確認',damage:'ダメージ',defeat:'撃破',victory:'会計・勝利',levelup:'レベルアップ'};
