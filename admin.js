@@ -213,6 +213,8 @@
     'presets/magic/magic_slime.png','presets/magic/fairy.png','presets/magic/Wight.png','presets/magic/armor.png','presets/magic/golem.png','presets/magic/ghost.png','presets/magic/cursed_book.png','presets/magic/vampire.png','presets/magic/dark_mage.png','presets/magic/summoned_dragon.png','presets/magic/master.png'
   ];
   var BGM_LIST=['title','slime','goblin','orc','cave','ruins','maou','daimaou','ending'];
+  for(var _bi=1;_bi<=59;_bi++){ BGM_LIST.push('bgm/bgm_'+_bi+'.mp3'); }
+  var SE_LIST_ALL=[]; for(var _si=1;_si<=23;_si++){ SE_LIST_ALL.push('se/se_'+_si+'.mp3'); }
   var RPG_BARE_FILES=['slime.png','goblin.png','orc.png','skeleton.png','mimic.png','minotaur.png','gargoyle.png','dragon.png','dark_wizard.png','maou.png','maou_new.png','grass.png','forest.png','cave.png','ruins.png','volcano.png','castle.png','victory_clear.PNG','background.jpg'];
   var PRESET_LABELS={rpg:'⚔️ RPG',space:'🚀 SF',magic:'🪄 魔法学校'};
   function activePresetId(){ return (data.settings&&data.settings.currentPresetId)||'rpg'; }
@@ -223,7 +225,39 @@
   function normalizeMonster(m,i){m=m||{};var hpMax=Number(m.maxHp||m.hp||500)||500;m.id=m.id||GuildUtils.uid('enemy');m.name=m.name||('敵'+(i+1));m.stage=m.stage||'草原';m.maxHp=hpMax;m.hp=Number.isFinite(Number(m.hp))?Number(m.hp):hpMax;m.bg=fixAssetPath(m.bg||m.background)||'presets/rpg/grass.png';m.background=m.bg;m.image=fixAssetPath(m.image)||'presets/rpg/slime.png';m.bgm=m.bgm||'slime';m.sort=Number(m.sort||i);return m;}
   function optList(arr,sel){return arr.map(function(v){return '<option value="'+esc(v)+'"'+(v===sel?' selected':'')+'>'+esc(v)+'</option>';}).join('');}
   var BGM_LABELS={title:'タイトル',slime:'序盤・スライム系',goblin:'中盤・ゴブリン系',orc:'オーク系',cave:'洞窟',ruins:'遺跡',maou:'魔王',daimaou:'大魔王',ending:'ファンファーレ（クリア）'};
-  function bgmOptList(arr,sel){return arr.map(function(v){var label=BGM_LABELS[v]||v;return '<option value="'+esc(v)+'"'+(v===sel?' selected':'')+'>'+esc(label)+'</option>';}).join('');}
+  function bgmLabelFor(v){
+    if(BGM_LABELS[v]) return BGM_LABELS[v];
+    var m=/bgm_(\d+)\.mp3$/.exec(v); if(m) return '曲 No.'+m[1];
+    var s=/se_(\d+)\.mp3$/.exec(v); if(s) return '効果音 No.'+s[1];
+    return v;
+  }
+  function audioSelectHtml(kind,key,currentValue,list,dataAttr){
+    var known=list.indexOf(currentValue)!==-1;
+    var selVal=currentValue?(known?currentValue:'__custom__'):'';
+    var opts='<option value="">未設定</option>'+list.map(function(v){return '<option value="'+esc(v)+'"'+(v===selVal?' selected':'')+'>'+esc(bgmLabelFor(v))+'</option>';}).join('')+'<option value="__custom__"'+(selVal==='__custom__'?' selected':'')+'>その他（ファイル名 / URLを自由入力）</option>';
+    var customVisible=selVal==='__custom__';
+    return '<select data-'+dataAttr+'-select="'+esc(key)+'">'+opts+'</select>'+
+      '<input data-'+dataAttr+'-key="'+esc(key)+'" placeholder="ファイル名 / https://...mp3" value="'+esc(customVisible?currentValue:'')+'" style="margin-top:6px'+(customVisible?'':';display:none')+'">';
+  }
+  function bindAudioSelects(dataAttr,map){
+    document.querySelectorAll('[data-'+dataAttr+'-select]').forEach(function(sel){
+      sel.onchange=function(){
+        var key=sel.getAttribute('data-'+dataAttr+'-select');
+        var custom=document.querySelector('[data-'+dataAttr+'-key="'+key+'"]');
+        if(!custom) return;
+        if(sel.value==='__custom__'){ custom.style.display=''; custom.focus(); }
+        else{ custom.style.display='none'; custom.value=sel.value; }
+      };
+    });
+  }
+  function bgmOptList(arr,sel){
+    var cats=arr.filter(function(v){return !!BGM_LABELS[v];});
+    var files=arr.filter(function(v){return !BGM_LABELS[v];});
+    var out='';
+    if(cats.length) out+='<optgroup label="用途カテゴリ（テーマ編集→BGMで割り当て先を変更）">'+cats.map(function(v){return '<option value="'+esc(v)+'"'+(v===sel?' selected':'')+'>'+esc(bgmLabelFor(v))+'</option>';}).join('')+'</optgroup>';
+    if(files.length) out+='<optgroup label="個別の曲・効果音を直接指定">'+files.map(function(v){return '<option value="'+esc(v)+'"'+(v===sel?' selected':'')+'>'+esc(bgmLabelFor(v))+'</option>';}).join('')+'</optgroup>';
+    return out;
+  }
   function monsterCard(m,i){var thumb=m.image?('<img src="'+esc(GuildUtils.driveImg(m.image))+'" alt="" style="width:36px;height:36px;object-fit:contain;vertical-align:middle;margin-right:8px" onerror="this.style.display=\'none\'">'):'';return '<section class="category-block" data-monster-index="'+i+'"><button type="button" class="category-head" data-monster-toggle="'+i+'"><span>'+thumb+(i+1)+'. '+esc(m.name)+' <b style="opacity:.7;font-weight:normal">'+esc(m.stage)+'</b></span><span class="category-toggle">開く</span></button><div class="category-body">'+
     '<label>敵名<input data-field="name" value="'+esc(m.name)+'"></label>'+
     '<label>ステージ<input data-field="stage" value="'+esc(m.stage)+'"></label>'+
@@ -644,12 +678,12 @@
       '<div class="toolbar"><button class="btn small" data-preview-input="tcVictoryBgm">▶ 試聴</button><button class="btn small" data-preview-stop="1">■ 停止</button></div>'+
       '</div>'+
       '<div class="admin-card"><div class="admin-card-title">⚔️ ステージ別BGM（キャラクターのBGM欄で呼び出す名前）</div>'+
-      '<p class="tiny">キャラクター編集画面のBGM欄に、ここで決めたキー名（例：slime）を入れると自動で使われます。空欄にすると既定のBGMのまま動きます。</p>'+
-      Object.keys(bgmMap).map(k=>`<label>${esc(k)}<input data-bgm-key="${esc(k)}" value="${esc(bgmMap[k]||'')}" placeholder="ファイル名 / https://...mp3"></label><div class="toolbar"><button class="btn small" data-preview-input="bgm-${esc(k)}">▶ 試聴</button><button class="btn small" data-preview-stop="1">■ 停止</button></div>`).join('')+
+      '<p class="tiny">キャラクター編集画面のBGM欄に、ここで決めたキー名（例：slime）を入れると自動で使われます。59曲全部から直接選べます。</p>'+
+      Object.keys(bgmMap).map(k=>`<label>${esc(k)}${audioSelectHtml('bgm',k,bgmMap[k]||'',BGM_LIST,'bgm')}</label><div class="toolbar"><button class="btn small" data-preview-input="bgm-${esc(k)}">▶ 試聴</button><button class="btn small" data-preview-stop="1">■ 停止</button></div>`).join('')+
       '</div>'+
       '<div class="admin-card"><div class="admin-card-title">🔔 効果音（SE）</div>'+
-      '<p class="tiny">ボタン操作や攻撃・撃破などの短い効果音です。ファイル名またはURLを指定できます。</p>'+
-      Object.keys(seMap).map(k=>`<label>${esc(SE_LABELS[k]||k)}<input data-se-key="${esc(k)}" value="${esc(seMap[k]||'')}" placeholder="ファイル名 / https://...mp3"></label><div class="toolbar"><button class="btn small" data-preview-input="se-${esc(k)}">▶ 試聴</button><button class="btn small" data-preview-stop="1">■ 停止</button></div>`).join('')+
+      '<p class="tiny">ボタン操作や攻撃・撃破などの短い効果音です。23個から直接選べます。</p>'+
+      Object.keys(seMap).map(k=>`<label>${esc(SE_LABELS[k]||k)}${audioSelectHtml('se',k,seMap[k]||'',SE_LIST_ALL,'se')}</label><div class="toolbar"><button class="btn small" data-preview-input="se-${esc(k)}">▶ 試聴</button><button class="btn small" data-preview-stop="1">■ 停止</button></div>`).join('')+
       '</div>'+
       '<div class="admin-card"><div class="admin-card-title">📝 音源クレジット表記</div>'+
       '<p class="tiny">配布サイトの規約でクレジット表記が必須の音源を使っている場合、ここに書いておくとタイトル画面に小さく表示されます。音源を全部自分の物や表記不要の物に差し替えた場合は空欄でOKです。</p>'+
@@ -657,21 +691,28 @@
       '</div>'+
       '<div class="toolbar"><button class="btn gold" id="saveThemeBgm">BGM・SE設定を保存</button><button class="btn" id="clearThemeCustom">場面BGMを初期化</button></div>'+
       '<h3>音源をアップロードする</h3>'+uploadWidgetHtml();
+    bindAudioSelects('bgm'); bindAudioSelects('se');
+    function currentAudioValue(dataAttr,key){
+      var sel=document.querySelector('[data-'+dataAttr+'-select="'+key+'"]');
+      if(!sel) return '';
+      if(sel.value==='__custom__'){ var c=document.querySelector('[data-'+dataAttr+'-key="'+key+'"]'); return c?c.value.trim():''; }
+      return sel.value;
+    }
     document.querySelectorAll('[data-preview-input]').forEach(function(btn){
       btn.onclick=function(){
         var key=btn.dataset.previewInput;
-        var el;
-        if(key==='tcStartBgm'||key==='tcVictoryBgm') el=$(key);
-        else if(key.indexOf('bgm-')===0) el=document.querySelector('[data-bgm-key="'+key.slice(4)+'"]');
-        else if(key.indexOf('se-')===0) el=document.querySelector('[data-se-key="'+key.slice(3)+'"]');
-        previewAudioTarget(el?el.value:'');
+        var val='';
+        if(key==='tcStartBgm'||key==='tcVictoryBgm'){ var el=$(key); val=el?el.value:''; }
+        else if(key.indexOf('bgm-')===0) val=currentAudioValue('bgm',key.slice(4));
+        else if(key.indexOf('se-')===0) val=currentAudioValue('se',key.slice(3));
+        previewAudioTarget(val);
       };
     });
     document.querySelectorAll('[data-preview-stop]').forEach(function(btn){ btn.onclick=stopAudioPreview; });
     $('saveThemeBgm').onclick=function(){
       Object.assign(c,{ startBgm:$('tcStartBgm').value.trim()||'title', victoryBgm:$('tcVictoryBgm').value.trim()||'ending' });
-      document.querySelectorAll('[data-bgm-key]').forEach(inp=>{ bgmMap[inp.dataset.bgmKey]=inp.value.trim()||bgmMap[inp.dataset.bgmKey]; });
-      document.querySelectorAll('[data-se-key]').forEach(inp=>{ seMap[inp.dataset.seKey]=inp.value.trim()||seMap[inp.dataset.seKey]; });
+      Object.keys(bgmMap).forEach(k=>{ const v=currentAudioValue('bgm',k); bgmMap[k]=v||bgmMap[k]; });
+      Object.keys(seMap).forEach(k=>{ const v=currentAudioValue('se',k); seMap[k]=v||seMap[k]; });
       s.audioCredit=$('tcAudioCredit').value.trim();
       save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud(); toast('BGM・SE設定を保存しました');
     };
