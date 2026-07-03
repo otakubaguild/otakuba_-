@@ -198,10 +198,10 @@
           "appName": "コズミック酒場ステーション",
           "shopName": "コズミック酒場",
           "masterName": "ステーション長",
-          "masterImage": "presets/space/master.png",
+          "masterImage": "presets/space/start.png",
           "masterFallbackEmoji": "🧑‍🚀",
-          "titleBg": "presets/space/cockpit.png",
-          "victoryImage": "presets/space/victory_space.png",
+          "titleBg": "presets/space/start.png",
+          "victoryImage": "presets/space/clear.png",
           "victoryTitle": "🏆 セクター防衛完了！",
           "victorySubtitle": "宇宙海賊王を撃墜し、銀河に平和が戻った。"
         },
@@ -299,7 +299,7 @@
           "stage": "廃棄コロニー",
           "maxHp": 12000,
           "bg": "presets/space/bg_colony.png",
-          "image": "presets/space/robot.png",
+          "image": "presets/space/ancient_sentinel.png",
           "bgm": "ruins",
           "scale": 145
         },
@@ -351,8 +351,8 @@
           "masterName": "学院長",
           "masterImage": "presets/magic/master.png",
           "masterFallbackEmoji": "🧙‍♂️",
-          "titleBg": "presets/magic/title.png",
-          "victoryImage": "presets/magic/victory_magic.png",
+          "titleBg": "presets/magic/start.png",
+          "victoryImage": "presets/magic/clear.png",
           "victoryTitle": "🏆 ゲームクリア",
           "victorySubtitle": "魔法学園の危機を救った。"
         },
@@ -449,7 +449,7 @@
           "name": "図書館の亡霊",
           "stage": "大図書館",
           "maxHp": 9800,
-          "bg": "presets/magic/bg_library.png",
+          "bg": "presets/magic/start.png",
           "image": "presets/magic/ghost.png",
           "bgm": "ruins",
           "scale": 135
@@ -467,7 +467,7 @@
           "name": "吸血貴族",
           "stage": "夜の礼拝堂",
           "maxHp": 18000,
-          "bg": "presets/magic/bg_tower.png",
+          "bg": "presets/magic/familiar.png",
           "image": "presets/magic/vampire.png",
           "bgm": "maou",
           "scale": 145
@@ -485,7 +485,7 @@
           "name": "星霊龍",
           "stage": "最終試験",
           "maxHp": 70000,
-          "bg": "presets/magic/bg_tower.png",
+          "bg": "presets/magic/familiar.png",
           "image": "presets/magic/summoned_dragon.png",
           "bgm": "daimaou",
           "scale": 150
