@@ -4,7 +4,7 @@ window.GuildTheme = (() => {
   const FALLBACK = {
     brand:{ appName:'おたく場ギルド', shopName:'おたく場ギルド', masterName:'ギルドマスター', masterImage:'master.png', masterFallbackEmoji:'🧙' },
     color:{ gold:'#f6c84f', green:'#7bd88f', white:'#fff6df', red:'#e26d6d', bgDark:'#0d0b1a' },
-    words:{ customer:'冒険者', customerRegister:'ギルド登録料（チャージ）', guild:'ギルド', quest:'クエスト', questClear:'クエスト達成', subjugation:'討伐', boss:'魔王', enemy:'敵', battle:'戦闘', defeat:'撃破', party:'パーティ', adventurerInfo:'冒険者情報', stage:'ステージ' },
+    words:{ customer:'冒険者', customerRegister:'ギルド登録料（チャージ）', guild:'ギルド', quest:'クエスト', questClear:'クエスト達成', subjugation:'討伐', boss:'魔王', enemy:'敵', battle:'戦闘', defeat:'撃破', party:'パーティ', adventurerInfo:'冒険者情報', stage:'ステージ', hpLabel:'HP', checkoutButton:'クエスト達成（会計）', bossDefeatText:'魔王討伐！', menuTitleDefault:'メニュー' },
     messages:{ welcome:'ようこそ、いらっしゃいませ。', welcomeBack:'おかえりなさい、冒険者。次のクエストを受けますか？', openMenu:'メニューを開きますか？', masterDefault:'冷やかしか？さっさとメニューを開け', checkoutDone:'おかえりなさい。クエスト達成（会計）を送信しました', peace:'魔王を倒し、平和が訪れた。' }
   };
   let theme = JSON.parse(JSON.stringify(FALLBACK));
@@ -96,6 +96,12 @@ window.GuildTheme = (() => {
     // 選んだテーマを端末に保存し、次回起動時も維持
     try{ localStorage.setItem('otakuba.theme.override', JSON.stringify(theme)); }catch(e){}
   }
+  // 管理画面から「呼称・固定文字」だけを部分保存する（Phase4-4）。他の項目(色/画像等)は保持したまま words だけ上書き。
+  function saveWordsOverride(partialWords){
+    theme = { brand:Object.assign({},theme.brand), color:Object.assign({},theme.color), words:Object.assign({},theme.words,partialWords||{}), messages:Object.assign({},theme.messages) };
+    applyColors(); applyDomText();
+    try{ localStorage.setItem('otakuba.theme.override', JSON.stringify(theme)); }catch(e){}
+  }
   // 起動時、保存済みテーマがあればそれを優先
   function loadOverride(){
     try{ const s=localStorage.getItem('otakuba.theme.override'); if(s){ const o=JSON.parse(s); if(o&&o.words){ theme=o; return true; } } }catch(e){}
@@ -103,5 +109,5 @@ window.GuildTheme = (() => {
   }
   function clearOverride(){ try{ localStorage.removeItem('otakuba.theme.override'); }catch(e){} }
 
-  return { init, w, m, b, all, applyColors, applyDomText, lookup, loadPresets, applyPresetTheme, loadOverride, clearOverride };
+  return { init, w, m, b, all, applyColors, applyDomText, lookup, loadPresets, applyPresetTheme, saveWordsOverride, loadOverride, clearOverride };
 })();

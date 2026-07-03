@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#050505">
   <title data-theme-title>おたく場ギルド</title>
-  <link rel="stylesheet" href="main.css?v=1.0-theme-auto">
-  <link rel="stylesheet" href="battle.css?v=1.0-theme-auto">
-  <link rel="stylesheet" href="menu.css?v=1.0-theme-auto">
-  <link rel="stylesheet" href="effects.css?v=1.0-theme-auto">
+  <link rel="stylesheet" href="main.css?v=1.1-words">
+  <link rel="stylesheet" href="battle.css?v=1.1-words">
+  <link rel="stylesheet" href="menu.css?v=1.1-words">
+  <link rel="stylesheet" href="effects.css?v=1.1-words">
 
   <style>
     .setup-wizard-overlay{z-index:10050}
@@ -102,19 +102,19 @@
         <main class="battlefield" id="battleField">
           <div class="enemy" id="enemySprite">👾</div>
           <div class="damage" id="damagePop"></div>
-          <div class="defeat" id="defeatPop">撃破！</div>
+          <div class="defeat" id="defeatPop" data-theme-text="words.defeat">撃破！</div>
     <div id="awakenOverlay"><div class="awaken-text">魔王が覚醒する——！</div></div>
         </main>
 
         <nav class="categories" id="categoryButtons"></nav>
-        <button class="btn gold checkout-main" id="btnCheckout">🏆 クエスト達成（会計）</button>
+        <button class="btn gold checkout-main" id="btnCheckout">🏆 <span data-theme-text="words.checkoutButton">クエスト達成（会計）</span></button>
         <button class="btn checkout-main" id="btnBackTitle">🏠 最初の画面へ</button>
       </div>
     </section>
 
     <div class="modal" id="modalMenu">
       <div class="modal-head">
-        <h2 id="menuTitle">メニュー</h2>
+        <h2 id="menuTitle" data-theme-text="words.menuTitleDefault">メニュー</h2>
         <button class="btn small" id="btnCloseMenu">閉じる</button>
       </div>
       <div class="scroll" id="productList"></div>
@@ -154,7 +154,7 @@
 
     <div class="modal" id="modalCheckoutConfirm">
       <div class="modal-head">
-        <h2>クエスト達成（会計）</h2>
+        <h2 data-theme-text="words.checkoutButton">クエスト達成（会計）</h2>
         <button class="btn small" id="btnCancelCheckout">戻る</button>
       </div>
       <div class="scroll">
@@ -258,16 +258,16 @@
 
 </div>
 
-  <script src="theme.js?v=1.0-theme-auto"></script>
-  <script src="utils.js?v=1.0-theme-auto"></script>
-  <script src="storage.js?v=1.0-theme-auto"></script>
-  <script src="audio.js?v=1.0-theme-auto"></script>
-  <script src="ui.js?v=1.0-theme-auto"></script>
-  <script src="customer.js?v=1.0-theme-auto"></script>
-  <script src="battle.js?v=1.0-theme-auto"></script>
-  <script src="discord.js?v=1.0-theme-auto"></script>
-  <script src="menu.js?v=1.0-theme-auto"></script>
-  <script src="order.js?v=1.0-theme-auto"></script>
-  <script src="app.js?v=1.0-theme-auto"></script>
+  <script src="theme.js?v=1.1-words"></script>
+  <script src="utils.js?v=1.1-words"></script>
+  <script src="storage.js?v=1.1-words"></script>
+  <script src="audio.js?v=1.1-words"></script>
+  <script src="ui.js?v=1.1-words"></script>
+  <script src="customer.js?v=1.1-words"></script>
+  <script src="battle.js?v=1.1-words"></script>
+  <script src="discord.js?v=1.1-words"></script>
+  <script src="menu.js?v=1.1-words"></script>
+  <script src="order.js?v=1.1-words"></script>
+  <script src="app.js?v=1.1-words"></script>
 </body>
 </html>

@@ -79,3 +79,12 @@ html,body{overflow:auto;min-height:100%;height:auto}
 
 
 #infoDesc,#infoHours,#infoAddress{min-height:70px}
+
+.admin-modebar{display:flex;gap:8px;margin-bottom:10px}
+.mode-btn{flex:1;border:2px solid rgba(255,246,223,.35);border-radius:999px;background:rgba(0,0,0,.5);padding:8px 6px;font-size:13px;text-shadow:1px 1px #000}
+.mode-btn.active{background:linear-gradient(#7bd88f,#3f9a56);color:#04170a;border-color:var(--green);font-weight:900;text-shadow:none}
+.dash-sub-h{color:var(--gold);margin:16px 0 8px;font-size:15px}
+.dash-quick{grid-template-columns:repeat(4,1fr)}
+.quick-card{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;color:var(--white);font-weight:700;cursor:pointer}
+.quick-icon{font-size:26px}
+@media(max-width:720px){.dash-quick{grid-template-columns:repeat(2,1fr)}}

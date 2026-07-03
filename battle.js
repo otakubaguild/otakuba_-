@@ -24,9 +24,9 @@ window.GuildBattle = (() => {
     if(!suppressBgm && !quiet){ const bk=bgmKey(e); GuildAudio.playBgm(bk); }
     $('adventurerName').textContent = c ? c.name : '名もなき冒険者';
     $('adventurerSub').textContent = `Lv.${c?c.level:1} / ${c&&c.title?c.title:'二つ名なし'}`;
-    $('stageName').textContent = `現在ステージ：${e.stage||'---'}`;
+    $('stageName').textContent = `${(window.GuildTheme?GuildTheme.w('stage'):'現在ステージ')}：${e.stage||'---'}`;
     $('enemyName').textContent = e.name || '---';
-    $('enemyHpText').textContent = `HP ${Math.max(0,Math.ceil(Number(e.hp)||0))} / ${e.maxHp||0}`;
+    $('enemyHpText').textContent = `${(window.GuildTheme?GuildTheme.w('hpLabel'):'HP')} ${Math.max(0,Math.ceil(Number(e.hp)||0))} / ${e.maxHp||0}`;
     $('enemyHpFill').style.width = `${Math.max(0,Math.min(100,(Number(e.hp||0)/Number(e.maxHp||1))*100))}%`;
     GuildUI.applyBg(e.bg);
     const sprite=$('enemySprite'); sprite.classList.remove('hit','defeated'); sprite.dataset.enemyId = e.id || '';
@@ -59,7 +59,7 @@ window.GuildBattle = (() => {
       await sleep(420); e.hp=Math.max(0,Number(e.hp||0)-chunk); render(); GuildStorage.save(); await sleep(930);
       if(e.hp<=0){
         defeatedAny=true; const finalBoss=isFinalEnemy(e); if(finalBoss) finalDefeated=true; sprite.classList.add('defeated');
-        const defeatPop=$('defeatPop'); defeatPop.textContent=finalBoss?'魔王討伐！':'撃破！'; defeatPop.classList.add('on');
+        const defeatPop=$('defeatPop'); defeatPop.textContent=finalBoss?(window.GuildTheme?GuildTheme.w('bossDefeatText'):'魔王討伐！'):((window.GuildTheme?GuildTheme.w('defeat'):'撃破')+'！'); defeatPop.classList.add('on');
         if(finalBoss){ suppressBgm=true; GuildAudio.stopBgm(); GuildAudio.playSe('victory');
           setTimeout(()=>{ defeatPop.classList.remove('on'); if(window.GuildApp && GuildApp.showVictoryClear) GuildApp.showVictoryClear(); }, 1600);
         } else { GuildAudio.playSe('defeat'); }

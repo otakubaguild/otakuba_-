@@ -3,9 +3,33 @@
   if(window.GuildTheme) await GuildTheme.init();
   const data = await GuildStorage.init();
   const SESSION='otakuba.v3.final.admin.session';
-  const tabs=[['dash','📊 概要'],['business','🟢 営業'],['menu','🍴 メニュー'],['inventory','📦 在庫'],['monsters','⚔️ 討伐'],['settings','⚙️ 設定'],['concept','🎭 コンセプト'],['qr','🔳 QR'],['storeInfo','🏪 店舗情報'],['customers','👤 顧客'],['sales','💰 売上管理'],['upload','🖼️ 画像/音源'],['sync','☁️ 同期'],['reset','🧹 reset']];
+  // モード（Easy/Normal/Hard）: 各タブがどのモード以上で表示されるかを持つ。上位モードは下位モードのタブも全て含む（累積表示）
+  const MODE_ORDER=['easy','normal','hard'];
+  const MODE_LABEL={easy:'🌱 かんたん',normal:'🛠 ふつう',hard:'⚙️ くわしい'};
+  const tabs=[
+    ['dash','🏠 ホーム','easy'],
+    ['business','🟢 営業','easy'],
+    ['themeEditor','🎭 テーマ編集','easy'],
+    ['menu','🍴 メニュー','easy'],
+    ['sales','💰 会計・売上','easy'],
+    ['qr','🔳 QR','normal'],
+    ['customers','👤 顧客','normal'],
+    ['settings','⚙️ 設定','hard'],
+    ['inventory','📦 在庫','hard'],
+    ['sync','☁️ 同期','hard'],
+    ['reset','🧹 reset','hard'],
+  ];
+  // テーマ編集タブ内のサブナビ（Phase4-3: 店舗情報/テキスト/画像/BGM/キャラクター/ステージ/プレビューを1画面にまとめる）
+  const THEME_SUBTABS=[['store','🏪 店舗情報'],['text','✏️ テキスト'],['image','🖼️ 画像'],['bgm','🎵 BGM'],['character','⚔️ キャラクター'],['stage','🗺️ ステージ'],['preview','👁️ プレビュー']];
+  let themeSubTab='store';
+  const MODE_KEY='otakuba.admin.mode';
+  // 既存ユーザーの操作感を壊さないよう、初回デフォルトは「くわしい」＝これまで通り全タブ表示。新規は店側の判断でモード変更可能。
+  function loadMode(){ try{ const m=localStorage.getItem(MODE_KEY); return MODE_ORDER.includes(m)?m:'hard'; }catch(e){ return 'hard'; } }
+  function saveMode(m){ try{ localStorage.setItem(MODE_KEY,m); }catch(e){} }
+  let currentMode=loadMode();
+  function visibleTabs(){ const maxIdx=MODE_ORDER.indexOf(currentMode); return tabs.filter(t=>MODE_ORDER.indexOf(t[2])<=maxIdx); }
   let current='dash', customerQuery='', salesQuery='';
-  function loginOk(){return sessionStorage.getItem(SESSION)==='ok'} function showLogin(){$('adminLogin').classList.remove('hidden');$('adminApp').classList.add('hidden')} function showApp(){$('adminLogin').classList.add('hidden');$('adminApp').classList.remove('hidden');renderTabs();render();startAutoRefresh()}
+  function loginOk(){return sessionStorage.getItem(SESSION)==='ok'} function showLogin(){$('adminLogin').classList.remove('hidden');$('adminApp').classList.add('hidden')} function showApp(){$('adminLogin').classList.add('hidden');$('adminApp').classList.remove('hidden');renderModeBar();renderTabs();render();startAutoRefresh()}
   let autoTimer=null;
   function startAutoRefresh(){ if(autoTimer)clearInterval(autoTimer); autoTimer=setInterval(async()=>{
     // 概要・顧客・履歴を見ている時だけ自動取得。入力中は邪魔しない
@@ -17,7 +41,16 @@
   $('adminBackToIndex').onclick=()=>location.href='index.html';$('adminHeaderToIndex').onclick=()=>location.href='index.html';$('logoutBtn').onclick=()=>{sessionStorage.removeItem(SESSION);showLogin()};
   function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),1500)}
   function save(){GuildStorage.save()}
-  function renderTabs(){$('adminTabs').innerHTML=tabs.map(t=>`<button class="tab ${current===t[0]?'active':''}" data-tab="${t[0]}">${t[1]}</button>`).join('');document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{current=b.dataset.tab;renderTabs();render()})}
+  function renderModeBar(){
+    const bar=$('adminModeBar'); if(!bar) return;
+    bar.innerHTML=MODE_ORDER.map(m=>`<button class="mode-btn ${currentMode===m?'active':''}" data-mode="${m}">${MODE_LABEL[m]}</button>`).join('');
+    bar.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{
+      currentMode=b.dataset.mode; saveMode(currentMode);
+      if(!visibleTabs().some(t=>t[0]===current)) current='dash';
+      renderModeBar(); renderTabs(); render();
+    });
+  }
+  function renderTabs(){const vt=visibleTabs();if(!vt.some(t=>t[0]===current))current='dash';$('adminTabs').innerHTML=vt.map(t=>`<button class="tab ${current===t[0]?'active':''}" data-tab="${t[0]}">${t[1]}</button>`).join('');document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{current=b.dataset.tab;renderTabs();render()})}
   function cats(){
     const fixed=[
       {id:'beer_sour',name:'ビール・サワー',icon:'🍺'},
@@ -197,7 +230,8 @@
   function monstersListHtml(){data.monsters=(data.monsters||[]).map(normalizeMonster);return data.monsters.length?data.monsters.map(function(m,i){return monsterCard(m,i);}).join(''):'<div class="empty">なし</div>';}
   function readMonsterCard(card){var m=data.monsters[+card.dataset.monsterIndex];m.name=card.querySelector('[data-field=name]').value;m.stage=card.querySelector('[data-field=stage]').value;var bgmUrl=(card.querySelector('[data-field=bgmUrl]')||{}).value||'';m.bgm=bgmUrl.trim()?bgmUrl.trim():card.querySelector('[data-field=bgm]').value;m.hp=+card.querySelector('[data-field=hp]').value||0;m.maxHp=+card.querySelector('[data-field=maxHp]').value||500;m.bg=card.querySelector('[data-field=bg]').value;m.background=m.bg;var imgUrl=(card.querySelector('[data-field=imageUrl]')||{}).value||'';m.image=imgUrl.trim()?imgUrl.trim():card.querySelector('[data-field=image]').value;m.scale=+card.querySelector('[data-field=scale]').value||100;m.offsetX=+card.querySelector('[data-field=offsetX]').value||0;m.offsetY=+card.querySelector('[data-field=offsetY]').value||0;return m;}
   function saveMonsterForm(){document.querySelectorAll('[data-monster-index]').forEach(readMonsterCard);save();}
-  function renderMonsters(){$('adminContent').innerHTML='<h2>⚔️ 討伐モンスター管理</h2><div class="toolbar"><button class="btn gold" id="addMonster">追加</button><button class="btn green" id="saveMonsters">全体保存</button><button class="btn" id="monOpenAll">全部開く</button><button class="btn" id="monCloseAll">全部閉じる</button><button class="btn" id="jsonMonsters">JSON</button></div><div class="category-list" id="monsterListBox">'+monstersListHtml()+'</div>';bindMonsterEvents();
+  let monsterContainerId='adminContent';
+  function renderMonsters(containerId){monsterContainerId=containerId||monsterContainerId;$(monsterContainerId).innerHTML='<h2>⚔️ 討伐モンスター管理</h2><div class="toolbar"><button class="btn gold" id="addMonster">追加</button><button class="btn green" id="saveMonsters">全体保存</button><button class="btn" id="monOpenAll">全部開く</button><button class="btn" id="monCloseAll">全部閉じる</button><button class="btn" id="jsonMonsters">JSON</button></div><div class="category-list" id="monsterListBox">'+monstersListHtml()+'</div>';bindMonsterEvents();
     $('addMonster').onclick=function(){saveMonsterForm();data.monsters.push(normalizeMonster({name:'新しい敵',maxHp:500},data.monsters.length));save();renderMonsters();};
     $('saveMonsters').onclick=function(){saveMonsterForm();toast('保存しました');if(GuildStorage.pushCloud)GuildStorage.pushCloud();};
     $('monOpenAll').onclick=function(){document.querySelectorAll('#monsterListBox .category-block').forEach(function(b){b.classList.add('open');var t=b.querySelector('.category-toggle');if(t)t.textContent='閉じる';});};
@@ -302,75 +336,43 @@
     }
   }
 
-  function renderConcept(){
+  function ensureThemeCustom(){
     const s=data.settings;
     s.themeCustom=Object.assign({
-      startTitle:'',
-      startSubtitle:'',
-      startBg:'',
-      startBgm:'title',
-      victoryBg:'',
-      victoryImage:'victory_clear.PNG',
-      victoryTitle:'',
-      victorySubtitle:'',
-      victoryBgm:'ending',
-      masterName:'ギルドマスター',
-      masterImage:'master_no.jpeg',
-      masterMessage:'冷やかしか？さっさとメニューを開け'
+      startTitle:'', startSubtitle:'', startBg:'', startBgm:'title',
+      victoryBg:'', victoryImage:'victory_clear.PNG', victoryTitle:'', victorySubtitle:'', victoryBgm:'ending',
+      masterName:'ギルドマスター', masterImage:'master_no.jpeg', masterMessage:'冷やかしか？さっさとメニューを開け'
     },s.themeCustom||{});
-    const c=s.themeCustom;
-    $('adminContent').innerHTML='<h2>🎭 Game設定 / テーマエディター</h2>'+
-      '<div class="admin-card"><p class="tiny">コンセプト切替＋店舗別カスタム。ここを編集すると、スタート画面・討伐完了画面・マスター表示を管理画面だけで変更できます。画像は「画像/音源」タブでアップロードしたURLを貼れます。</p></div>'+
-      '<div class="admin-card"><div class="admin-card-title">🎬 スタート画面</div>'+
-      '<label>タイトルHTML<textarea id="tcStartTitle" placeholder="例：おたく場ギルドへ&lt;br&gt;ようこそ">'+esc(c.startTitle||'')+'</textarea></label>'+
-      '<label>サブメッセージ<input id="tcStartSubtitle" value="'+esc(c.startSubtitle||'')+'" placeholder="例：メニューを開きますか？"></label>'+
-      '<label>背景画像URL / ファイル名<input id="tcStartBg" value="'+esc(c.startBg||'')+'" placeholder="例：start_bg.png / https://..."></label>'+
-      '<label>BGMキー / URL<input id="tcStartBgm" value="'+esc(c.startBgm||'title')+'" placeholder="例：title / https://...mp3"></label>'+
-      '</div>'+
-      '<div class="admin-card"><div class="admin-card-title">🏆 討伐完了画面</div>'+
-      '<label>背景画像URL / ファイル名<input id="tcVictoryBg" value="'+esc(c.victoryBg||'')+'" placeholder="例：victory_bg.png / https://..."></label>'+
-      '<label>中央画像URL / ファイル名<input id="tcVictoryImage" value="'+esc(c.victoryImage||'victory_clear.PNG')+'" placeholder="例：victory_clear.PNG / https://..."></label>'+
-      '<label>追加タイトル<input id="tcVictoryTitle" value="'+esc(c.victoryTitle||'')+'" placeholder="例：MISSION COMPLETE"></label>'+
-      '<label>追加メッセージ<textarea id="tcVictorySubtitle" placeholder="例：ご来店ありがとうございました">'+esc(c.victorySubtitle||'')+'</textarea></label>'+
-      '<label>BGMキー / URL<input id="tcVictoryBgm" value="'+esc(c.victoryBgm||'ending')+'" placeholder="例：ending / https://...mp3"></label>'+
-      '</div>'+
-      '<div class="admin-card"><div class="admin-card-title">🧙 いいえ選択時のマスター</div>'+'<label>表示名<input id="tcMasterName" value="'+esc(c.masterName||'ギルドマスター')+'" placeholder="例：ギルドマスター / 店長 / 校長"></label>'+
-      '<label>マスター画像URL / ファイル名<input id="tcMasterImage" value="'+esc(c.masterImage||'master_no.jpeg')+'" placeholder="例：master_no.jpeg / https://..."></label>'+
-      '<label>セリフ<input id="tcMasterMessage" value="'+esc(c.masterMessage||'冷やかしか？さっさとメニューを開け')+'"></label>'+
-      '</div>'+
-      '<div class="toolbar"><button class="btn gold" id="saveThemeEditor">Game設定を保存</button><button class="btn" id="clearThemeEditor">カスタムを初期化</button></div>'+
-      '<h3>コンセプトプリセット</h3>'+
+    return s.themeCustom;
+  }
+
+  // ===== テーマ編集（Phase4-3）：店舗情報/テキスト/画像/BGM/キャラクター/ステージ/プレビューを1画面にまとめる =====
+  function renderThemeEditor(){
+    $('adminContent').innerHTML='<h2>🎭 テーマ編集</h2>'+
+      '<div class="admin-card"><p class="tiny">店舗情報・文言・画像・BGM・キャラクターをここでまとめて編集できます。JSON編集やGitHub編集は不要です。</p></div>'+
+      '<h3>コンセプト一括切替</h3>'+
       '<div id="presetList" class="grid"><div class="tiny">読み込み中...</div></div>'+
-      '<div class="admin-card"><div class="admin-card-title">元に戻す</div><p class="tiny">選んだコンセプトを解除して、既定(theme.json)に戻します。</p><button class="btn" id="clearPreset">コンセプトを解除</button></div>';
-
-    $('saveThemeEditor').onclick=function(){
-      s.themeCustom={
-        startTitle:$('tcStartTitle').value.trim(),
-        startSubtitle:$('tcStartSubtitle').value.trim(),
-        startBg:$('tcStartBg').value.trim(),
-        startBgm:$('tcStartBgm').value.trim()||'title',
-        victoryBg:$('tcVictoryBg').value.trim(),
-        victoryImage:$('tcVictoryImage').value.trim()||'victory_clear.PNG',
-        victoryTitle:$('tcVictoryTitle').value.trim(),
-        victorySubtitle:$('tcVictorySubtitle').value,
-        victoryBgm:$('tcVictoryBgm').value.trim()||'ending',
-        masterName:$('tcMasterName').value.trim()||'ギルドマスター',
-        masterImage:$('tcMasterImage').value.trim()||'master_no.jpeg',
-        masterMessage:$('tcMasterMessage').value.trim()||'冷やかしか？さっさとメニューを開け'
-      };
-      save();
-      if(GuildStorage.pushCloud)GuildStorage.pushCloud();
-      toast('Game設定を保存しました');
-    };
-    $('clearThemeEditor').onclick=function(){
-      if(!confirm('スタート/討伐完了/マスターのカスタム設定を初期化しますか？'))return;
-      s.themeCustom={};
-      save();
-      if(GuildStorage.pushCloud)GuildStorage.pushCloud();
-      toast('初期化しました');
-      renderConcept();
-    };
-
+      '<div class="admin-card"><div class="admin-card-title">元に戻す</div><p class="tiny">選んだコンセプトを解除して、既定(theme.json)に戻します。</p><button class="btn" id="clearPreset">コンセプトを解除</button></div>'+
+      '<nav class="theme-subnav" id="themeSubNav"></nav>'+
+      '<div id="themeSubContent"></div>';
+    renderPresetPicker();
+    renderThemeSubNav();
+    renderThemeSub();
+  }
+  function renderThemeSubNav(){
+    $('themeSubNav').innerHTML=THEME_SUBTABS.map(t=>`<button class="tab subtab ${themeSubTab===t[0]?'active':''}" data-subtab="${t[0]}">${t[1]}</button>`).join('');
+    document.querySelectorAll('[data-subtab]').forEach(b=>b.onclick=()=>{themeSubTab=b.dataset.subtab;renderThemeSubNav();renderThemeSub();});
+  }
+  function renderThemeSub(){
+    if(themeSubTab==='store') renderStoreInfoAdmin('themeSubContent');
+    if(themeSubTab==='text') renderThemeText();
+    if(themeSubTab==='image') renderThemeImage();
+    if(themeSubTab==='bgm') renderThemeBgm();
+    if(themeSubTab==='character') renderMonsters('themeSubContent');
+    if(themeSubTab==='stage') renderThemeStage();
+    if(themeSubTab==='preview') renderThemePreview();
+  }
+  function renderPresetPicker(){
     if(!window.GuildTheme){ $('presetList').innerHTML='<div class="tiny">テーマ機能が読み込まれていません</div>'; return; }
     GuildTheme.loadPresets().then(function(presets){
       if(!presets.length){ $('presetList').innerHTML='<div class="tiny">presets.json が見つかりません。GitHubに置いてください。</div>'; return; }
@@ -394,7 +396,6 @@
             data.currentEnemyIndex=0;
           }
           if(p.theme&&p.theme.brand&&p.theme.brand.shopName){ data.settings.shopName=p.theme.brand.shopName; }
-          // コンセプト別の勝利画面・タイトル背景を反映
           if(p.theme&&p.theme.brand){
             var pb=p.theme.brand;
             data.settings.themeCustom=data.settings.themeCustom||{};
@@ -405,17 +406,142 @@
           }
           save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
           toast('「'+(p.label||p.id)+'」に切り替えました');
+          renderThemeEditor();
         };
       });
     });
     $('clearPreset').onclick=function(){ if(!confirm('コンセプトを解除して既定に戻しますか？'))return; GuildTheme.clearOverride(); toast('解除しました。再読み込みで既定に戻ります'); };
   }
+  const WORD_FIELDS=[
+    ['customer','対象の呼び方（例：冒険者）'],['boss','ラスボス呼び方（例：魔王）'],['enemy','敵の呼び方（例：敵）'],
+    ['quest','注文の呼び方（例：クエスト）'],['questClear','クリア文字（例：クエスト達成）'],['defeat','撃破文字（例：撃破）'],
+    ['bossDefeatText','ラスボス撃破文字（例：魔王討伐！）'],['subjugation','討伐の呼び方'],['battle','戦闘の呼び方'],
+    ['party','パーティ（人数）の呼び方'],['guild','店・ギルドの呼び方'],['customerRegister','登録料ラベル'],
+    ['adventurerInfo','対象情報ラベル'],['stage','ステージの呼び方'],['hpLabel','HP表示名'],
+    ['checkoutButton','会計ボタンの文字'],['menuTitleDefault','メニュー初期タイトル']
+  ];
+  function renderThemeText(){
+    const c=ensureThemeCustom();
+    const words=(window.GuildTheme?GuildTheme.all().words:{})||{};
+    $('themeSubContent').innerHTML=
+      '<div class="admin-card"><div class="admin-card-title">🏷️ 呼び名・固定文字</div>'+
+      '<p class="tiny">画面のあちこちに出てくる固定の言葉をここでまとめて変えられます。例：「冒険者」→「お客様」、「魔王」→「ラスボス」など。</p>'+
+      WORD_FIELDS.map(([k,label])=>'<label>'+esc(label)+'<input data-word-key="'+k+'" value="'+esc(words[k]||'')+'"></label>').join('')+
+      '<div class="toolbar"><button class="btn gold" id="saveThemeWords">呼び名を保存</button></div>'+
+      '</div>'+
+      '<div class="admin-card"><div class="admin-card-title">🎬 スタート画面</div>'+
+      '<label>タイトルHTML<textarea id="tcStartTitle" placeholder="例：おたく場ギルドへ&lt;br&gt;ようこそ">'+esc(c.startTitle||'')+'</textarea></label>'+
+      '<label>サブメッセージ<input id="tcStartSubtitle" value="'+esc(c.startSubtitle||'')+'" placeholder="例：メニューを開きますか？"></label>'+
+      '</div>'+
+      '<div class="admin-card"><div class="admin-card-title">🏆 討伐完了画面</div>'+
+      '<label>追加タイトル<input id="tcVictoryTitle" value="'+esc(c.victoryTitle||'')+'" placeholder="例：MISSION COMPLETE"></label>'+
+      '<label>追加メッセージ<textarea id="tcVictorySubtitle" placeholder="例：ご来店ありがとうございました">'+esc(c.victorySubtitle||'')+'</textarea></label>'+
+      '</div>'+
+      '<div class="admin-card"><div class="admin-card-title">🧙 いいえ選択時のマスター</div>'+
+      '<label>表示名<input id="tcMasterName" value="'+esc(c.masterName||'ギルドマスター')+'" placeholder="例：ギルドマスター / 店長 / 校長"></label>'+
+      '<label>セリフ<input id="tcMasterMessage" value="'+esc(c.masterMessage||'冷やかしか？さっさとメニューを開け')+'"></label>'+
+      '</div>'+
+      '<div class="toolbar"><button class="btn gold" id="saveThemeText">テキストを保存</button><button class="btn" id="clearThemeCustom">すべて初期化</button></div>';
+    $('saveThemeWords').onclick=function(){
+      const partial={};
+      document.querySelectorAll('[data-word-key]').forEach(inp=>{ const v=inp.value.trim(); if(v) partial[inp.dataset.wordKey]=v; });
+      if(window.GuildTheme) GuildTheme.saveWordsOverride(partial);
+      toast('呼び名を保存しました（この端末に反映）');
+    };
+    $('saveThemeText').onclick=function(){
+      Object.assign(c,{
+        startTitle:$('tcStartTitle').value.trim(),
+        startSubtitle:$('tcStartSubtitle').value.trim(),
+        victoryTitle:$('tcVictoryTitle').value.trim(),
+        victorySubtitle:$('tcVictorySubtitle').value,
+        masterName:$('tcMasterName').value.trim()||'ギルドマスター',
+        masterMessage:$('tcMasterMessage').value.trim()||'冷やかしか？さっさとメニューを開け'
+      });
+      save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud(); toast('テキストを保存しました');
+    };
+    bindThemeCustomReset();
+  }
+  function renderThemeImage(){
+    const c=ensureThemeCustom();
+    $('themeSubContent').innerHTML=
+      '<div class="admin-card"><div class="admin-card-title">🎬 スタート画面 背景</div>'+
+      '<label>背景画像URL / ファイル名<input id="tcStartBg" value="'+esc(c.startBg||'')+'" placeholder="例：start_bg.png / https://..."></label></div>'+
+      '<div class="admin-card"><div class="admin-card-title">🏆 討伐完了画面</div>'+
+      '<label>背景画像URL / ファイル名<input id="tcVictoryBg" value="'+esc(c.victoryBg||'')+'" placeholder="例：victory_bg.png / https://..."></label>'+
+      '<label>中央画像URL / ファイル名<input id="tcVictoryImage" value="'+esc(c.victoryImage||'victory_clear.PNG')+'" placeholder="例：victory_clear.PNG / https://..."></label></div>'+
+      '<div class="admin-card"><div class="admin-card-title">🧙 マスター画像</div>'+
+      '<label>マスター画像URL / ファイル名<input id="tcMasterImage" value="'+esc(c.masterImage||'master_no.jpeg')+'" placeholder="例：master_no.jpeg / https://..."></label></div>'+
+      '<div class="toolbar"><button class="btn gold" id="saveThemeImage">画像設定を保存</button><button class="btn" id="clearThemeCustom">すべて初期化</button></div>'+
+      '<h3>画像をアップロードする</h3>'+uploadWidgetHtml();
+    $('saveThemeImage').onclick=function(){
+      Object.assign(c,{
+        startBg:$('tcStartBg').value.trim(),
+        victoryBg:$('tcVictoryBg').value.trim(),
+        victoryImage:$('tcVictoryImage').value.trim()||'victory_clear.PNG',
+        masterImage:$('tcMasterImage').value.trim()||'master_no.jpeg'
+      });
+      save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud(); toast('画像設定を保存しました');
+    };
+    bindThemeCustomReset();
+    bindUploadWidget();
+  }
+  function renderThemeBgm(){
+    const c=ensureThemeCustom();
+    const s=data.settings;
+    s.audioFiles=s.audioFiles||{}; s.audioFiles.bgm=Object.assign({title:'title.mp3',slime:'slime.mp3',goblin:'goblin.mp3',orc:'orc.mp3',cave:'cave.mp3',ruins:'ruins.mp3',maou:'maou.mp3',ending:'ending.mp3',daimaou:'daimaou.mp3'},s.audioFiles.bgm||{});
+    const bgmMap=s.audioFiles.bgm;
+    $('themeSubContent').innerHTML=
+      '<div class="admin-card"><div class="admin-card-title">🎬 場面BGM</div>'+
+      '<label>スタート画面BGM（キー or URL）<input id="tcStartBgm" value="'+esc(c.startBgm||'title')+'" placeholder="例：title / https://...mp3"></label>'+
+      '<label>討伐完了BGM（キー or URL）<input id="tcVictoryBgm" value="'+esc(c.victoryBgm||'ending')+'" placeholder="例：ending / https://...mp3"></label>'+
+      '</div>'+
+      '<div class="admin-card"><div class="admin-card-title">⚔️ ステージ別BGM（キャラクターのBGM欄で呼び出す名前）</div>'+
+      '<p class="tiny">キャラクター編集画面のBGM欄に、ここで決めたキー名（例：slime）を入れると自動で使われます。空欄にすると既定のBGMのまま動きます。</p>'+
+      Object.keys(bgmMap).map(k=>`<label>${esc(k)}<input data-bgm-key="${esc(k)}" value="${esc(bgmMap[k]||'')}" placeholder="ファイル名 / https://...mp3"></label>`).join('')+
+      '</div>'+
+      '<div class="toolbar"><button class="btn gold" id="saveThemeBgm">BGM設定を保存</button><button class="btn" id="clearThemeCustom">場面BGMを初期化</button></div>'+
+      '<h3>音源をアップロードする</h3>'+uploadWidgetHtml();
+    $('saveThemeBgm').onclick=function(){
+      Object.assign(c,{ startBgm:$('tcStartBgm').value.trim()||'title', victoryBgm:$('tcVictoryBgm').value.trim()||'ending' });
+      document.querySelectorAll('[data-bgm-key]').forEach(inp=>{ bgmMap[inp.dataset.bgmKey]=inp.value.trim()||bgmMap[inp.dataset.bgmKey]; });
+      save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud(); toast('BGM設定を保存しました');
+    };
+    bindThemeCustomReset();
+    bindUploadWidget();
+  }
+  function bindThemeCustomReset(){
+    const btn=$('clearThemeCustom'); if(!btn) return;
+    btn.onclick=function(){
+      if(!confirm('スタート/討伐完了/マスターのカスタム設定（テキスト・画像・BGM）をすべて初期化しますか？'))return;
+      data.settings.themeCustom={};
+      save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
+      toast('初期化しました');
+      renderThemeSub();
+    };
+  }
+  function renderThemeStage(){
+    data.monsters=(data.monsters||[]).map(normalizeMonster);
+    $('themeSubContent').innerHTML='<div class="admin-card"><p class="tiny">討伐の並び順にステージ名だけをまとめて編集できます。詳しいHP・画像などは「キャラクター」タブへ。</p></div>'+
+      '<div class="category-list" id="stageListBox">'+data.monsters.map((m,i)=>`<div class="admin-card"><div class="admin-card-title">${i+1}. ${esc(m.name)}</div><label>ステージ名<input data-stage-index="${i}" value="${esc(m.stage||'')}"></label></div>`).join('')+'</div>'+
+      '<div class="toolbar"><button class="btn gold" id="saveStages">ステージ名を保存</button></div>';
+    $('saveStages').onclick=function(){
+      document.querySelectorAll('[data-stage-index]').forEach(inp=>{ const m=data.monsters[+inp.dataset.stageIndex]; if(m) m.stage=inp.value.trim()||m.stage; });
+      save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud(); toast('ステージ名を保存しました'); renderThemeStage();
+    };
+  }
+  function renderThemePreview(){
+    $('themeSubContent').innerHTML='<div class="admin-card"><div class="admin-card-title">👁️ プレビュー</div>'+
+      '<p class="tiny">編集した内容は保存後、一般画面を開くとすぐ反映されます。画面内リアルタイムプレビューはPhase4-8で対応予定です。</p>'+
+      '<div class="toolbar"><button class="btn gold" id="openLivePreview">一般画面を新しいタブで開く</button></div></div>';
+    $('openLivePreview').onclick=function(){ window.open('index.html','_blank'); };
+  }
 
-  function renderStoreInfoAdmin(){
+  function renderStoreInfoAdmin(containerId){
+    containerId=containerId||'adminContent';
     const s=data.settings;
     s.storeInfo=Object.assign({name:'',address:'',hours:'',phone:'',instagram:'',x:'',website:'',mapUrl:'',description:''},s.storeInfo||{});
     const i=s.storeInfo;
-    $('adminContent').innerHTML='<h2>🏪 店舗情報</h2>'+
+    $(containerId).innerHTML='<h2>🏪 店舗情報</h2>'+
       '<div class="admin-card"><p class="tiny">一般画面の「店舗情報」ボタンに表示されます。営業時間・SNS・地図など、お客様に見せたい情報を登録できます。</p></div>'+
       '<div class="admin-card">'+
       '<label>店舗名<input id="infoName" value="'+esc(i.name||s.storeName||s.shopName||'')+'" placeholder="例：おたく場ギルド"></label>'+
@@ -498,9 +624,8 @@
     $('openQrUrl').onclick=function(){ window.open($('qrUrlText').value,'_blank'); };
   }
 
-  function renderUpload(){
-    $('adminContent').innerHTML=`<h2>🖼️ 画像 / 音源アップロード</h2>
-    <div class="admin-card"><div class="tiny">敵画像・背景・BGM・メニュー写真をここからアップできます。アップ後に出るURLを、各編集画面の「画像」欄や「BGM」欄に貼れば使えます。</div></div>
+  function uploadWidgetHtml(){
+    return `<div class="admin-card"><div class="tiny">敵画像・背景・BGM・メニュー写真をここからアップできます。アップ後に出るURLを、上の画像欄・BGM欄に貼れば使えます。</div></div>
     <div class="admin-card">
       <label>ファイルを選択<input id="upFile" type="file"></label>
       <label>用途メモ（任意・ファイル名に使います）<input id="upLabel" placeholder="例：slime2 / bgm_boss / menu_beer"></label>
@@ -509,9 +634,8 @@
     </div>
     <div id="upResult"></div>
     <div class="admin-card"><div class="admin-card-title">アップ済み一覧（この端末の履歴）</div><div id="upHistory">${uploadHistoryHtml()}</div></div>`;
-    $('upBtn').onclick=doUpload;
-    bindUploadHistoryEvents();
   }
+  function bindUploadWidget(){ $('upBtn').onclick=doUpload; bindUploadHistoryEvents(); }
   function uploadHistoryHtml(){const h=(data.settings.uploadHistory||[]).slice().reverse();return h.length?h.map((u,i)=>`<div class="billbox" style="margin:4px 0"><b>${esc(u.name)}</b><br><input readonly value="${esc(u.url)}" data-up-url="${i}" onclick="this.select();this.setSelectionRange(0,99999)" style="width:100%;font-size:.8em"><button class="btn small" data-copy-url="${i}">URLコピー</button></div>`).join(''):'<div class="tiny">まだありません</div>';}
   function copyText(text,btn){
     let ok=false;
@@ -542,7 +666,7 @@
         $('upProgress').textContent='';
         $('upResult').innerHTML=`<div class="admin-card"><div class="admin-card-title">✅ アップ完了</div><div class="tiny">このURLを画像欄/BGM欄に貼ってください</div><input readonly value="${esc(j.url)}" onclick="this.select();this.setSelectionRange(0,99999)" style="width:100%"><div class="toolbar"><button class="btn gold" id="upCopy">URLをコピー</button></div><img src="${esc(GuildUtils.driveImg(j.url))}" style="max-width:100%;max-height:200px;margin-top:8px" onerror="this.style.display='none'"></div>`;
         $('upCopy').onclick=()=>copyText(j.url,$('upCopy'));
-        renderUpload();
+        if($('upHistory')){ $('upHistory').innerHTML=uploadHistoryHtml(); bindUploadHistoryEvents(); }
       }else{ $('upProgress').textContent=''; $('upResult').innerHTML=`<div class="admin-card">❌ 失敗：${esc((j&&j.error)||'不明なエラー')}</div>`; }
     }catch(e){ $('upProgress').textContent=''; $('upResult').innerHTML=`<div class="admin-card">❌ 通信失敗：${esc(String(e))}</div>`; }
   }
@@ -702,6 +826,40 @@
     $('resetDailyReports').onclick=resetDailyReports;
     $('resetAllLocal').onclick=resetAllLocal;
   }
-  function render(){if(current==='dash'){const ss=salesSettings();const monthList=activeSales().filter(x=>saleMonth(x)===ss.currentMonth);const total=sumSales(monthList);const cover=chargeTotal(monthList);const e=data.monsters[data.currentEnemyIndex]||{};$('adminContent').innerHTML=`<h2>概要</h2><div class="grid"><div class="admin-card"><div class="admin-card-title">現在の敵</div>${esc(e.name||'-')}<br>HP ${e.hp||0}/${e.maxHp||0}</div><div class="admin-card"><div class="admin-card-title">顧客数</div>${data.customers.length}</div><div class="admin-card"><div class="admin-card-title">今月売上</div>${yen(total,data.settings.currency)}<br><span class="tiny">${esc(ss.currentMonth)} / 席料 ${yen(cover,data.settings.currency)}</span></div><div class="admin-card"><div class="admin-card-title">状態</div>v1.0 Game体験型メニュー</div></div>`} if(current==='business')renderBusiness(); if(current==='menu')renderMenu(); if(current==='inventory')renderInventory(); if(current==='monsters')renderMonsters(); if(current==='settings')renderSettings(); if(current==='storeInfo')renderStoreInfoAdmin(); if(current==='concept')renderConcept(); if(current==='qr')renderQR(); if(current==='customers')renderCustomers(); if(current==='sales')renderSales(); if(current==='upload')renderUpload(); if(current==='sync')renderSync(); if(current==='reset')renderReset();}
+  function goto(tabId,subTab){ current=tabId; if(subTab) themeSubTab=subTab; renderTabs(); render(); }
+  function renderDash(){
+    const ss=salesSettings();
+    const monthList=activeSales().filter(x=>saleMonth(x)===ss.currentMonth);
+    const today=activeSales().filter(s=>saleDay(s)===todayKey()&&saleMonth(s)===ss.currentMonth);
+    const total=sumSales(monthList);
+    const todayTotal=sumSales(today);
+    const cover=chargeTotal(monthList);
+    const e=data.monsters[data.currentEnemyIndex]||{};
+    const shopName=(data.settings.storeInfo&&data.settings.storeInfo.name)||data.settings.storeName||data.settings.shopName||(window.GuildTheme?GuildTheme.b('shopName'):'')||'-';
+    const themeName=(window.GuildTheme?GuildTheme.b('appName'):'')||shopName||'-';
+    const activeBillTotal=(data.activeBill||[]).reduce((a,i)=>a+(Number(i.subtotal)||0),0);
+    const activeBillCount=(data.activeBill||[]).length;
+    const curCustomer=data.currentCustomer||'-';
+    $('adminContent').innerHTML=`
+      <h2>ホーム</h2>
+      <div class="grid dash-grid">
+        <div class="admin-card"><div class="admin-card-title">🏪 店舗名</div>${esc(shopName)}</div>
+        <div class="admin-card"><div class="admin-card-title">🎭 現在テーマ</div>${esc(themeName)}</div>
+        <div class="admin-card"><div class="admin-card-title">💰 本日の売上</div>${yen(todayTotal,data.settings.currency)}<br><span class="tiny">会計 ${today.length}件</span></div>
+        <div class="admin-card"><div class="admin-card-title">🧾 現在会計</div>${activeBillCount?yen(activeBillTotal,data.settings.currency):'なし'}<br><span class="tiny">${esc(curCustomer)} / ${activeBillCount}品</span></div>
+        <div class="admin-card"><div class="admin-card-title">⚔️ 現在対象</div>${esc(e.name||'-')}<br><span class="tiny">HP ${e.hp||0}/${e.maxHp||0}</span></div>
+        <div class="admin-card"><div class="admin-card-title">👤 登録顧客数</div>${data.customers.length}名</div>
+        <div class="admin-card"><div class="admin-card-title">📅 今月売上</div>${yen(total,data.settings.currency)}<br><span class="tiny">${esc(ss.currentMonth)} / 席料 ${yen(cover,data.settings.currency)}</span></div>
+      </div>
+      <h3 class="dash-sub-h">まずはこちら</h3>
+      <div class="grid dash-quick">
+        <button class="admin-card quick-card" data-goto="themeEditor" data-sub="store"><div class="quick-icon">🏪</div>店舗</button>
+        <button class="admin-card quick-card" data-goto="themeEditor" data-sub="text"><div class="quick-icon">🎭</div>テーマ</button>
+        <button class="admin-card quick-card" data-goto="menu"><div class="quick-icon">🍴</div>メニュー</button>
+        <button class="admin-card quick-card" data-goto="sales"><div class="quick-icon">💰</div>会計</button>
+      </div>`;
+    document.querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>goto(b.dataset.goto,b.dataset.sub));
+  }
+  function render(){if(current==='dash')renderDash(); if(current==='business')renderBusiness(); if(current==='menu')renderMenu(); if(current==='inventory')renderInventory(); if(current==='settings')renderSettings(); if(current==='themeEditor')renderThemeEditor(); if(current==='qr')renderQR(); if(current==='customers')renderCustomers(); if(current==='sales')renderSales(); if(current==='sync')renderSync(); if(current==='reset')renderReset();}
   loginOk()?showApp():showLogin();
 })();
