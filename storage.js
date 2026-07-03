@@ -14,12 +14,15 @@ window.GuildStorage = (() => {
   function get(key, fallback){ try{ const raw=localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }catch(e){ return fallback; } }
   function set(key, value){ localStorage.setItem(key, JSON.stringify(value)); }
 
+  // 「grass.png」のようにフォルダ抜きで保存されてしまった古いRPG素材名を、正しい presets/rpg/ 配下へ自動修復する
+  const RPG_BARE_FILES = ['slime.png','goblin.png','orc.png','skeleton.png','mimic.png','minotaur.png','gargoyle.png','dragon.png','dark_wizard.png','maou.png','maou_new.png','grass.png','forest.png','cave.png','ruins.png','volcano.png','castle.png','victory_clear.PNG','background.jpg'];
+  function fixAssetPath(v){ return (v && RPG_BARE_FILES.indexOf(v)!==-1) ? ('presets/rpg/'+v) : v; }
   function normalizeMonster(m, i){
     m = m || {}; const hpMax = Number(m.maxHp || m.hp || 500) || 500;
     return {id:m.id || GuildUtils.uid('enemy'), name:m.name || `敵${i+1}`, stage:m.stage || '草原',
       hp:Number.isFinite(Number(m.hp)) ? Math.max(0,Number(m.hp)) : hpMax, maxHp:hpMax,
-      bg:m.bg || m.background || 'grass.png', background:m.bg || m.background || 'grass.png',
-      image:m.image || 'slime.png', bgm:m.bgm || 'slime', sort:Number(m.sort || i),
+      bg:fixAssetPath(m.bg || m.background) || 'presets/rpg/grass.png', background:fixAssetPath(m.bg || m.background) || 'presets/rpg/grass.png',
+      image:fixAssetPath(m.image) || 'presets/rpg/slime.png', bgm:m.bgm || 'slime', sort:Number(m.sort || i),
       scale:Number.isFinite(Number(m.scale))?Number(m.scale):100, offsetX:Number.isFinite(Number(m.offsetX))?Number(m.offsetX):0, offsetY:Number.isFinite(Number(m.offsetY))?Number(m.offsetY):0};
   }
 

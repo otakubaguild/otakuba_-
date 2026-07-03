@@ -206,7 +206,14 @@
     'presets/magic/magic_slime.png','presets/magic/fairy.png','presets/magic/Wight.png','presets/magic/armor.png','presets/magic/golem.png','presets/magic/ghost.png','presets/magic/cursed_book.png','presets/magic/vampire.png','presets/magic/dark_mage.png','presets/magic/summoned_dragon.png','presets/magic/master.png'
   ];
   var BGM_LIST=['title','slime','goblin','orc','cave','ruins','maou','daimaou','ending'];
-  function normalizeMonster(m,i){m=m||{};var hpMax=Number(m.maxHp||m.hp||500)||500;m.id=m.id||GuildUtils.uid('enemy');m.name=m.name||('敵'+(i+1));m.stage=m.stage||'草原';m.maxHp=hpMax;m.hp=Number.isFinite(Number(m.hp))?Number(m.hp):hpMax;m.bg=m.bg||m.background||'presets/rpg/grass.png';m.background=m.bg;m.image=m.image||'presets/rpg/slime.png';m.bgm=m.bgm||'slime';m.sort=Number(m.sort||i);return m;}
+  var RPG_BARE_FILES=['slime.png','goblin.png','orc.png','skeleton.png','mimic.png','minotaur.png','gargoyle.png','dragon.png','dark_wizard.png','maou.png','maou_new.png','grass.png','forest.png','cave.png','ruins.png','volcano.png','castle.png','victory_clear.PNG','background.jpg'];
+  var PRESET_LABELS={rpg:'⚔️ RPG',space:'🚀 SF',magic:'🪄 魔法学校'};
+  function activePresetId(){ return (data.settings&&data.settings.currentPresetId)||'rpg'; }
+  function scopedList(list,presetId){ var prefix='presets/'+presetId+'/'; return list.filter(function(v){ return v.indexOf(prefix)===0; }); }
+  function themeScopedBgList(){ return scopedList(BG_LIST,activePresetId()); }
+  function themeScopedImgList(){ return scopedList(IMG_LIST,activePresetId()); }
+  function fixAssetPath(v){ return (v && RPG_BARE_FILES.indexOf(v)!==-1) ? ('presets/rpg/'+v) : v; }
+  function normalizeMonster(m,i){m=m||{};var hpMax=Number(m.maxHp||m.hp||500)||500;m.id=m.id||GuildUtils.uid('enemy');m.name=m.name||('敵'+(i+1));m.stage=m.stage||'草原';m.maxHp=hpMax;m.hp=Number.isFinite(Number(m.hp))?Number(m.hp):hpMax;m.bg=fixAssetPath(m.bg||m.background)||'presets/rpg/grass.png';m.background=m.bg;m.image=fixAssetPath(m.image)||'presets/rpg/slime.png';m.bgm=m.bgm||'slime';m.sort=Number(m.sort||i);return m;}
   function optList(arr,sel){return arr.map(function(v){return '<option value="'+esc(v)+'"'+(v===sel?' selected':'')+'>'+esc(v)+'</option>';}).join('');}
   var BGM_LABELS={title:'タイトル',slime:'序盤・スライム系',goblin:'中盤・ゴブリン系',orc:'オーク系',cave:'洞窟',ruins:'遺跡',maou:'魔王',daimaou:'大魔王',ending:'ファンファーレ（クリア）'};
   function bgmOptList(arr,sel){return arr.map(function(v){var label=BGM_LABELS[v]||v;return '<option value="'+esc(v)+'"'+(v===sel?' selected':'')+'>'+esc(label)+'</option>';}).join('');}
@@ -218,8 +225,8 @@
     '<label>BGM URL（アップした音源を使う場合はここに貼る）<input data-field="bgmUrl" value="'+esc(/^https?:/i.test(m.bgm)?m.bgm:'')+'" placeholder="https://drive.google.com/..."></label>'+
     '<label>現在HP<input data-field="hp" type="number" value="'+(m.hp||0)+'"></label>'+
     '<label>最大HP<input data-field="maxHp" type="number" value="'+(m.maxHp||500)+'"></label>'+
-    '<label>背景<select data-field="bg">'+optList(BG_LIST,m.bg)+'</select></label>'+
-    '<label>敵画像（一覧から選択）<select data-field="image">'+optList(IMG_LIST.concat(IMG_LIST.includes(m.image)||!m.image||/^https?:/i.test(m.image)?[]:[m.image]),m.image)+'</select></label>'+
+    '<label>背景<select data-field="bg">'+optList(themeScopedBgList().concat(themeScopedBgList().includes(m.bg)||!m.bg?[]:[m.bg]),m.bg)+'</select></label>'+
+    '<label>敵画像（一覧から選択）<select data-field="image">'+optList(themeScopedImgList().concat(themeScopedImgList().includes(m.image)||!m.image||/^https?:/i.test(m.image)?[]:[m.image]),m.image)+'</select></label>'+
     '<label>敵画像 URL（アップした画像を使う場合はここに貼る）<input data-field="imageUrl" value="'+esc(/^https?:/i.test(m.image)?m.image:'')+'" placeholder="https://drive.google.com/..."></label>'+
     '<div class="enemy-preview" data-preview="'+i+'" style="position:relative;width:100%;height:180px;border:2px solid rgba(255,246,223,.5);border-radius:12px;overflow:hidden;margin:8px 0;background:#000 center/cover no-repeat;background-image:url('+esc(GuildUtils.driveImg(m.bg))+')"><img data-preview-img src="'+esc(GuildUtils.driveImg(m.image))+'" style="position:absolute;left:50%;top:50%;max-width:60%;max-height:80%;object-fit:contain;transform:translate(calc(-50% + '+(Number(m.offsetX)||0)+'%),calc(-50% + '+(Number(m.offsetY)||0)+'%)) scale('+((Number(m.scale)||100)/100)+')" onerror="this.style.display=\'none\'"></div>'+
     '<label>大きさ <span data-scale-val>'+(Number(m.scale)||100)+'</span>%<input data-field="scale" type="range" min="30" max="250" value="'+(Number(m.scale)||100)+'"></label>'+
@@ -230,7 +237,7 @@
   function readMonsterCard(card){var m=data.monsters[+card.dataset.monsterIndex];m.name=card.querySelector('[data-field=name]').value;m.stage=card.querySelector('[data-field=stage]').value;var bgmUrl=(card.querySelector('[data-field=bgmUrl]')||{}).value||'';m.bgm=bgmUrl.trim()?bgmUrl.trim():card.querySelector('[data-field=bgm]').value;m.hp=+card.querySelector('[data-field=hp]').value||0;m.maxHp=+card.querySelector('[data-field=maxHp]').value||500;m.bg=card.querySelector('[data-field=bg]').value;m.background=m.bg;var imgUrl=(card.querySelector('[data-field=imageUrl]')||{}).value||'';m.image=imgUrl.trim()?imgUrl.trim():card.querySelector('[data-field=image]').value;m.scale=+card.querySelector('[data-field=scale]').value||100;m.offsetX=+card.querySelector('[data-field=offsetX]').value||0;m.offsetY=+card.querySelector('[data-field=offsetY]').value||0;return m;}
   function saveMonsterForm(){document.querySelectorAll('[data-monster-index]').forEach(readMonsterCard);save();}
   let monsterContainerId='adminContent';
-  function renderMonsters(containerId){monsterContainerId=containerId||monsterContainerId;$(monsterContainerId).innerHTML='<h2>⚔️ 討伐モンスター管理</h2><div class="toolbar"><button class="btn gold" id="addMonster">追加</button><button class="btn green" id="saveMonsters">全体保存</button><button class="btn" id="monOpenAll">全部開く</button><button class="btn" id="monCloseAll">全部閉じる</button><button class="btn" id="jsonMonsters">JSON</button></div><div class="category-list" id="monsterListBox">'+monstersListHtml()+'</div>';bindMonsterEvents();
+  function renderMonsters(containerId){monsterContainerId=containerId||monsterContainerId;$(monsterContainerId).innerHTML='<h2>⚔️ 討伐モンスター管理</h2><div class="admin-card"><div class="admin-card-title">現在のテーマ：'+esc(PRESET_LABELS[activePresetId()]||activePresetId())+'</div><p class="tiny">背景・敵画像の選択肢は、このテーマの素材だけに絞り込んで表示されます。テーマを変えたい場合は「テーマ編集」の上部から選び直してください。</p></div><div class="toolbar"><button class="btn gold" id="addMonster">追加</button><button class="btn green" id="saveMonsters">全体保存</button><button class="btn" id="monOpenAll">全部開く</button><button class="btn" id="monCloseAll">全部閉じる</button><button class="btn" id="jsonMonsters">JSON</button></div><div class="category-list" id="monsterListBox">'+monstersListHtml()+'</div>';bindMonsterEvents();
     $('addMonster').onclick=function(){saveMonsterForm();data.monsters.push(normalizeMonster({name:'新しい敵',maxHp:500},data.monsters.length));save();renderMonsters();};
     $('saveMonsters').onclick=function(){saveMonsterForm();toast('保存しました');if(GuildStorage.pushCloud)GuildStorage.pushCloud();};
     $('monOpenAll').onclick=function(){document.querySelectorAll('#monsterListBox .category-block').forEach(function(b){b.classList.add('open');var t=b.querySelector('.category-toggle');if(t)t.textContent='閉じる';});};
@@ -390,6 +397,7 @@
           if(!confirm('「'+(p.label||p.id)+'」に切り替えますか？\n\n・店名/色/呼び名が変わります\n・敵の構成が'+((p.enemies||[]).length)+'体に入れ替わります（今の敵設定は上書き）\n・メニュー/顧客/売上は残ります'))return;
           GuildTheme.applyPresetTheme(p);
           applyConceptTemplateToSettings(p);
+          data.settings.currentPresetId=p.id;
           if(Array.isArray(p.enemies)){
             data.monsters=p.enemies.map(function(e,idx){ return normalizeMonster({ id:GuildUtils.uid('enemy'), name:e.name, stage:e.stage, maxHp:e.maxHp, hp:e.maxHp, bg:e.bg, image:e.image, bgm:e.bgm, scale:e.scale||100, offsetX:e.offsetX||0, offsetY:e.offsetY||0 }, idx); });
             data.currentEnemyIndex=0;
