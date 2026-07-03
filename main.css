@@ -32,6 +32,7 @@ input,textarea,select{color:var(--white);background:rgba(0,0,0,.62);border:2px s
 .btn.small{min-height:32px;padding:5px 8px;font-size:12px;border-width:2px}
 .admin-link{width:100%;border-color:var(--blue);color:var(--blue);font-weight:900;background:rgba(0,0,0,.72)}
 .mt{margin-top:12px}.tiny{font-size:12px;opacity:.78;line-height:1.5}.hidden{display:none!important}
+.audio-credit{margin-top:14px;font-size:10px;opacity:.45;text-align:center;letter-spacing:.3px}
 .toast{position:fixed;left:14px;right:14px;bottom:calc(20px + env(safe-area-inset-bottom));z-index:9999;display:none;background:rgba(0,0,0,.92);border:2px solid var(--gold);border-radius:12px;padding:14px;text-align:center;font-weight:bold;box-shadow:0 6px 24px rgba(0,0,0,.6)}
 .toast.show{display:block;animation:pop .2s ease both}
 .modal{position:absolute;inset:0;z-index:20;background:rgba(0,0,0,.92);display:none;flex-direction:column;padding:14px}

@@ -46,6 +46,8 @@ window.GuildApp = {VERSION:'4.0'};
     welcomeText(welcomePrompt());
     GuildUI.show('screenWelcome');
     GuildAudio.playBgm((themeCustom().startBgm)||'title');
+    const creditEl=$('audioCreditText');
+    if(creditEl){ const credit=(data.settings.audioCredit!==undefined)?data.settings.audioCredit:'音楽：魔王魂 / パンダの中のパンダ'; creditEl.textContent=credit; creditEl.style.display=credit?'':'none'; }
   }
   function resumeBattle(){
     GuildAudio.stopBgm();

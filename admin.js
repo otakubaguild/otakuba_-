@@ -257,19 +257,9 @@
       var urlField=(card.querySelector('[data-field=bgmUrl]')||{}).value||'';
       var key=card.querySelector('[data-field=bgm]').value;
       var target=urlField.trim()?urlField.trim():key;
-      // 実際に鳴らすファイルパスを解決して表示
-      var resolved='';
-      try{ resolved=GuildAudio.resolvePath?GuildAudio.resolvePath('bgm',target):target; }catch(e){}
-      var af=(data.settings.audioFiles||{}); var file=(af.bgm&&af.bgm[target])||af[target]||(/^https?:|\.(mp3|wav|ogg|m4a)$/i.test(target)?target:'');
-      if(!file){ toast('⚠️「'+target+'」に対応する音源が未登録です'); return; }
-      try{
-        if(window._bgmTest){ window._bgmTest.pause(); window._bgmTest=null; }
-        var src=/^https?:|\.(mp3|wav|ogg|m4a)$/i.test(file)?file:file;
-        if(window.GuildUtils&&GuildUtils.driveImg&&/drive\.google/.test(src)) src=GuildUtils.driveImg(src);
-        var a=new Audio(src); window._bgmTest=a; a.play().then(function(){ toast('▶ 再生中: '+file); }).catch(function(e){ toast('❌ 再生失敗: '+file+'（'+e.name+'）'); });
-      }catch(e){ toast('❌ エラー: '+e); }
+      previewAudioTarget(target);
     };});
-    document.querySelectorAll('[data-bgm-stop]').forEach(function(b){b.onclick=function(){ if(window._bgmTest){ window._bgmTest.pause(); window._bgmTest=null; toast('■ 停止'); } };});
+    document.querySelectorAll('[data-bgm-stop]').forEach(function(b){b.onclick=stopAudioPreview;});
     document.querySelectorAll('[data-monster-toggle]').forEach(function(h){h.onclick=function(){var b=h.closest('.category-block');b.classList.toggle('open');h.querySelector('.category-toggle').textContent=b.classList.contains('open')?'閉じる':'開く';};});
     document.querySelectorAll('[data-monster-index]').forEach(function(card){['scale','offsetX','offsetY'].forEach(function(f){var el=card.querySelector('[data-field='+f+']');if(el)el.addEventListener('input',function(){updatePreview(card);});});var imgSel=card.querySelector('[data-field=image]');if(imgSel)imgSel.addEventListener('change',function(){updatePreview(card);});var imgUrlEl=card.querySelector('[data-field=imageUrl]');if(imgUrlEl)imgUrlEl.addEventListener('input',function(){updatePreview(card);});var bgSel=card.querySelector('[data-field=bg]');if(bgSel)bgSel.addEventListener('change',function(){updatePreview(card);});});
     document.querySelectorAll('[data-save-monster]').forEach(function(b){b.onclick=function(){var card=b.closest('[data-monster-index]');readMonsterCard(card);save();if(GuildStorage.pushCloud)GuildStorage.pushCloud();toast('保存しました');var orig=b.textContent;b.textContent='✓ 保存しました';b.classList.add('green');setTimeout(function(){b.textContent=orig;b.classList.remove('green');},1400);};});
@@ -621,6 +611,22 @@
     bindThemeCustomReset();
     bindUploadWidget();
   }
+  // BGM/SEの試聴共通処理。target はキー名(例:'slime')・生ファイル名・URLのどれでもOK
+  function previewAudioTarget(target){
+    target=(target||'').trim();
+    if(!target){ toast('⚠️ 音源が指定されていません'); return; }
+    var af=(data.settings.audioFiles||{});
+    var file=(af.bgm&&af.bgm[target])||(af.se&&af.se[target])||(/^https?:|\.(mp3|wav|ogg|m4a)$/i.test(target)?target:'');
+    if(!file){ toast('⚠️「'+target+'」に対応する音源が見つかりません'); return; }
+    try{
+      if(window._bgmTest){ window._bgmTest.pause(); window._bgmTest=null; }
+      var src=file;
+      if(window.GuildUtils&&GuildUtils.driveImg&&/drive\.google/.test(src)) src=GuildUtils.driveImg(src);
+      var a=new Audio(src); window._bgmTest=a;
+      a.play().then(function(){ toast('▶ 再生中: '+file); }).catch(function(e){ toast('❌ 再生失敗: '+file+'（'+e.name+'）'); });
+    }catch(e){ toast('❌ エラー: '+e); }
+  }
+  function stopAudioPreview(){ if(window._bgmTest){ window._bgmTest.pause(); window._bgmTest=null; toast('■ 停止'); } }
   function renderThemeBgm(){
     const c=ensureThemeCustom();
     const s=data.settings;
@@ -633,22 +639,40 @@
     $('themeSubContent').innerHTML=
       '<div class="admin-card"><div class="admin-card-title">🎬 場面BGM</div>'+
       '<label>スタート画面BGM（キー or URL）<input id="tcStartBgm" value="'+esc(c.startBgm||'title')+'" placeholder="例：title / https://...mp3"></label>'+
+      '<div class="toolbar"><button class="btn small" data-preview-input="tcStartBgm">▶ 試聴</button><button class="btn small" data-preview-stop="1">■ 停止</button></div>'+
       '<label>討伐完了BGM（キー or URL）<input id="tcVictoryBgm" value="'+esc(c.victoryBgm||'ending')+'" placeholder="例：ending / https://...mp3"></label>'+
+      '<div class="toolbar"><button class="btn small" data-preview-input="tcVictoryBgm">▶ 試聴</button><button class="btn small" data-preview-stop="1">■ 停止</button></div>'+
       '</div>'+
       '<div class="admin-card"><div class="admin-card-title">⚔️ ステージ別BGM（キャラクターのBGM欄で呼び出す名前）</div>'+
       '<p class="tiny">キャラクター編集画面のBGM欄に、ここで決めたキー名（例：slime）を入れると自動で使われます。空欄にすると既定のBGMのまま動きます。</p>'+
-      Object.keys(bgmMap).map(k=>`<label>${esc(k)}<input data-bgm-key="${esc(k)}" value="${esc(bgmMap[k]||'')}" placeholder="ファイル名 / https://...mp3"></label>`).join('')+
+      Object.keys(bgmMap).map(k=>`<label>${esc(k)}<input data-bgm-key="${esc(k)}" value="${esc(bgmMap[k]||'')}" placeholder="ファイル名 / https://...mp3"></label><div class="toolbar"><button class="btn small" data-preview-input="bgm-${esc(k)}">▶ 試聴</button><button class="btn small" data-preview-stop="1">■ 停止</button></div>`).join('')+
       '</div>'+
       '<div class="admin-card"><div class="admin-card-title">🔔 効果音（SE）</div>'+
       '<p class="tiny">ボタン操作や攻撃・撃破などの短い効果音です。ファイル名またはURLを指定できます。</p>'+
-      Object.keys(seMap).map(k=>`<label>${esc(SE_LABELS[k]||k)}<input data-se-key="${esc(k)}" value="${esc(seMap[k]||'')}" placeholder="ファイル名 / https://...mp3"></label>`).join('')+
+      Object.keys(seMap).map(k=>`<label>${esc(SE_LABELS[k]||k)}<input data-se-key="${esc(k)}" value="${esc(seMap[k]||'')}" placeholder="ファイル名 / https://...mp3"></label><div class="toolbar"><button class="btn small" data-preview-input="se-${esc(k)}">▶ 試聴</button><button class="btn small" data-preview-stop="1">■ 停止</button></div>`).join('')+
+      '</div>'+
+      '<div class="admin-card"><div class="admin-card-title">📝 音源クレジット表記</div>'+
+      '<p class="tiny">配布サイトの規約でクレジット表記が必須の音源を使っている場合、ここに書いておくとタイトル画面に小さく表示されます。音源を全部自分の物や表記不要の物に差し替えた場合は空欄でOKです。</p>'+
+      '<input id="tcAudioCredit" value="'+esc(s.audioCredit!==undefined?s.audioCredit:'音楽：魔王魂 / パンダの中のパンダ')+'" placeholder="例：音楽：魔王魂">'+
       '</div>'+
       '<div class="toolbar"><button class="btn gold" id="saveThemeBgm">BGM・SE設定を保存</button><button class="btn" id="clearThemeCustom">場面BGMを初期化</button></div>'+
       '<h3>音源をアップロードする</h3>'+uploadWidgetHtml();
+    document.querySelectorAll('[data-preview-input]').forEach(function(btn){
+      btn.onclick=function(){
+        var key=btn.dataset.previewInput;
+        var el;
+        if(key==='tcStartBgm'||key==='tcVictoryBgm') el=$(key);
+        else if(key.indexOf('bgm-')===0) el=document.querySelector('[data-bgm-key="'+key.slice(4)+'"]');
+        else if(key.indexOf('se-')===0) el=document.querySelector('[data-se-key="'+key.slice(3)+'"]');
+        previewAudioTarget(el?el.value:'');
+      };
+    });
+    document.querySelectorAll('[data-preview-stop]').forEach(function(btn){ btn.onclick=stopAudioPreview; });
     $('saveThemeBgm').onclick=function(){
       Object.assign(c,{ startBgm:$('tcStartBgm').value.trim()||'title', victoryBgm:$('tcVictoryBgm').value.trim()||'ending' });
       document.querySelectorAll('[data-bgm-key]').forEach(inp=>{ bgmMap[inp.dataset.bgmKey]=inp.value.trim()||bgmMap[inp.dataset.bgmKey]; });
       document.querySelectorAll('[data-se-key]').forEach(inp=>{ seMap[inp.dataset.seKey]=inp.value.trim()||seMap[inp.dataset.seKey]; });
+      s.audioCredit=$('tcAudioCredit').value.trim();
       save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud(); toast('BGM・SE設定を保存しました');
     };
     bindThemeCustomReset();
