@@ -7,7 +7,7 @@ input,textarea,select{color:var(--white);background:rgba(0,0,0,.62);border:2px s
 .app{position:relative;width:100vw;max-width:480px;height:100dvh;margin:0 auto;overflow:hidden;background:#000;isolation:isolate}
 .bg{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.08),rgba(0,0,0,.20) 55%,rgba(0,0,0,.75)),url("background.jpg") center/cover no-repeat;z-index:-3}
 .scan{position:absolute;inset:0;pointer-events:none;z-index:5;background:repeating-linear-gradient(to bottom,rgba(255,255,255,.025),rgba(255,255,255,.025) 1px,transparent 2px,transparent 5px);opacity:.10}
-.screen{position:absolute;inset:0;display:none;padding:14px 12px calc(14px + env(safe-area-inset-bottom));animation:fadeIn .18s ease both}
+.screen{position:absolute;inset:0;display:none;padding:14px 12px calc(14px + env(safe-area-inset-bottom));animation:fadeIn .18s ease both;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .screen.active{display:flex;flex-direction:column}
 .center{justify-content:center;align-items:center;text-align:center}
 .panel{background:linear-gradient(180deg,rgba(7,12,20,.66),rgba(0,3,8,.78));backdrop-filter:blur(2.5px);-webkit-backdrop-filter:blur(2.5px);border:3px solid rgba(255,246,223,.88);border-radius:12px;box-shadow:var(--shadow);padding:12px;position:relative}
