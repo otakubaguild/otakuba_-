@@ -76,6 +76,7 @@ window.GuildApp = {VERSION:'4.0'};
       const src=c.victoryImage || 'victory_clear.PNG';
       img.src=assetUrl(src);
       img.style.display=src?'':'none';
+      img.alt=(window.GuildTheme?GuildTheme.w('bossDefeatText'):'魔王討伐完了');
     }
     const vt=$('victoryClearTitle');
     if(vt){
@@ -262,7 +263,8 @@ window.GuildApp = {VERSION:'4.0'};
   };
 
   showWelcomeScreen();
-  if(GuildStorage.needsInitialSetup&&GuildStorage.needsInitialSetup()) showSetupWizard(); };
+  const forceSetup = (function(){ try{ return new URLSearchParams(location.search||'').get('setup')==='1'; }catch(e){ return false; } })();
+  if(forceSetup || (GuildStorage.needsInitialSetup&&GuildStorage.needsInitialSetup())) showSetupWizard(); };
   GuildApp.showLevelUp=function(oldLevel,newLevel){ const o=$('levelUpOverlay'); $('levelUpText').textContent=`Lv.${oldLevel} → Lv.${newLevel}`; o.classList.add('show'); };
   GuildApp.showVictoryClear=function(){ const o=$('guildReturnOverlay'); if(o) o.classList.add('show'); };
   if($('guildReturnBtn')) $('guildReturnBtn').onclick=(ev)=>{

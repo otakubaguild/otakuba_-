@@ -1,7 +1,6 @@
 {
   "currency": "G",
   "coverCharge": 500,
-  "levelStep": 3000,
   "adminPassword": "OTAKU",
   "notifyOn": true,
   "gasUrl": "https://script.google.com/macros/s/AKfycbzGMB8qWGRFiEapNpX6n5BpBFXZGUG7JljnZ38IjBucArvTqgEFGwjA34vj1yfk_ZJ42Q/exec",
@@ -64,5 +63,10 @@
     "title": "本日のお知らせ",
     "body": "",
     "position": "top"
-  }
+  },
+  "levelMode": "visits",
+  "levelStep": 3000,
+  "levelThresholds": [
+    3000
+  ]
 }

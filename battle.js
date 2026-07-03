@@ -25,7 +25,8 @@ window.GuildBattle = (() => {
     $('adventurerName').textContent = c ? c.name : ('名もなき'+(window.GuildTheme?GuildTheme.w('customer'):'冒険者'));
     $('adventurerSub').textContent = `Lv.${c?c.level:1} / ${c&&c.title?c.title:'二つ名なし'}`;
     $('stageName').textContent = `${(window.GuildTheme?GuildTheme.w('stage'):'現在ステージ')}：${e.stage||'---'}`;
-    $('enemyName').textContent = e.name || '---';
+    const enemyLabel = (window.GuildTheme?(isFinalEnemy(e)?GuildTheme.w('boss'):GuildTheme.w('enemy')):(isFinalEnemy(e)?'魔王':'敵'));
+    $('enemyName').textContent = (e.name? (enemyLabel+'：'+e.name) : '---');
     $('enemyHpText').textContent = `${(window.GuildTheme?GuildTheme.w('hpLabel'):'HP')} ${Math.max(0,Math.ceil(Number(e.hp)||0))} / ${e.maxHp||0}`;
     $('enemyHpFill').style.width = `${Math.max(0,Math.min(100,(Number(e.hp||0)/Number(e.maxHp||1))*100))}%`;
     GuildUI.applyBg(e.bg);

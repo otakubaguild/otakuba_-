@@ -169,7 +169,7 @@ window.GuildStorage = (() => {
       currentCustomer:'', activeBill:[], currentEnemyIndex:0, partyCount:1
     };
     defaults.settings = Object.assign({
-      currency:'G', coverCharge:500, levelStep:3000, adminPassword:'OTAKU', notifyOn:true, setupDone:false, gasUrl:'', discordWebhookUrl:'', storeId:'',
+      currency:'G', coverCharge:500, levelMode:'visits', levelStep:3000, levelThresholds:[3000], adminPassword:'OTAKU', notifyOn:true, setupDone:false, gasUrl:'', discordWebhookUrl:'', storeId:'',
       categories:[
         {id:'beer_sour', name:'ビール・サワー', icon:'🍺'}, {id:'shochu_cocktail', name:'焼酎・カクテル', icon:'🍸'},
         {id:'shot_bottle', name:'ショット・ボトル', icon:'🥂'}, {id:'soft', name:'ソフトドリンク', icon:'🥤'},
@@ -280,7 +280,24 @@ window.GuildStorage = (() => {
     try{
       const res=await fetch(url+(url.includes('?')?'&':'?')+'action=sync&v='+Date.now(),{cache:'no-store'});
       const remote=await res.json(); if(!remote||typeof remote!=='object') return false;
-      if(remote.settings && Object.keys(remote.settings).length){ data.settings=Object.assign({},data.settings,remote.settings); }
+      if(remote.settings && Object.keys(remote.settings).length){
+        // 浅いマージだと themeCustom / notice / audioFiles などのネストしたオブジェクトが
+        // 丸ごと置き換わってしまい、片方の端末にしかない項目が消えることがあるため、
+        // ネストが深いキーだけは1階層だけ深くマージする
+        const NESTED_KEYS=['themeCustom','notice','audioFiles','storeInfo'];
+        const merged=Object.assign({},data.settings,remote.settings);
+        NESTED_KEYS.forEach(function(k){
+          if(remote.settings[k] && typeof remote.settings[k]==='object' && !Array.isArray(remote.settings[k])){
+            merged[k]=Object.assign({}, data.settings[k]||{}, remote.settings[k]);
+          }
+        });
+        // audioFiles.bgm はさらにもう1段ネストしているので、そこも個別にマージ
+        if(remote.settings.audioFiles && remote.settings.audioFiles.bgm){
+          merged.audioFiles = merged.audioFiles || {};
+          merged.audioFiles.bgm = Object.assign({}, (data.settings.audioFiles||{}).bgm||{}, remote.settings.audioFiles.bgm);
+        }
+        data.settings = merged;
+      }
       if(Array.isArray(remote.menu)&&remote.menu.length){
         const remoteMenu = remote.menu.map(normalizeMenu);
         const localMenu = Array.isArray(data.menu) ? data.menu : [];

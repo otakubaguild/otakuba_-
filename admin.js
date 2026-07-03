@@ -271,22 +271,69 @@
     document.querySelectorAll('[data-del-monster]').forEach(function(b){b.onclick=function(){if(confirm('削除しますか？')){saveMonsterForm();data.monsters.splice(+b.dataset.delMonster,1);save();renderMonsters();}};});}
 
   // ===== 設定ボタン編集 =====
-  function renderSettings(){var s=data.settings;s.notice=Object.assign({enabled:true,title:'本日のお知らせ',body:'',position:'top'},s.notice||{});$('adminContent').innerHTML='<h2>⚙️ 設定</h2><div class="admin-card">'+
+  function levelThresholdRowsHtml(s){
+    const th=(Array.isArray(s.levelThresholds)&&s.levelThresholds.length)?s.levelThresholds.map(Number):[Number(s.levelStep)||3000];
+    return th.map((v,i)=>'<div class="row" style="align-items:center;gap:6px;margin:4px 0">'+
+      '<span style="min-width:78px">Lv'+(i+1)+'→Lv'+(i+2)+'</span>'+
+      '<input type="number" data-lv-th="'+i+'" value="'+(v||0)+'" style="flex:1">'+
+      '<button class="btn small gold" data-lv-save="'+i+'">保存</button>'+
+      (th.length>1?'<button class="btn small" data-lv-del="'+i+'">×</button>':'')+
+    '</div>').join('');
+  }
+  function renderSettings(){var s=data.settings;s.notice=Object.assign({enabled:true,title:'本日のお知らせ',body:'',position:'top'},s.notice||{});$('adminContent').innerHTML='<h2>⚙️ 設定</h2>'+
+    '<div class="admin-card"><div class="admin-card-title">🏪 基本設定</div>'+
     '<label>通貨単位<input id="setCurrency" value="'+esc(s.currency||'G')+'"></label>'+
     '<label>チャージ（1人）<input id="setCover" type="number" value="'+(s.coverCharge??500)+'"></label>'+
     '<label>管理パスワード<input id="setPass" value="'+esc(s.adminPassword||'OTAKU')+'"></label>'+
+    '<div class="toolbar"><button class="btn gold" id="saveBasic">この項目だけ保存</button></div>'+
+    '<button class="btn" id="resetSetupWizard">初回セットアップを確認する</button>'+
+    '</div><div class="admin-card"><div class="admin-card-title">🔔 通知・連携</div>'+
     '<label class="check-row"><input id="setNotify" type="checkbox" '+(s.notifyOn!==false?'checked':'')+'>通知ON</label>'+
     '<label>GAS URL<input id="setGas" value="'+esc(s.gasUrl||'')+'" placeholder="https://script.google.com/.../exec"></label>'+
     '<label>Discord通知URL（この店の通知先）<input id="setHook" value="'+esc(s.discordWebhookUrl||'')+'" placeholder="https://discord.com/api/webhooks/..."></label>'+
-    '<div class="tiny">Discordのチャンネル設定→連携サービス→ウェブフックで作ったURLを貼ると、注文/会計の通知がその店のDiscordに届きます。空欄ならGAS側の設定が使われます。</div>'+'<button class="btn" id="resetSetupWizard">初回セットアップを再表示</button>'+
+    '<div class="tiny">Discordのチャンネル設定→連携サービス→ウェブフックで作ったURLを貼ると、注文/会計の通知がその店のDiscordに届きます。空欄ならGAS側の設定が使われます。</div>'+
+    '<div class="toolbar"><button class="btn gold" id="saveNotify">この項目だけ保存</button></div>'+
+    '</div><div class="admin-card"><div class="admin-card-title">🆙 レベル計算方式</div>'+
+    '<p class="tiny">冒険者(お客様)のレベルをどう計算するか選べます。</p>'+
+    '<select id="setLevelMode"><option value="visits" '+((s.levelMode||'visits')==='visits'?'selected':'')+'>来店回数（来店1回でLv+1）</option><option value="total" '+(s.levelMode==='total'?'selected':'')+'>合計金額（レベルごとに金額を設定）</option></select>'+
+    '<div id="levelThresholdBox" style="'+(s.levelMode==='total'?'':'display:none')+'">'+
+      '<p class="tiny">各レベルに必要な「累計金額」を自由に設定できます。行ごとに保存でき、その場でクラウド(GAS)にも送信されます。</p>'+
+      '<div id="levelThresholdList">'+levelThresholdRowsHtml(s)+'</div>'+
+      '<div class="toolbar"><button class="btn" id="addLevelThreshold">＋ レベルを追加</button></div>'+
+    '</div>'+
     '</div><div class="admin-card notice-admin"><div class="admin-card-title">📢 本日のお知らせ</div>'+
     '<label class="check-row"><input id="noticeEnabled" type="checkbox" '+(s.notice.enabled!==false?'checked':'')+'>一般画面に表示する</label>'+
     '<label>見出し<input id="noticeTitle" value="'+esc(s.notice.title||'本日のお知らせ')+'"></label>'+
     '<label>本文<textarea id="noticeBody" placeholder="例：本日は20時からイベントクエスト開催！">'+esc(s.notice.body||'')+'</textarea></label>'+ 
     '<label>表示位置<select id="noticePosition"><option value="top" '+(s.notice.position!=='bottom'?'selected':'')+'>上に表示</option><option value="bottom" '+(s.notice.position==='bottom'?'selected':'')+'>下に表示</option></select></label>'+ 
-    '</div><div class="toolbar"><button class="btn green" id="saveSettings">保存</button><button class="btn" id="jsonSettings">詳細JSON</button></div>';
-    $('saveSettings').onclick=function(){s.currency=$('setCurrency').value||'G';s.coverCharge=+$('setCover').value||0;s.adminPassword=$('setPass').value||'OTAKU';s.notifyOn=$('setNotify').checked;s.gasUrl=$('setGas').value.trim();s.discordWebhookUrl=$('setHook').value.trim();s.notice={enabled:$('noticeEnabled').checked,title:$('noticeTitle').value||'本日のお知らせ',body:$('noticeBody').value||'',position:$('noticePosition').value||'top'};save();toast('保存しました');if(GuildStorage.pushCloud)GuildStorage.pushCloud();};
-    $('jsonSettings').onclick=function(){textareaEditor('settings','settings.json');};if($('resetSetupWizard'))$('resetSetupWizard').onclick=function(){s.setupDone=false;save();if(GuildStorage.pushCloud)GuildStorage.pushCloud();toast('次回、初回セットアップを表示します');};}
+    '<div class="toolbar"><button class="btn gold" id="saveNotice">この項目だけ保存</button></div>'+
+    '</div><div class="toolbar"><button class="btn" id="jsonSettings">詳細JSON</button></div>';
+    function pushToast(msg){ save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud(); toast(msg+'（クラウドにも送信）'); }
+    $('saveBasic').onclick=function(){ s.currency=$('setCurrency').value||'G'; s.coverCharge=+$('setCover').value||0; s.adminPassword=$('setPass').value||'OTAKU'; pushToast('基本設定を保存しました'); };
+    $('saveNotify').onclick=function(){ s.notifyOn=$('setNotify').checked; s.gasUrl=$('setGas').value.trim(); s.discordWebhookUrl=$('setHook').value.trim(); pushToast('通知・連携設定を保存しました'); };
+    $('saveNotice').onclick=function(){ s.notice={enabled:$('noticeEnabled').checked,title:$('noticeTitle').value||'本日のお知らせ',body:$('noticeBody').value||'',position:$('noticePosition').value||'top'}; pushToast('お知らせを保存しました'); };
+    $('setLevelMode').onchange=function(){s.levelMode=$('setLevelMode').value; $('levelThresholdBox').style.display=s.levelMode==='total'?'':'none'; pushToast('レベル計算方式を保存しました');};
+    function ensureThresholds(){ if(!Array.isArray(s.levelThresholds)||!s.levelThresholds.length) s.levelThresholds=[Number(s.levelStep)||3000]; return s.levelThresholds; }
+    function bindLevelThresholdRows(){
+      document.querySelectorAll('[data-lv-save]').forEach(btn=>btn.onclick=function(){
+        const i=+btn.dataset.lvSave; const th=ensureThresholds(); const inp=document.querySelector('[data-lv-th="'+i+'"]');
+        th[i]=Math.max(0,+inp.value||0); s.levelThresholds=th; s.levelStep=th[0]||s.levelStep;
+        save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
+        toast('Lv'+(i+2)+'の必要金額を保存しました（クラウドにも送信）');
+      });
+      document.querySelectorAll('[data-lv-del]').forEach(btn=>btn.onclick=function(){
+        const i=+btn.dataset.lvDel; const th=ensureThresholds(); if(th.length<=1)return;
+        th.splice(i,1); s.levelThresholds=th; save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
+        $('levelThresholdList').innerHTML=levelThresholdRowsHtml(s); bindLevelThresholdRows(); toast('削除しました');
+      });
+    }
+    bindLevelThresholdRows();
+    $('addLevelThreshold').onclick=function(){
+      const th=ensureThresholds(); const last=th[th.length-1]||3000; th.push(last+(Number(s.levelStep)||3000));
+      s.levelThresholds=th; save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
+      $('levelThresholdList').innerHTML=levelThresholdRowsHtml(s); bindLevelThresholdRows(); toast('レベルを追加しました');
+    };
+    $('jsonSettings').onclick=function(){textareaEditor('settings','settings.json');};if($('resetSetupWizard'))$('resetSetupWizard').onclick=function(){const base=location.href.replace(/admin\.html.*$/,'index.html').replace(/\?.*$/,'');const url=base+'?setup=1';if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(url).catch(function(){});}alert('このURLを開くと、購入者が最初に見る初回セットアップ画面を確認できます（GAS連携済みでも必ず表示されます）。\n\n'+url+'\n\nリンクをコピーしました。');};}
 
   function conceptTemplateFromPreset(p){
     p=p||{};
