@@ -3,7 +3,7 @@
   "coverCharge": 500,
   "adminPassword": "OTAKU",
   "notifyOn": true,
-  "gasUrl": "https://script.google.com/macros/s/AKfycbzGMB8qWGRFiEapNpX6n5BpBFXZGUG7JljnZ38IjBucArvTqgEFGwjA34vj1yfk_ZJ42Q/exec",
+  "gasUrl": "",
   "discordWebhookUrl": "",
   "categories": [
     {
@@ -68,5 +68,6 @@
   "levelStep": 3000,
   "levelThresholds": [
     3000
-  ]
+  ],
+  "_comment_gasUrl": "このファイルは公開リポジトリに含まれます。実際のGAS URLは絶対にここへ書かないでください。管理画面の設定 or 初回セットアップ画面から入力すればブラウザ側(localStorage)に保存され、以後は上書きされません。"
 }
