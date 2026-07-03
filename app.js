@@ -216,9 +216,54 @@ window.GuildApp = {VERSION:'4.0'};
   }
 
   function renderParty(){ const count=Math.max(1,Math.min(20,Number(data.partyCount||1)||1)); data.partyCount=count; const charge=Number(data.settings.coverCharge??500)||0; const label=(window.GuildTheme?GuildTheme.w('customerRegister'):'ギルド登録料（チャージ）'); $('partyCountView').textContent=`${count}名`; $('chargePreview').textContent=`${label}：${GuildUtils.yen(charge,data.settings.currency)} × ${count}名 = ${GuildUtils.yen(charge*count,data.settings.currency)}`; }
+  // 同じ名前の人がいても見た目で区別できるように、登録時にアイコン(絵文字)を選んでもらう
+  const AVATAR_LIST=['🙂','😎','🐱','🐶','🦊','🐻','🐼','🐰','🦁','🐯','🐸','🐧','🦄','🐲','👻','🎃','⭐','🔥','🍀','💎'];
+  let selectedAvatar=AVATAR_LIST[0];
+  let selectedAvatarImage='';
+  function renderAvatarPicker(){
+    const box=$('avatarPicker'); if(!box) return;
+    box.innerHTML=AVATAR_LIST.map(a=>`<div class="avatar-opt${a===selectedAvatar?' selected':''}" data-avatar="${a}">${a}</div>`).join('');
+    box.querySelectorAll('[data-avatar]').forEach(el=>el.onclick=()=>{ selectedAvatar=el.dataset.avatar; selectedAvatarImage=''; updateAvatarImgPreview(); renderAvatarPicker(); });
+  }
+  function updateAvatarImgPreview(){
+    const box=$('avatarImgPreview'); const clearBtn=$('avatarImgClear');
+    if(!box) return;
+    if(selectedAvatarImage){ box.innerHTML=`<img src="${selectedAvatarImage}" alt="">`; if(clearBtn) clearBtn.style.display=''; }
+    else { box.textContent=selectedAvatar; if(clearBtn) clearBtn.style.display='none'; }
+  }
+  // 画像は正方形に切り抜いて96pxまで縮小し、この端末のブラウザ内だけに保存する（クラウドへは送らない＝容量対策）
+  function resizeAvatarImage(file, cb){
+    const reader=new FileReader();
+    reader.onload=(e)=>{
+      const img=new Image();
+      img.onload=()=>{
+        const size=96;
+        const canvas=document.createElement('canvas'); canvas.width=size; canvas.height=size;
+        const ctx=canvas.getContext('2d');
+        const s=Math.min(img.width,img.height); const sx=(img.width-s)/2, sy=(img.height-s)/2;
+        ctx.drawImage(img,sx,sy,s,s,0,0,size,size);
+        cb(canvas.toDataURL('image/jpeg',0.72));
+      };
+      img.onerror=()=>{ GuildUI.toast('画像を読み込めませんでした'); };
+      img.src=e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+  if($('avatarImgFile')) $('avatarImgFile').onchange=(ev)=>{
+    const file=ev.target.files&&ev.target.files[0]; if(!file) return;
+    resizeAvatarImage(file,(dataUrl)=>{ selectedAvatarImage=dataUrl; updateAvatarImgPreview(); });
+  };
+  if($('avatarImgClear')) $('avatarImgClear').onclick=()=>{ selectedAvatarImage=''; if($('avatarImgFile')) $('avatarImgFile').value=''; updateAvatarImgPreview(); };
+  renderAvatarPicker();
+  updateAvatarImgPreview();
   function showChargeConfirm(){ const count=Math.max(1,Math.min(20,Number(data.partyCount||1)||1)); const charge=Number(data.settings.coverCharge??500)||0; const total=charge*count; const label=(window.GuildTheme?GuildTheme.w('customerRegister'):'登録料（チャージ）'); const custWord=(window.GuildTheme?GuildTheme.w('customer'):'冒険者'); const guildWord=(window.GuildTheme?GuildTheme.w('guild'):'ギルド'); const partyWord=(window.GuildTheme?GuildTheme.w('party'):'パーティ'); $('chargeConfirmBody').textContent=`${guildWord}への登録には${label}が必要です。\n\n${custWord}名：${data.currentCustomer||'未登録'}\n${partyWord}人数：${count}名\n${label}：${GuildUtils.yen(charge,data.settings.currency)} × ${count}名\n\n合計：${GuildUtils.yen(total,data.settings.currency)}\n\n登録しますか？`; GuildUI.openModal('modalChargeConfirm'); }
   function applyCoverCharge(){ const count=Math.max(1,Math.min(20,Number(data.partyCount||1)||1)); const charge=Number(data.settings.coverCharge??500)||0; const total=charge*count; const label=(window.GuildTheme?GuildTheme.w('customerRegister'):'ギルド登録料（チャージ）'); data.activeBill=Array.isArray(data.activeBill)?data.activeBill:[]; data.activeBill=data.activeBill.filter(i=>!i.isCharge); if(charge>0&&count>0){ data.activeBill.unshift({id:'cover_charge',name:label,cat:'charge',price:charge,qty:count,subtotal:total,partyCount:count,isCharge:true}); } GuildStorage.save(); }
-  GuildApp.showWelcomeBack=function(){ welcomeText((window.GuildTheme?GuildTheme.m('welcomeBack'):'おかえりなさい、冒険者。次のクエストを受けますか？')); 
+  GuildApp.showWelcomeBack=function(){
+    applyStartTheme();
+    welcomeText((window.GuildTheme?GuildTheme.m('welcomeBack'):'おかえりなさい、冒険者。次のクエストを受けますか？'));
+    GuildUI.show('screenWelcome');
+    GuildAudio.playBgm((themeCustom().startBgm)||'title');
+  };
   if($('setupTheme')) $('setupTheme').onchange=async()=>{
     await applySetupPreset(wizardVal('setupTheme'));
     fillSetupWizard();
@@ -262,10 +307,6 @@ window.GuildApp = {VERSION:'4.0'};
     hideSetupWizard();
     GuildUI.toast('あとで管理画面から設定できます');
   };
-
-  showWelcomeScreen();
-  const forceSetup = (function(){ try{ return new URLSearchParams(location.search||'').get('setup')==='1'; }catch(e){ return false; } })();
-  if(forceSetup || (GuildStorage.needsInitialSetup&&GuildStorage.needsInitialSetup())) showSetupWizard(); };
   GuildApp.showLevelUp=function(oldLevel,newLevel){ const o=$('levelUpOverlay'); $('levelUpText').textContent=`Lv.${oldLevel} → Lv.${newLevel}`; o.classList.add('show'); };
   GuildApp.showVictoryClear=function(){ const o=$('guildReturnOverlay'); if(o) o.classList.add('show'); };
   if($('guildReturnBtn')) $('guildReturnBtn').onclick=(ev)=>{
@@ -292,8 +333,23 @@ window.GuildApp = {VERSION:'4.0'};
   if($('btnStoreInfo')) $('btnStoreInfo').onclick=()=>{ GuildAudio.playSe('ok'); renderStoreInfo(); $('storeInfoOverlay').classList.add('show'); };
   if($('storeInfoClose')) $('storeInfoClose').onclick=()=>{ GuildAudio.playSe('cancel'); $('storeInfoOverlay').classList.remove('show'); };
   $('btnBackWelcome').onclick=()=>{ GuildAudio.playSe('cancel'); showWelcomeScreen(); };
-  $('btnNameOk').onclick=()=>{ const n=$('nameInput').value.trim(); if(!n){GuildAudio.playSe('cancel'); GuildUI.toast('名前を入力してください'); return;} GuildAudio.playSe('ok'); GuildCustomer.setName(n); renderParty(); GuildUI.show('screenParty'); };
-  function renderExistingList(q){ const list=GuildCustomer.list().filter(c=>!q||String(c.name||'').toLowerCase().includes(q.toLowerCase())); $('existingList').innerHTML = list.length ? list.map(c=>`<button class="btn existing-pick" data-cid="${c.id}" style="display:block;width:100%;text-align:left;margin:4px 0">${GuildUtils.esc(c.name)} <span style="opacity:.6;font-size:.85em">Lv.${c.level||1}・来店${c.visits||0}回</span></button>`).join('') : '<p style="opacity:.6;text-align:center">該当なし</p>'; document.querySelectorAll('.existing-pick').forEach(b=>b.onclick=()=>{ const c=GuildCustomer.selectExisting(b.dataset.cid); if(c){ GuildAudio.playSe('ok'); $('existingOverlay').classList.remove('show'); $('nameInput').value=c.name; const lu=c._levelUp; if(lu&&lu.leveled){ GuildAudio.playSe('levelup'); if(window.GuildApp&&GuildApp.showLevelUp) GuildApp.showLevelUp(lu.oldLevel,lu.newLevel); } renderParty(); GuildUI.show('screenParty'); } }); }
+  $('btnNameOk').onclick=()=>{
+    const n=$('nameInput').value.trim();
+    if(!n){GuildAudio.playSe('cancel'); GuildUI.toast('名前を入力してください'); return;}
+    GuildAudio.playSe('ok');
+    const existing=GuildCustomer.findByName?GuildCustomer.findByName(n):null;
+    let c;
+    if(existing){
+      const same=confirm((existing.avatar||'🙂')+' 「'+existing.name+'」という名前の登録者が既にいます（Lv.'+(existing.level||1)+'・来店'+(existing.visits||0)+'回）。\n\nあなたは今回選んだアイコン '+selectedAvatar+' の方ですか？\n\n「OK」→ '+(existing.avatar||'🙂')+'さんとして、そのまま登録情報を引き継ぐ\n「キャンセル」→ 別人として新規登録する');
+      c = same ? GuildCustomer.setName(n,{reuseId:existing.id}) : GuildCustomer.setName(n,{avatar:selectedAvatar,avatarImage:selectedAvatarImage});
+    } else {
+      c = GuildCustomer.setName(n,{avatar:selectedAvatar,avatarImage:selectedAvatarImage});
+    }
+    const lu=c&&c._levelUp; if(lu&&lu.leveled){ GuildAudio.playSe('levelup'); if(window.GuildApp&&GuildApp.showLevelUp) GuildApp.showLevelUp(lu.oldLevel,lu.newLevel); }
+    selectedAvatar=AVATAR_LIST[0]; selectedAvatarImage=''; if($('avatarImgFile')) $('avatarImgFile').value=''; renderAvatarPicker(); updateAvatarImgPreview();
+    renderParty(); GuildUI.show('screenParty');
+  };
+  function renderExistingList(q){ const list=GuildCustomer.list().filter(c=>!q||String(c.name||'').toLowerCase().includes(q.toLowerCase())); $('existingList').innerHTML = list.length ? list.map(c=>`<button class="btn existing-pick" data-cid="${c.id}" style="display:block;width:100%;text-align:left;margin:4px 0">${GuildUtils.avatarTag(c)}${GuildUtils.esc(c.name)} <span style="opacity:.6;font-size:.85em">Lv.${c.level||1}・来店${c.visits||0}回</span></button>`).join('') : '<p style="opacity:.6;text-align:center">該当なし</p>'; document.querySelectorAll('.existing-pick').forEach(b=>b.onclick=()=>{ const c=GuildCustomer.selectExisting(b.dataset.cid); if(c){ GuildAudio.playSe('ok'); $('existingOverlay').classList.remove('show'); $('nameInput').value=c.name; const lu=c._levelUp; if(lu&&lu.leveled){ GuildAudio.playSe('levelup'); if(window.GuildApp&&GuildApp.showLevelUp) GuildApp.showLevelUp(lu.oldLevel,lu.newLevel); } renderParty(); GuildUI.show('screenParty'); } }); }
   $('btnSelectExisting').onclick=()=>{ GuildAudio.playSe('ok'); $('existingSearch').value=''; renderExistingList(''); $('existingOverlay').classList.add('show'); };
   $('existingSearch').oninput=e=>renderExistingList(e.target.value);
   $('existingClose').onclick=()=>{ GuildAudio.playSe('cancel'); $('existingOverlay').classList.remove('show'); };
@@ -307,4 +363,6 @@ window.GuildApp = {VERSION:'4.0'};
   $('btnBackTitle').onclick=()=>{ GuildAudio.playSe('cancel'); GuildUI.closeModals(); welcomeText('メニューを開きますか？'); showWelcomeScreen(); };
   $('btnCloseMenu').onclick=()=>GuildUI.closeModals(); $('btnCancelOrder').onclick=GuildOrder.cancelPending; $('btnNoOrder').onclick=GuildOrder.cancelPending; $('btnDoOrder').onclick=GuildOrder.confirmOrder; $('btnCheckout').onclick=GuildOrder.checkoutAsk; $('btnCancelCheckout').onclick=()=>GuildUI.closeModals(); $('btnNoCheckout').onclick=()=>GuildUI.closeModals(); $('btnDoCheckout').onclick=GuildOrder.checkoutDo;
   showWelcomeScreen();
+  const forceSetup = (function(){ try{ return new URLSearchParams(location.search||'').get('setup')==='1'; }catch(e){ return false; } })();
+  if(forceSetup || (GuildStorage.needsInitialSetup&&GuildStorage.needsInitialSetup())) showSetupWizard();
 })();

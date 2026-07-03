@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#050505">
   <title data-theme-title>おたく場ギルド</title>
-  <link rel="stylesheet" href="main.css?v=1.14-security">
-  <link rel="stylesheet" href="battle.css?v=1.14-security">
-  <link rel="stylesheet" href="menu.css?v=1.14-security">
-  <link rel="stylesheet" href="effects.css?v=1.14-security">
+  <link rel="stylesheet" href="main.css?v=1.19-avatarimg">
+  <link rel="stylesheet" href="battle.css?v=1.19-avatarimg">
+  <link rel="stylesheet" href="menu.css?v=1.19-avatarimg">
+  <link rel="stylesheet" href="effects.css?v=1.19-avatarimg">
 
   <style>
     .setup-wizard-overlay{z-index:10050}
@@ -44,6 +44,14 @@
         <div class="title-logo small" data-theme-text="messages.registerTitle">冒険者登録</div>
         <p><span data-theme-text="words.customer">冒険者</span>名を入力してください</p>
         <input id="nameInput" placeholder="例：タロウ" autocomplete="name">
+        <p class="tiny mt">アイコンを選んでください（同じ名前の人と区別するために使います）</p>
+        <div class="avatar-picker" id="avatarPicker"></div>
+        <div class="row mt" style="align-items:center;gap:8px">
+          <div id="avatarImgPreview" class="avatar-img-preview"></div>
+          <label class="btn small" style="flex:1;text-align:center;cursor:pointer">📷 画像を選ぶ（任意）<input id="avatarImgFile" type="file" accept="image/*" style="display:none"></label>
+          <button class="btn small" id="avatarImgClear" style="display:none;flex:0 0 auto">絵文字に戻す</button>
+        </div>
+        <p class="tiny">※画像はこの端末だけに保存されます（他の端末には表示されません）</p>
         <div class="row mt">
           <button class="btn gold" id="btnNameOk">新規登録</button>
           <button class="btn" id="btnBackWelcome">戻る</button>
@@ -264,16 +272,16 @@
 
 </div>
 
-  <script src="theme.js?v=1.14-security"></script>
-  <script src="utils.js?v=1.14-security"></script>
-  <script src="storage.js?v=1.14-security"></script>
-  <script src="audio.js?v=1.14-security"></script>
-  <script src="ui.js?v=1.14-security"></script>
-  <script src="customer.js?v=1.14-security"></script>
-  <script src="battle.js?v=1.14-security"></script>
-  <script src="discord.js?v=1.14-security"></script>
-  <script src="menu.js?v=1.14-security"></script>
-  <script src="order.js?v=1.14-security"></script>
-  <script src="app.js?v=1.14-security"></script>
+  <script src="theme.js?v=1.19-avatarimg"></script>
+  <script src="utils.js?v=1.19-avatarimg"></script>
+  <script src="storage.js?v=1.19-avatarimg"></script>
+  <script src="audio.js?v=1.19-avatarimg"></script>
+  <script src="ui.js?v=1.19-avatarimg"></script>
+  <script src="customer.js?v=1.19-avatarimg"></script>
+  <script src="battle.js?v=1.19-avatarimg"></script>
+  <script src="discord.js?v=1.19-avatarimg"></script>
+  <script src="menu.js?v=1.19-avatarimg"></script>
+  <script src="order.js?v=1.19-avatarimg"></script>
+  <script src="app.js?v=1.19-avatarimg"></script>
 </body>
 </html>

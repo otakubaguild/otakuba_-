@@ -22,7 +22,7 @@ window.GuildBattle = (() => {
   function render(quiet){
     const e=enemy(); const c=GuildCustomer.current(); if(!e) return;
     if(!suppressBgm && !quiet){ const bk=bgmKey(e); GuildAudio.playBgm(bk); }
-    $('adventurerName').textContent = c ? c.name : ('名もなき'+(window.GuildTheme?GuildTheme.w('customer'):'冒険者'));
+    $('adventurerName').innerHTML = c ? (GuildUtils.avatarTag(c)+GuildUtils.esc(c.name)) : GuildUtils.esc('名もなき'+(window.GuildTheme?GuildTheme.w('customer'):'冒険者'));
     $('adventurerSub').textContent = `Lv.${c?c.level:1} / ${c&&c.title?c.title:'二つ名なし'}`;
     $('stageName').textContent = `${(window.GuildTheme?GuildTheme.w('stage'):'現在ステージ')}：${e.stage||'---'}`;
     const enemyLabel = (window.GuildTheme?(isFinalEnemy(e)?GuildTheme.w('boss'):GuildTheme.w('enemy')):(isFinalEnemy(e)?'魔王':'敵'));

@@ -15,5 +15,11 @@ window.GuildUtils = (() => {
   function todayText(){ return new Date().toLocaleString('ja-JP', {timeZone:'Asia/Tokyo'}); }
   function clamp(n,min,max){ return Math.max(min, Math.min(max, Number(n)||0)); }
   function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
-  return {$, uid, yen, esc, todayText, clamp, sleep, driveImg};
+  // 顧客アバター表示用。画像があればそれを、無ければ絵文字を返す（indexとadmin両方で共通利用）
+  function avatarTag(c){
+    c=c||{};
+    if(c.avatarImage) return `<img class="avatar-img-tag" src="${c.avatarImage}" alt="">`;
+    return `<span class="avatar-tag">${esc(c.avatar||'🙂')}</span>`;
+  }
+  return {$, uid, yen, esc, todayText, clamp, sleep, driveImg, avatarTag};
 })();

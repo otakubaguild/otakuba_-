@@ -266,7 +266,12 @@ window.GuildStorage = (() => {
   // 共有すべき管理データだけを送る（戦闘の一時状態は端末ローカルのまま）
   function saleKey(s){ return s && (s.id || s.saleId || (String(s.time||'')+'|'+String(s.customer||'')+'|'+String(s.total||'')+'|'+JSON.stringify(s.items||[]))); }
   function sharedPayload(){
-    return {action:'saveAll', settings:data.settings, menu:data.menu, monsters:data.monsters, customers:data.customers, sales:data.sales, deletedSaleIds:data.deletedSaleIds||[], salesSettings:data.salesSettings, currentEnemyIndex:data.currentEnemyIndex, progressResetAt:data.progressResetAt||'', monsters:data.monsters};
+    // avatarImage（顧客が選んだ画像アイコン）は容量が大きくなりがちなので、クラウド送信からは除外する（この端末のブラウザだけに残す）
+    const customersForCloud=(data.customers||[]).map(function(c){
+      if(!c || !c.avatarImage) return c;
+      const copy=Object.assign({}, c); delete copy.avatarImage; return copy;
+    });
+    return {action:'saveAll', settings:data.settings, menu:data.menu, monsters:data.monsters, customers:customersForCloud, sales:data.sales, deletedSaleIds:data.deletedSaleIds||[], salesSettings:data.salesSettings, currentEnemyIndex:data.currentEnemyIndex, progressResetAt:data.progressResetAt||'', monsters:data.monsters};
   }
   function pushCloud(){
     const url=gasUrl(); if(!url) return;
@@ -331,8 +336,18 @@ window.GuildStorage = (() => {
       }
       if(Array.isArray(remote.customers)){
         // IDで突合してマージ。両方にあれば来店回数が多い方（=新しい記録）を残す
+        // ただし avatarImage（顧客の画像アイコン）はこの端末だけの情報でクラウドには乗らないため、
+        // どちらが勝っても local 側の avatarImage は消さずに引き継ぐ
         const byId={}; (data.customers||[]).forEach(c=>{ if(c&&c.id) byId[c.id]=c; });
-        remote.customers.forEach(rc=>{ if(!rc||!rc.id){ return; } const local=byId[rc.id]; if(!local){ byId[rc.id]=rc; } else { const lv=(Number(local.visits)||0), rv=(Number(rc.visits)||0); byId[rc.id]=(rv>=lv)?rc:local; } });
+        remote.customers.forEach(rc=>{
+          if(!rc||!rc.id){ return; }
+          const local=byId[rc.id];
+          if(!local){ byId[rc.id]=rc; return; }
+          const lv=(Number(local.visits)||0), rv=(Number(rc.visits)||0);
+          const winner=(rv>=lv)?rc:local;
+          if(local.avatarImage && !winner.avatarImage){ byId[rc.id]=Object.assign({}, winner, {avatarImage:local.avatarImage}); }
+          else { byId[rc.id]=winner; }
+        });
         data.customers=Object.keys(byId).map(k=>byId[k]);
       }
       if(remote.salesSettings && typeof remote.salesSettings==='object'){ data.salesSettings=Object.assign({},data.salesSettings||{},remote.salesSettings); if(!Array.isArray(data.salesSettings.closedMonths))data.salesSettings.closedMonths=[]; if(!data.salesSettings.monthlyArchives||typeof data.salesSettings.monthlyArchives!=='object')data.salesSettings.monthlyArchives={}; if(!data.salesSettings.currentMonth)data.salesSettings.currentMonth=new Date().toISOString().slice(0,7); }

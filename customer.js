@@ -14,7 +14,17 @@ window.GuildCustomer = (() => {
     }
     return Math.max(1, Number(c&&c.visits)||1);
   }
-  function setName(name){ const data=GuildStorage.getData(); const nm=String(name||'').trim(); data.currentCustomer=nm; if(!nm){ data.currentCustomerId=''; GuildStorage.save(); return null; } const c={id:GuildUtils.uid('cust'), name:nm, level:1, title:'新米冒険者', visits:1, total:0, lastVisit:GuildUtils.todayText(), memo:'', checkedOut:false}; data.customers.push(c); data.currentCustomerId=c.id; GuildStorage.save(); return c; }
+  function findByName(name){ const data=GuildStorage.getData(); const nm=String(name||'').trim(); if(!nm) return null; return (data.customers||[]).find(x=>String(x.name||'').trim()===nm) || null; }
+  function setName(name, opts){
+    opts=opts||{};
+    const data=GuildStorage.getData(); const nm=String(name||'').trim(); data.currentCustomer=nm;
+    if(!nm){ data.currentCustomerId=''; GuildStorage.save(); return null; }
+    // 同じ名前の既存顧客がいても、別人の可能性があるため無条件では統合しない。
+    // 呼び出し側（UI）が確認した上で reuseId を渡した時だけ、その顧客として扱う
+    if(opts.reuseId){ return selectExisting(opts.reuseId); }
+    const c={id:GuildUtils.uid('cust'), name:nm, avatar:opts.avatar||'🙂', avatarImage:opts.avatarImage||'', level:1, title:'新米冒険者', visits:1, total:0, lastVisit:GuildUtils.todayText(), memo:'', checkedOut:false};
+    data.customers.push(c); data.currentCustomerId=c.id; GuildStorage.save(); return c;
+  }
   function selectExisting(id){ const data=GuildStorage.getData(); const c=data.customers.find(x=>x.id===id); if(!c) return null; const old=Number(c.level||1);
     // 前回会計(退店)済みなら新しい来店としてカウント。会計せず入り直しただけなら据え置き
     const isNewVisit = (c.checkedOut !== false); // 未定義(初期)や true は新規来店とみなす
@@ -30,5 +40,5 @@ window.GuildCustomer = (() => {
     return {oldLevel:old, newLevel:c.level, leveled:c.level>old};
   }
   function list(){ const data=GuildStorage.getData(); return (data.customers||[]).slice().sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'ja')); }
-  return {current, setName, selectExisting, list, computeLevel, recheckLevelAfterCheckout};
+  return {current, setName, findByName, selectExisting, list, computeLevel, recheckLevelAfterCheckout};
 })();
