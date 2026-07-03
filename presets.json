@@ -11,8 +11,8 @@
           "masterName": "ギルドマスター",
           "masterImage": "presets/rpg/maou.png",
           "masterFallbackEmoji": "🧙",
-          "titleBg": "",
-          "victoryImage": "victory_clear.PNG",
+          "titleBg": "presets/rpg/background.jpg",
+          "victoryImage": "presets/rpg/victory_clear.PNG",
           "victoryTitle": "🏆 魔王討伐！",
           "victorySubtitle": "魔王を倒し、平和が訪れた。"
         },

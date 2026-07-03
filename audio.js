@@ -2,6 +2,8 @@ window.GuildAudio = (() => {
   let settings = {}; let bgmAudio = null; let currentKey = ''; let enabled = true;
   let endingAudio = null; let endingLock = false;
   function init(s){ settings = s || {}; preloadEnding(); }
+  // data.settings は同期処理で丸ごと差し替わることがあるため、init時点のスナップショットだけに頼らず常に最新を見る
+  function liveSettings(){ try{ if(window.GuildStorage && GuildStorage.getData) return GuildStorage.getData().settings||settings; }catch(e){} return settings; }
   function preloadEnding(){
     try{ const src=path('bgm','ending'); if(src){ endingAudio=new Audio(src); endingAudio.loop=true; endingAudio.preload='auto'; endingAudio.load(); } }catch(e){}
   }
@@ -17,12 +19,12 @@ window.GuildAudio = (() => {
     tryPlay(4); bgmAudio=a;
   }
   function releaseEnding(){ endingLock=false; }
-  function volume(type){ return Number(settings[type === 'bgm' ? 'bgmVolume' : 'seVolume'] ?? (type==='bgm'?0.45:0.9)); }
+  function volume(type){ const s=liveSettings(); return Number(s[type === 'bgm' ? 'bgmVolume' : 'seVolume'] ?? (type==='bgm'?0.45:0.9)); }
   function path(type, key){
     if(!key) return '';
     // URL（http...）や拡張子付きファイル名(.mp3等)ならそのまま使う
     if(/^https?:\/\//i.test(key) || /\.(mp3|wav|ogg|m4a)$/i.test(key)) return key;
-    const files = settings.audioFiles || {};
+    const files = liveSettings().audioFiles || {};
     if(files[type] && files[type][key]) return files[type][key];
     if(type==='bgm' && files[key]) return files[key];
     return '';

@@ -173,7 +173,7 @@ window.GuildStorage = (() => {
         {id:'food', name:'フード', icon:'🍟'}
       ],
       audioFiles:{
-        bgm:{title:'冒険への誘い.mp3',slime:'maou_bgm_fantasy15.mp3',goblin:'Baring_Their_Fangs.mp3',orc:'反撃の一矢.mp3',cave:'Rumbling.mp3',ruins:'龍太鼓.mp3',maou:'Extinguish.mp3',ending:'March_for__delightful_future.mp3'},
+        bgm:{title:'冒険への誘い.mp3',slime:'maou_bgm_fantasy15.mp3',goblin:'Baring_Their_Fangs.mp3',orc:'反撃の一矢.mp3',cave:'Rumbling.mp3',ruins:'龍太鼓.mp3',maou:'Extinguish.mp3',ending:'ending.mp3'},
         se:{ok:'maou_se_system37.mp3',cancel:'maou_se_system49.mp3',bad:'maou_se_system49.mp3',add:'maou_se_onepoint16.mp3',confirm:'maou_se_system37.mp3',damage:'maou_se_onepoint20.mp3',defeat:'maou_se_system49.mp3',victory:'RPG風ファンファーレ.mp3',levelup:'レベルアップ.mp3'}
       },
       bgmVolume:0.45,seVolume:0.9,
@@ -220,12 +220,20 @@ window.GuildStorage = (() => {
     data.partyCount = Math.max(1, Math.min(20, Number(data.partyCount || 1) || 1));
     // 音源の紐付けを保証：保存済み設定に無いBGM/SEキーを、正しいファイル名で補完
     // （古い設定がクラウド/localStorageに残っていても、daimaou等が必ず登録される）
+    // さらに、開発初期の日本語ファイル名(存在しないファイル)が保存済み設定に残っている場合は、
+    // 「保存済みだから触らない」の対象外として強制的に正しいファイル名へ補修する（スライム等のBGM無音バグ対策）
+    const LEGACY_BGM_FIX = {
+      '冒険への誘い.mp3':'title.mp3','maou_bgm_fantasy15.mp3':'slime.mp3','Baring_Their_Fangs.mp3':'goblin.mp3',
+      '反撃の一矢.mp3':'orc.mp3','Rumbling.mp3':'cave.mp3','龍太鼓.mp3':'ruins.mp3','Extinguish.mp3':'maou.mp3',
+      'March_for__delightful_future.mp3':'ending.mp3'
+    };
+    function repairLegacyBgm(bgmMap){ Object.keys(bgmMap||{}).forEach(k=>{ const fix=LEGACY_BGM_FIX[bgmMap[k]]; if(fix) bgmMap[k]=fix; }); return bgmMap; }
     data.settings.audioFiles = data.settings.audioFiles || {};
-    data.settings.audioFiles.bgm = Object.assign({
+    data.settings.audioFiles.bgm = repairLegacyBgm(Object.assign({
       title:'title.mp3', slime:'slime.mp3', goblin:'goblin.mp3', orc:'orc.mp3',
       cave:'cave.mp3', ruins:'ruins.mp3', maou:'maou.mp3', daimaou:'daimaou.mp3',
-      ending:'March_for__delightful_future.mp3'
-    }, data.settings.audioFiles.bgm || {});
+      ending:'ending.mp3'
+    }, data.settings.audioFiles.bgm || {}));
     // daimaouは特に、古い未登録状態を確実に上書きする
     if(!data.settings.audioFiles.bgm.daimaou) data.settings.audioFiles.bgm.daimaou='daimaou.mp3';
     data.settings.audioFiles.se = Object.assign({
@@ -235,13 +243,13 @@ window.GuildStorage = (() => {
     set(keys.state,data);
     pullCloud().then(()=>{
       ensureMenuCategories();
-      // クラウドの古い設定で上書きされても、必須BGM(特にdaimaou)を再補完
+      // クラウドの古い設定で上書きされても、必須BGM(特にdaimaou)と、壊れたレガシーファイル名を再補修
       data.settings.audioFiles = data.settings.audioFiles || {};
-      data.settings.audioFiles.bgm = Object.assign({
+      data.settings.audioFiles.bgm = repairLegacyBgm(Object.assign({
         title:'title.mp3', slime:'slime.mp3', goblin:'goblin.mp3', orc:'orc.mp3',
         cave:'cave.mp3', ruins:'ruins.mp3', maou:'maou.mp3', daimaou:'daimaou.mp3',
-        ending:'March_for__delightful_future.mp3'
-      }, data.settings.audioFiles.bgm || {});
+        ending:'ending.mp3'
+      }, data.settings.audioFiles.bgm || {}));
       if(!data.settings.audioFiles.bgm.daimaou) data.settings.audioFiles.bgm.daimaou='daimaou.mp3';
       set(keys.state,data);
       try{ if(window.GuildMenu && GuildMenu.renderCategoryButtons) GuildMenu.renderCategoryButtons(); }catch(e){}
