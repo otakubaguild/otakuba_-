@@ -37,7 +37,14 @@
     const ae=document.activeElement; if(ae&&(ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.tagName==='SELECT'))return;
     const ok=await GuildStorage.pullCloud(); if(ok)render();
   }, 10000); }
-  $('adminLoginBtn').onclick=()=>{if($('adminPass').value===(data.settings.adminPassword||'OTAKU')){sessionStorage.setItem(SESSION,'ok');showApp()}else $('loginError').textContent='パスワードが違います'};
+  $('adminLoginBtn').onclick=()=>{if($('adminPass').value===(data.settings.adminPassword||'OTAKU')){sessionStorage.setItem(SESSION,'ok');playAdminAuthFx()}else $('loginError').textContent='パスワードが違います'};
+  function playAdminAuthFx(){
+    const fx=$('adminAuthFx');
+    if(!fx){ showApp(); return; }
+    fx.classList.add('on');
+    setTimeout(()=>{ showApp(); },550); // 画面が暗転したタイミングで裏側を管理画面に切り替える
+    setTimeout(()=>{ fx.classList.remove('on'); },1300);
+  }
   $('adminBackToIndex').onclick=()=>location.href='index.html';$('adminHeaderToIndex').onclick=()=>location.href='index.html';$('logoutBtn').onclick=()=>{sessionStorage.removeItem(SESSION);showLogin()};
   function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),1500)}
   function save(){GuildStorage.save()}
@@ -969,8 +976,10 @@
     const activeBillTotal=(data.activeBill||[]).reduce((a,i)=>a+(Number(i.subtotal)||0),0);
     const activeBillCount=(data.activeBill||[]).length;
     const curCustomer=data.currentCustomer||'-';
+    const pwWarning = (data.settings.adminPassword||'')==='OTAKU' ? `<div class="admin-card" style="border-color:var(--red)"><div class="admin-card-title" style="color:var(--red)">⚠️ 管理パスワードが初期値のままです</div><p class="tiny">このテンプレート共通の初期パスワード「OTAKU」のままだと、他の人にも管理画面を開かれてしまう可能性があります。「設定」→「基本設定」から今すぐ変更してください。</p></div>` : '';
     $('adminContent').innerHTML=`
       <h2>ホーム</h2>
+      ${pwWarning}
       <div class="grid dash-grid">
         <div class="admin-card"><div class="admin-card-title">🏪 店舗名</div>${esc(shopName)}</div>
         <div class="admin-card"><div class="admin-card-title">🎭 現在テーマ</div>${esc(themeName)}</div>

@@ -249,6 +249,7 @@ window.GuildApp = {VERSION:'4.0'};
       storeId:wizardVal('setupStoreId'),
       gasUrl,
       discordWebhookUrl:wizardVal('setupDiscordUrl'),
+      adminPassword:wizardVal('setupAdminPassword'),
       themeCustom
     });
     hideSetupWizard();

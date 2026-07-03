@@ -1,11 +1,4 @@
 {
-  "_comment": "店舗ID方式のQRで使う設定です。?store=otakuba のように開くと、このGAS URLを使います。",
-  "stores": {
-    "otakuba": {
-      "label": "おたく場ギルド",
-      "gasUrl": "",
-      "discordWebhookUrl": "",
-      "storeName": "おたく場ギルド"
-    }
-  }
+  "_comment": "店舗ID方式のQRで使う設定です（任意機能・使わなくても動作します）。?store=sample のように開くと、対応するgasUrlが使われます。通常は管理画面の「設定」からgasUrlを直接設定すれば、このファイルは空のままで問題ありません。",
+  "stores": {}
 }

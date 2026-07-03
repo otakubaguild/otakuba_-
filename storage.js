@@ -397,6 +397,7 @@ window.GuildStorage = (() => {
     if(values.storeId) data.settings.storeId=values.storeId;
     if(values.gasUrl) data.settings.gasUrl=values.gasUrl;
     if(values.discordWebhookUrl) data.settings.discordWebhookUrl=values.discordWebhookUrl;
+    if(values.adminPassword) data.settings.adminPassword=values.adminPassword;
     data.settings.themeCustom=Object.assign({}, data.settings.themeCustom||{}, values.themeCustom||{});
     data.settings.setupDone=true;
     save();

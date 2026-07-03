@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#050505">
   <title data-theme-title>おたく場ギルド</title>
-  <link rel="stylesheet" href="main.css?v=1.13-setupfix">
-  <link rel="stylesheet" href="battle.css?v=1.13-setupfix">
-  <link rel="stylesheet" href="menu.css?v=1.13-setupfix">
-  <link rel="stylesheet" href="effects.css?v=1.13-setupfix">
+  <link rel="stylesheet" href="main.css?v=1.14-security">
+  <link rel="stylesheet" href="battle.css?v=1.14-security">
+  <link rel="stylesheet" href="menu.css?v=1.14-security">
+  <link rel="stylesheet" href="effects.css?v=1.14-security">
 
   <style>
     .setup-wizard-overlay{z-index:10050}
@@ -200,7 +200,7 @@
 
         <div class="setup-step">
           <div class="admin-card-title">① 店舗</div>
-          <label>店舗名<input id="setupStoreName" placeholder="例：おたく場ギルド"></label>
+          <label>店舗名<input id="setupStoreName" placeholder="例：〇〇バー / △△カフェ"></label>
           <label>テーマ<select id="setupTheme">
             <option value="">現在のまま</option>
             <option value="rpg">⚔️ RPG</option>
@@ -210,8 +210,14 @@
         </div>
 
         <div class="setup-step">
+          <div class="admin-card-title">🔐 管理画面のパスワード</div>
+          <p class="tiny">このテンプレートの初期パスワードは共通です。他の人に管理画面を開かれないよう、必ずここで変更してください。</p>
+          <label>新しい管理パスワード<input id="setupAdminPassword" placeholder="例：好きな文字列に変更してください"></label>
+        </div>
+
+        <div class="setup-step">
           <div class="admin-card-title">② スタート画面</div>
-          <label>タイトルHTML<textarea id="setupStartTitle" placeholder="例：おたく場ギルドへ&lt;br&gt;ようこそ"></textarea></label>
+          <label>タイトルHTML<textarea id="setupStartTitle" placeholder="例：ようこそ&lt;br&gt;いらっしゃいませ"></textarea></label>
           <label>メッセージ<input id="setupStartSubtitle" placeholder="例：メニューを開きますか？"></label>
           <label>背景画像URL / ファイル名<input id="setupStartBg" placeholder="例：start_bg.png / https://..."></label>
           <label>BGMキー / URL<input id="setupStartBgm" placeholder="例：title"></label>
@@ -235,7 +241,7 @@
 
         <div class="setup-step">
           <div class="admin-card-title">⑤ 同期・通知</div>
-          <label>店舗ID（QR用）<input id="setupStoreId" placeholder="例：otakuba"></label>
+          <label>店舗ID（QR用）<input id="setupStoreId" placeholder="例：mystore"></label>
           <label>GAS URL<input id="setupGasUrl" placeholder="https://script.google.com/macros/s/.../exec"></label>
           <label>Discord通知URL（任意）<input id="setupDiscordUrl" placeholder="https://discord.com/api/webhooks/..."></label>
         </div>
@@ -258,16 +264,16 @@
 
 </div>
 
-  <script src="theme.js?v=1.13-setupfix"></script>
-  <script src="utils.js?v=1.13-setupfix"></script>
-  <script src="storage.js?v=1.13-setupfix"></script>
-  <script src="audio.js?v=1.13-setupfix"></script>
-  <script src="ui.js?v=1.13-setupfix"></script>
-  <script src="customer.js?v=1.13-setupfix"></script>
-  <script src="battle.js?v=1.13-setupfix"></script>
-  <script src="discord.js?v=1.13-setupfix"></script>
-  <script src="menu.js?v=1.13-setupfix"></script>
-  <script src="order.js?v=1.13-setupfix"></script>
-  <script src="app.js?v=1.13-setupfix"></script>
+  <script src="theme.js?v=1.14-security"></script>
+  <script src="utils.js?v=1.14-security"></script>
+  <script src="storage.js?v=1.14-security"></script>
+  <script src="audio.js?v=1.14-security"></script>
+  <script src="ui.js?v=1.14-security"></script>
+  <script src="customer.js?v=1.14-security"></script>
+  <script src="battle.js?v=1.14-security"></script>
+  <script src="discord.js?v=1.14-security"></script>
+  <script src="menu.js?v=1.14-security"></script>
+  <script src="order.js?v=1.14-security"></script>
+  <script src="app.js?v=1.14-security"></script>
 </body>
 </html>
