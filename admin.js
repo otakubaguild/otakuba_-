@@ -422,6 +422,28 @@
   const FONT_TARGETS=[
     ['brand','🏪 店名・見出し用'],['battle','⚔️ 討伐・戦闘UI用（敵名/撃破文字/HP等）'],['button','🔘 ボタンの文字']
   ];
+  const FONT_PRESETS=[
+    ['','指定なし（既定のフォント）'],
+    ['游ゴシック','游ゴシック（標準・読みやすい）'],
+    ['游明朝','游明朝（上品・和風）'],
+    ['DotGothic16','ドット文字（レトロゲーム風・RPG向け）'],
+    ['Zen Maru Gothic','丸ゴシック（かわいい系）'],
+    ['Kaisei Decol','ゲーム見出し風（装飾的）'],
+    ['Yusei Magic','手書き風（魔法・ファンタジー向け）'],
+    ['Shippori Mincho','上品な明朝（和風・カフェ向け）'],
+    ['Potta One','丸くてポップ'],
+    ['Cinzel','重厚な洋風英字（ファンタジー向け）'],
+    ['Orbitron','近未来英字（SF向け）'],
+    ['__custom__','その他（フォント名を自由入力）']
+  ];
+  function fontSelectHtml(id,currentValue){
+    const known=FONT_PRESETS.some(function(p){return p[0]===currentValue;});
+    const selVal=currentValue? (known?currentValue:'__custom__') : '';
+    const opts=FONT_PRESETS.map(function(p){return '<option value="'+esc(p[0])+'" '+(p[0]===selVal?'selected':'')+'>'+esc(p[1])+'</option>';}).join('');
+    const customVisible=selVal==='__custom__';
+    return '<select data-font-select="'+id+'">'+opts+'</select>'+
+      '<input data-font-custom="'+id+'" placeholder="Google Fontsの名前を入力（例：Kosugi Maru）" value="'+esc(customVisible?currentValue:'')+'" style="margin-top:6px'+(customVisible?'':';display:none')+'">';
+  }
   let fontMode='bulk';
   function fontCardHtml(){
     const fonts=(window.GuildTheme?GuildTheme.all().fonts:{})||{};
@@ -429,25 +451,37 @@
     const modeBtns='<div class="toolbar"><button class="btn '+(fontMode==='bulk'?'gold':'')+'" data-font-mode="bulk">一括</button><button class="btn '+(fontMode==='detail'?'gold':'')+'" data-font-mode="detail">詳細</button></div>';
     let fields;
     if(fontMode==='bulk'){
-      fields='<label>フォント名（サイト全体に適用）<input id="fontBase" value="'+esc(fonts.base||'')+'" placeholder="例：Zen Maru Gothic / 游ゴシック"></label>';
+      fields='<label>フォント（サイト全体に適用）'+fontSelectHtml('base',fonts.base||'')+'</label>';
     }else{
-      fields='<label>基本フォント（他が空欄の時のフォールバック）<input id="fontBase" value="'+esc(fonts.base||'')+'" placeholder="例：Zen Maru Gothic"></label>'+
-        FONT_TARGETS.map(([k,label])=>'<label>'+esc(label)+'<input id="font_'+k+'" value="'+esc(fonts[k]||'')+'" placeholder="空欄なら基本フォントを使用"></label>').join('');
+      fields='<label>基本フォント（他が空欄の時のフォールバック）'+fontSelectHtml('base',fonts.base||'')+'</label>'+
+        FONT_TARGETS.map(([k,label])=>'<label>'+esc(label)+fontSelectHtml(k,fonts[k]||'')+'</label>').join('');
     }
     return '<div class="admin-card"><div class="admin-card-title">🔤 フォント設定</div>'+
-      '<p class="tiny">Google Fontsの名前をそのまま入力すると自動で読み込みます（例：Zen Maru Gothic、Kaisei Decol）。空欄なら元のフォントのままです。一括はサイト全体、詳細は場所ごとに変えられます。</p>'+
+      '<p class="tiny">一覧から選ぶだけでOK。Google Fontsは自動で読み込みます。リストにない名前を使いたい時だけ「その他」を選んで入力してください。一括はサイト全体、詳細は場所ごとに変えられます。</p>'+
       modeBtns+fields+
       '<div class="toolbar"><button class="btn gold" id="saveThemeFonts">フォントを保存</button></div></div>';
   }
   function bindFontCard(){
     document.querySelectorAll('[data-font-mode]').forEach(b=>b.onclick=()=>{ fontMode=b.dataset.fontMode; renderThemeText(); });
+    document.querySelectorAll('[data-font-select]').forEach(sel=>sel.onchange=()=>{
+      const custom=document.querySelector('[data-font-custom="'+sel.dataset.fontSelect+'"]');
+      if(!custom) return;
+      if(sel.value==='__custom__'){ custom.style.display=''; custom.focus(); }
+      else{ custom.style.display='none'; custom.value=''; }
+    });
+    function readFont(id){
+      const sel=document.querySelector('[data-font-select="'+id+'"]');
+      if(!sel) return '';
+      if(sel.value==='__custom__'){ const c=document.querySelector('[data-font-custom="'+id+'"]'); return c?c.value.trim():''; }
+      return sel.value;
+    }
     $('saveThemeFonts').onclick=function(){
       let partial;
       if(fontMode==='bulk'){
-        partial={ mode:'bulk', base:$('fontBase').value.trim(), brand:'', battle:'', button:'' };
+        partial={ mode:'bulk', base:readFont('base'), brand:'', battle:'', button:'' };
       }else{
-        partial={ mode:'detail', base:$('fontBase').value.trim() };
-        FONT_TARGETS.forEach(([k])=>{ partial[k]=$('font_'+k).value.trim(); });
+        partial={ mode:'detail', base:readFont('base') };
+        FONT_TARGETS.forEach(([k])=>{ partial[k]=readFont(k); });
       }
       if(window.GuildTheme) GuildTheme.saveFontsOverride(partial);
       toast('フォントを保存しました（この端末に反映）');
@@ -459,7 +493,7 @@
     ['bossDefeatText','ラスボス撃破文字（例：魔王討伐！）'],['subjugation','討伐の呼び方'],['battle','戦闘の呼び方'],
     ['party','パーティ（人数）の呼び方'],['guild','店・ギルドの呼び方'],['customerRegister','登録料ラベル'],
     ['adventurerInfo','対象情報ラベル'],['stage','ステージの呼び方'],['hpLabel','HP表示名'],
-    ['checkoutButton','会計ボタンの文字'],['menuTitleDefault','メニュー初期タイトル']
+    ['checkoutButton','会計ボタンの文字'],['menuTitleDefault','メニュー初期タイトル'],['awakenText','覚醒演出のセリフ（例：魔王が覚醒する——！）']
   ];
   function renderThemeText(){
     const c=ensureThemeCustom();
@@ -479,6 +513,10 @@
       '<label>追加タイトル<input id="tcVictoryTitle" value="'+esc(c.victoryTitle||'')+'" placeholder="例：MISSION COMPLETE"></label>'+
       '<label>追加メッセージ<textarea id="tcVictorySubtitle" placeholder="例：ご来店ありがとうございました">'+esc(c.victorySubtitle||'')+'</textarea></label>'+
       '</div>'+
+      '<div class="admin-card"><div class="admin-card-title">🌀 覚醒演出（ラスボス直前）</div>'+
+      '<p class="tiny">敵が2体以上いる場合、ラスボスの1つ前を倒すと画面が揺れてセリフが出る演出です。テーマによって合わない場合はオフにできます（呼び名の「覚醒演出のセリフ」で文言も変更可）。</p>'+
+      '<label class="check-row"><input type="checkbox" id="tcAwakenEnabled" '+(c.awakenEnabled!==false?'checked':'')+'> 演出を有効にする</label>'+
+      '</div>'+
       '<div class="admin-card"><div class="admin-card-title">🧙 いいえ選択時のマスター</div>'+
       '<label>表示名<input id="tcMasterName" value="'+esc(c.masterName||'ギルドマスター')+'" placeholder="例：ギルドマスター / 店長 / 校長"></label>'+
       '<label>セリフ<input id="tcMasterMessage" value="'+esc(c.masterMessage||'冷やかしか？さっさとメニューを開け')+'"></label>'+
@@ -497,6 +535,7 @@
         startSubtitle:$('tcStartSubtitle').value.trim(),
         victoryTitle:$('tcVictoryTitle').value.trim(),
         victorySubtitle:$('tcVictorySubtitle').value,
+        awakenEnabled:$('tcAwakenEnabled').checked,
         masterName:$('tcMasterName').value.trim()||'ギルドマスター',
         masterMessage:$('tcMasterMessage').value.trim()||'冷やかしか？さっさとメニューを開け'
       });

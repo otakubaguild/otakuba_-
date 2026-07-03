@@ -67,7 +67,9 @@ window.GuildBattle = (() => {
         if(finalBoss){ done&&done(defeatedAny,finalDefeated); }
         else if(nextIsFinal()){
           // 魔王撃破 → 次はラスボス(覚醒魔王)。覚醒演出を挟んでからBGMをdaimaouに切り替え
-          await playAwaken();
+          // ただし店舗のテーマ設定で演出を無効化している場合はスキップ（テーマによって「覚醒」が合わないケース向け）
+          const awakenOn = ((data&&data.settings&&data.settings.themeCustom)||{}).awakenEnabled!==false;
+          if(awakenOn) await playAwaken();
           nextEnemy();            // 覚醒魔王へ
           suppressBgm=false;      // 抑制を解除して
           const be=enemy(); if(be) GuildAudio.playBgm(bgmKey(be));  // daimaou BGMを確実に鳴らす
