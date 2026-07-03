@@ -7,7 +7,7 @@ window.GuildApp = {VERSION:'4.0'};
   function welcomeText(text){ const sub=document.querySelector('#screenWelcome .subtitle'); if(sub) sub.textContent=text||'メニューを開きますか？'; }
   function themeCustom(){ data.settings.themeCustom=data.settings.themeCustom||{}; return data.settings.themeCustom; }
   function assetUrl(u){ return u ? (GuildUtils.driveImg ? GuildUtils.driveImg(u) : u) : ''; }
-  function startTitleDefault(){ return (window.GuildTheme&&GuildTheme.lookup&&GuildTheme.lookup('messages.titleWelcome')) || 'おたく場ギルドへ<br>ようこそ'; }
+  function startTitleDefault(){ return (window.GuildTheme&&GuildTheme.lookup&&GuildTheme.lookup('messages.titleWelcome')) || 'ギルドへ<br>ようこそ'; }
   function startSubtitleDefault(){ return (window.GuildTheme&&GuildTheme.m&&GuildTheme.m('openMenu')) || 'メニューを開きますか？'; }
   function applyStartTheme(){
     const c=themeCustom();
@@ -210,6 +210,7 @@ window.GuildApp = {VERSION:'4.0'};
     if(s.phone) lines.push(`<div><b>電話</b>：${GuildUtils.esc(s.phone)}</div>`);
     lines.push(linkLine('Instagram',s.instagram,'Instagram'));
     lines.push(linkLine('X',s.x,'X'));
+    lines.push(linkLine('YouTube',s.youtube,'YouTube'));
     lines.push(linkLine('Web',s.website,'公式サイト'));
     lines.push(linkLine('MAP',s.mapUrl,'Google Map'));
     const body=$('storeInfoBody'); if(body) body.innerHTML=lines.filter(Boolean).join('');

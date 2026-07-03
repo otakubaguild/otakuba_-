@@ -29,7 +29,7 @@
   let currentMode=loadMode();
   function visibleTabs(){ const maxIdx=MODE_ORDER.indexOf(currentMode); return tabs.filter(t=>MODE_ORDER.indexOf(t[2])<=maxIdx); }
   let current='dash', customerQuery='', salesQuery='';
-  function loginOk(){return sessionStorage.getItem(SESSION)==='ok'} function showLogin(){$('adminLogin').classList.remove('hidden');$('adminApp').classList.add('hidden')} function showApp(){$('adminLogin').classList.add('hidden');$('adminApp').classList.remove('hidden');renderModeBar();renderTabs();render();startAutoRefresh()}
+  function loginOk(){return sessionStorage.getItem(SESSION)==='ok'} function showLogin(){$('adminLogin').classList.remove('hidden');$('adminApp').classList.add('hidden')} function showApp(){$('adminLogin').classList.add('hidden');$('adminApp').classList.remove('hidden');const hn=data.settings.storeInfo&&data.settings.storeInfo.name||data.settings.storeName||data.settings.shopName||(window.GuildTheme?GuildTheme.b('shopName'):'')||'';if($('adminHeadTitle'))$('adminHeadTitle').textContent=(hn?hn+' ':'')+'管理室';renderModeBar();renderTabs();render();startAutoRefresh()}
   let autoTimer=null;
   function startAutoRefresh(){ if(autoTimer)clearInterval(autoTimer); autoTimer=setInterval(async()=>{
     // 概要・顧客・履歴を見ている時だけ自動取得。入力中は邪魔しない
@@ -560,7 +560,7 @@
       '<div class="toolbar"><button class="btn gold" id="saveThemeWords">呼び名を保存</button></div>'+
       '</div>'+
       '<div class="admin-card"><div class="admin-card-title">🎬 スタート画面</div>'+
-      '<label>タイトルHTML<textarea id="tcStartTitle" placeholder="例：おたく場ギルドへ&lt;br&gt;ようこそ">'+esc(c.startTitle||'')+'</textarea></label>'+
+      '<label>タイトルHTML<textarea id="tcStartTitle" placeholder="例：ギルドへ&lt;br&gt;ようこそ">'+esc(c.startTitle||'')+'</textarea></label>'+
       '<label>サブメッセージ<input id="tcStartSubtitle" value="'+esc(c.startSubtitle||'')+'" placeholder="例：メニューを開きますか？"></label>'+
       '</div>'+
       '<div class="admin-card"><div class="admin-card-title">🏆 討伐完了画面</div>'+
@@ -675,18 +675,19 @@
   function renderStoreInfoAdmin(containerId){
     containerId=containerId||'adminContent';
     const s=data.settings;
-    s.storeInfo=Object.assign({name:'',address:'',hours:'',phone:'',instagram:'',x:'',website:'',mapUrl:'',description:''},s.storeInfo||{});
+    s.storeInfo=Object.assign({name:'',address:'',hours:'',phone:'',instagram:'',x:'',youtube:'',website:'',mapUrl:'',description:''},s.storeInfo||{});
     const i=s.storeInfo;
     $(containerId).innerHTML='<h2>🏪 店舗情報</h2>'+
       '<div class="admin-card"><p class="tiny">一般画面の「店舗情報」ボタンに表示されます。営業時間・SNS・地図など、お客様に見せたい情報を登録できます。</p></div>'+
       '<div class="admin-card">'+
-      '<label>店舗名<input id="infoName" value="'+esc(i.name||s.storeName||s.shopName||'')+'" placeholder="例：おたく場ギルド"></label>'+
+      '<label>店舗名<input id="infoName" value="'+esc(i.name||s.storeName||s.shopName||'')+'" placeholder="例：〇〇バー / △△カフェ"></label>'+
       '<label>紹介文<textarea id="infoDesc" placeholder="例：ゲームを遊びながら注文できるバーです">'+esc(i.description||'')+'</textarea></label>'+
       '<label>営業時間<textarea id="infoHours" placeholder="例：20:00〜LAST / 定休日：月曜">'+esc(i.hours||'')+'</textarea></label>'+
       '<label>住所<textarea id="infoAddress" placeholder="例：青森県むつ市...">'+esc(i.address||'')+'</textarea></label>'+
       '<label>電話番号<input id="infoPhone" value="'+esc(i.phone||'')+'" placeholder="例：0175-..."></label>'+
       '<label>Instagram URL<input id="infoInstagram" value="'+esc(i.instagram||'')+'" placeholder="https://instagram.com/..."></label>'+
       '<label>X URL<input id="infoX" value="'+esc(i.x||'')+'" placeholder="https://x.com/..."></label>'+
+      '<label>YouTube URL<input id="infoYoutube" value="'+esc(i.youtube||'')+'" placeholder="https://youtube.com/@..."></label>'+
       '<label>公式サイトURL<input id="infoWebsite" value="'+esc(i.website||'')+'" placeholder="https://..."></label>'+
       '<label>Google Map URL<input id="infoMap" value="'+esc(i.mapUrl||'')+'" placeholder="https://maps.app.goo.gl/..."></label>'+
       '<div class="toolbar"><button class="btn gold" id="saveStoreInfo">店舗情報を保存</button></div>'+
@@ -700,6 +701,7 @@
         phone:$('infoPhone').value.trim(),
         instagram:$('infoInstagram').value.trim(),
         x:$('infoX').value.trim(),
+        youtube:$('infoYoutube').value.trim(),
         website:$('infoWebsite').value.trim(),
         mapUrl:$('infoMap').value.trim()
       };
