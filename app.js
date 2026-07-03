@@ -35,8 +35,9 @@ window.GuildApp = {VERSION:'4.0'};
   function welcomePrompt(){
     if(hasActiveSession()){
       const c=GuildCustomer.current&&GuildCustomer.current();
-      const nm=(c&&c.name)||data.currentCustomer||'冒険者';
-      return `戦闘を再開しますか？\nお帰りなさい、冒険者${nm}`;
+      const custWord=(window.GuildTheme?GuildTheme.w('customer'):'冒険者');
+      const nm=(c&&c.name)||data.currentCustomer||custWord;
+      return `${(window.GuildTheme?GuildTheme.w('battle'):'戦闘')}を再開しますか？\nお帰りなさい、${custWord}${nm}`;
     }
     return (themeCustom().startSubtitle || startSubtitleDefault());
   }
@@ -213,10 +214,10 @@ window.GuildApp = {VERSION:'4.0'};
     const body=$('storeInfoBody'); if(body) body.innerHTML=lines.filter(Boolean).join('');
   }
 
-  function renderParty(){ const count=Math.max(1,Math.min(20,Number(data.partyCount||1)||1)); data.partyCount=count; const charge=Number(data.settings.coverCharge??500)||0; $('partyCountView').textContent=`${count}名`; $('chargePreview').textContent=`ギルド登録料（チャージ）：${GuildUtils.yen(charge,data.settings.currency)} × ${count}名 = ${GuildUtils.yen(charge*count,data.settings.currency)}`; }
-  function showChargeConfirm(){ const count=Math.max(1,Math.min(20,Number(data.partyCount||1)||1)); const charge=Number(data.settings.coverCharge??500)||0; const total=charge*count; $('chargeConfirmBody').textContent=`ギルドへの登録には登録料（チャージ）が必要です。\n\n冒険者名：${data.currentCustomer||'未登録'}\nパーティ人数：${count}名\n登録料：${GuildUtils.yen(charge,data.settings.currency)} × ${count}名\n\n合計：${GuildUtils.yen(total,data.settings.currency)}\n\n登録しますか？`; GuildUI.openModal('modalChargeConfirm'); }
-  function applyCoverCharge(){ const count=Math.max(1,Math.min(20,Number(data.partyCount||1)||1)); const charge=Number(data.settings.coverCharge??500)||0; const total=charge*count; data.activeBill=Array.isArray(data.activeBill)?data.activeBill:[]; data.activeBill=data.activeBill.filter(i=>i.id!=='cover_charge'); if(charge>0&&count>0){ data.activeBill.unshift({id:'cover_charge',name:'ギルド登録料（チャージ）',cat:'charge',price:charge,qty:count,subtotal:total,partyCount:count,isCharge:true}); } GuildStorage.save(); }
-  GuildApp.showWelcomeBack=function(){ welcomeText('おかえりなさい、冒険者。次のクエストを受けますか？'); 
+  function renderParty(){ const count=Math.max(1,Math.min(20,Number(data.partyCount||1)||1)); data.partyCount=count; const charge=Number(data.settings.coverCharge??500)||0; const label=(window.GuildTheme?GuildTheme.w('customerRegister'):'ギルド登録料（チャージ）'); $('partyCountView').textContent=`${count}名`; $('chargePreview').textContent=`${label}：${GuildUtils.yen(charge,data.settings.currency)} × ${count}名 = ${GuildUtils.yen(charge*count,data.settings.currency)}`; }
+  function showChargeConfirm(){ const count=Math.max(1,Math.min(20,Number(data.partyCount||1)||1)); const charge=Number(data.settings.coverCharge??500)||0; const total=charge*count; const label=(window.GuildTheme?GuildTheme.w('customerRegister'):'登録料（チャージ）'); const custWord=(window.GuildTheme?GuildTheme.w('customer'):'冒険者'); const guildWord=(window.GuildTheme?GuildTheme.w('guild'):'ギルド'); const partyWord=(window.GuildTheme?GuildTheme.w('party'):'パーティ'); $('chargeConfirmBody').textContent=`${guildWord}への登録には${label}が必要です。\n\n${custWord}名：${data.currentCustomer||'未登録'}\n${partyWord}人数：${count}名\n${label}：${GuildUtils.yen(charge,data.settings.currency)} × ${count}名\n\n合計：${GuildUtils.yen(total,data.settings.currency)}\n\n登録しますか？`; GuildUI.openModal('modalChargeConfirm'); }
+  function applyCoverCharge(){ const count=Math.max(1,Math.min(20,Number(data.partyCount||1)||1)); const charge=Number(data.settings.coverCharge??500)||0; const total=charge*count; const label=(window.GuildTheme?GuildTheme.w('customerRegister'):'ギルド登録料（チャージ）'); data.activeBill=Array.isArray(data.activeBill)?data.activeBill:[]; data.activeBill=data.activeBill.filter(i=>!i.isCharge); if(charge>0&&count>0){ data.activeBill.unshift({id:'cover_charge',name:label,cat:'charge',price:charge,qty:count,subtotal:total,partyCount:count,isCharge:true}); } GuildStorage.save(); }
+  GuildApp.showWelcomeBack=function(){ welcomeText((window.GuildTheme?GuildTheme.m('welcomeBack'):'おかえりなさい、冒険者。次のクエストを受けますか？')); 
   if($('setupTheme')) $('setupTheme').onchange=async()=>{
     await applySetupPreset(wizardVal('setupTheme'));
     fillSetupWizard();

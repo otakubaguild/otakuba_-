@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#050505">
   <title data-theme-title>おたく場ギルド</title>
-  <link rel="stylesheet" href="main.css?v=1.6-awaken">
-  <link rel="stylesheet" href="battle.css?v=1.6-awaken">
-  <link rel="stylesheet" href="menu.css?v=1.6-awaken">
-  <link rel="stylesheet" href="effects.css?v=1.6-awaken">
+  <link rel="stylesheet" href="main.css?v=1.8-wordaudit">
+  <link rel="stylesheet" href="battle.css?v=1.8-wordaudit">
+  <link rel="stylesheet" href="menu.css?v=1.8-wordaudit">
+  <link rel="stylesheet" href="effects.css?v=1.8-wordaudit">
 
   <style>
     .setup-wizard-overlay{z-index:10050}
@@ -42,14 +42,14 @@
     <section class="screen center" id="screenName">
       <div class="panel window">
         <div class="title-logo small" data-theme-text="messages.registerTitle">冒険者登録</div>
-        <p>冒険者名を入力してください</p>
+        <p><span data-theme-text="words.customer">冒険者</span>名を入力してください</p>
         <input id="nameInput" placeholder="例：タロウ" autocomplete="name">
         <div class="row mt">
           <button class="btn gold" id="btnNameOk">新規登録</button>
           <button class="btn" id="btnBackWelcome">戻る</button>
         </div>
         <div class="row mt">
-          <button class="btn" id="btnSelectExisting">📋 登録済みの冒険者から選ぶ</button>
+          <button class="btn" id="btnSelectExisting">📋 登録済みの<span data-theme-text="words.customer">冒険者</span>から選ぶ</button>
         </div>
       </div>
     </section>
@@ -122,7 +122,7 @@
 
     <div class="modal" id="modalOrderConfirm">
       <div class="modal-head">
-        <h2>クエスト受注確認</h2>
+        <h2><span data-theme-text="words.quest">クエスト</span>受注確認</h2>
         <button class="btn small" id="btnCancelOrder">戻る</button>
       </div>
       <div class="scroll">
@@ -138,7 +138,7 @@
 
     <div class="modal" id="modalChargeConfirm">
       <div class="modal-head">
-        <h2>ギルド登録料</h2>
+        <h2><span data-theme-text="words.guild">ギルド</span>登録料</h2>
         <button class="btn small" id="btnCancelCharge">戻る</button>
       </div>
       <div class="scroll">
@@ -178,9 +178,9 @@
 
     <div id="guildReturnOverlay" class="victory-clear-overlay">
       <div class="panel window center">
-        <div class="level-up-title">🏆 魔王討伐！</div>
-        <div class="mt">魔王を倒し、平和が訪れた。</div>
-        <button class="btn gold mt" id="guildReturnBtn">🏰 ギルドに帰還</button>
+        <div class="level-up-title">🏆 <span data-theme-text="words.bossDefeatText">魔王討伐！</span></div>
+        <div class="mt" data-theme-text="messages.peace">魔王を倒し、平和が訪れた。</div>
+        <button class="btn gold mt" id="guildReturnBtn">🏰 <span data-theme-text="words.guild">ギルド</span>に帰還</button>
       </div>
     </div>
 
@@ -190,7 +190,7 @@
         <div id="victoryClearTitle" class="level-up-title" style="display:none"></div>
         <div id="victoryClearSubtitle" class="panel" style="display:none;max-width:420px"></div>
       </div>
-      <button class="btn" id="victoryClearClose">⚔️ 最初の戦闘に戻る</button>
+      <button class="btn" id="victoryClearClose">⚔️ 最初の<span data-theme-text="words.battle">戦闘</span>に戻る</button>
     </div>
   
     <div id="setupWizardOverlay" class="level-up-overlay setup-wizard-overlay">
@@ -258,16 +258,16 @@
 
 </div>
 
-  <script src="theme.js?v=1.6-awaken"></script>
-  <script src="utils.js?v=1.6-awaken"></script>
-  <script src="storage.js?v=1.6-awaken"></script>
-  <script src="audio.js?v=1.6-awaken"></script>
-  <script src="ui.js?v=1.6-awaken"></script>
-  <script src="customer.js?v=1.6-awaken"></script>
-  <script src="battle.js?v=1.6-awaken"></script>
-  <script src="discord.js?v=1.6-awaken"></script>
-  <script src="menu.js?v=1.6-awaken"></script>
-  <script src="order.js?v=1.6-awaken"></script>
-  <script src="app.js?v=1.6-awaken"></script>
+  <script src="theme.js?v=1.8-wordaudit"></script>
+  <script src="utils.js?v=1.8-wordaudit"></script>
+  <script src="storage.js?v=1.8-wordaudit"></script>
+  <script src="audio.js?v=1.8-wordaudit"></script>
+  <script src="ui.js?v=1.8-wordaudit"></script>
+  <script src="customer.js?v=1.8-wordaudit"></script>
+  <script src="battle.js?v=1.8-wordaudit"></script>
+  <script src="discord.js?v=1.8-wordaudit"></script>
+  <script src="menu.js?v=1.8-wordaudit"></script>
+  <script src="order.js?v=1.8-wordaudit"></script>
+  <script src="app.js?v=1.8-wordaudit"></script>
 </body>
 </html>
