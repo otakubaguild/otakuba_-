@@ -2,6 +2,11 @@
   const {$, esc, yen} = GuildUtils;
   if(window.GuildTheme) await GuildTheme.init();
   const data = await GuildStorage.init();
+  // 他端末で保存された呼び名・フォントをこの端末にも反映
+  if(window.GuildTheme){
+    try{ if(data.settings.themeWords) GuildTheme.saveWordsOverride(data.settings.themeWords); }catch(e){}
+    try{ if(data.settings.themeFonts) GuildTheme.saveFontsOverride(data.settings.themeFonts); }catch(e){}
+  }
   const SESSION='otakuba.v3.final.admin.session';
   // モード（Easy/Normal/Hard）: 各タブがどのモード以上で表示されるかを持つ。上位モードは下位モードのタブも全て含む（累積表示）
   const MODE_ORDER=['easy','normal','hard'];
@@ -166,7 +171,7 @@
   function saveMenuForm(){document.querySelectorAll('[data-menu-index]').forEach(card=>{const p=data.menu[+card.dataset.menuIndex];p.name=card.querySelector('[data-field="name"]').value;p.cat=card.querySelector('[data-field="cat"]').value;p.category=p.cat;p.price=+card.querySelector('[data-field="price"]').value||0;p.emoji=card.querySelector('[data-field="emoji"]').value||'🍽️';p.icon=p.emoji;p.image=card.querySelector('[data-field="image"]').value;p.desc=card.querySelector('[data-field="desc"]').value;p.stock=card.querySelector('[data-field="stock"]').value===''?'':Math.max(0,+card.querySelector('[data-field="stock"]').value||0);p.recommended=card.querySelector('[data-field="recommended"]').checked;p.limited=card.querySelector('[data-field="limited"]').checked;p.soldOut=card.querySelector('[data-field="soldOut"]').checked;p.hidden=card.querySelector('[data-field="hidden"]').checked});data.settings.menuPushedAt=new Date().toISOString();save();if(GuildStorage.pushCloud)GuildStorage.pushCloud();}
   function customerListHtml(){const q=customerQuery.toLowerCase();const list=(data.customers||[]).map((c,i)=>({c,i})).filter(({c})=>!q||[c.name,c.title,c.memo,c.id].some(v=>String(v||'').toLowerCase().includes(q)));return list.length?list.map(({c,i})=>customerCard(c,i)).join(''):'<div class="empty">なし</div>';}
   function refreshCustomerList(){const box=$('customerListBox');if(box)box.innerHTML=customerListHtml();bindCustomerListEvents();}
-  function bindCustomerListEvents(){document.querySelectorAll('[data-del-customer]').forEach(b=>b.onclick=()=>{if(confirm('削除しますか？')){data.customers.splice(+b.dataset.delCustomer,1);save();refreshCustomerList()}});document.querySelectorAll('[data-sales-of]').forEach(b=>b.onclick=()=>{salesQuery=data.customers[+b.dataset.salesOf].name;current='sales';renderTabs();renderSales()})}
+  function bindCustomerListEvents(){document.querySelectorAll('[data-del-customer]').forEach(b=>b.onclick=()=>{if(confirm('削除しますか？')){const idx=+b.dataset.delCustomer;const c=data.customers[idx];if(c&&c.id){data.deletedCustomerIds=Array.from(new Set([...(data.deletedCustomerIds||[]),c.id]));if(GuildStorage.markCustomerDeleted)GuildStorage.markCustomerDeleted(c);}data.customers.splice(idx,1);save();if(GuildStorage.pushCloud)GuildStorage.pushCloud();refreshCustomerList();toast('削除しました')}});document.querySelectorAll('[data-sales-of]').forEach(b=>b.onclick=()=>{salesQuery=data.customers[+b.dataset.salesOf].name;current='sales';renderTabs();renderSales()})}
   function renderCustomers(){$('adminContent').innerHTML=`<h2>👤 顧客管理</h2><div class="toolbar searchbar"><input id="customerSearch" placeholder="顧客検索（Enterで検索）" value="${esc(customerQuery)}" enterkeyhint="search"><button class="btn" id="customerSearchBtn">検索</button><button class="btn gold" id="addCustomer">追加</button><button class="btn green" id="saveCustomers">保存</button><button class="btn" id="jsonCustomers">JSON</button></div><div class="customer-list" id="customerListBox">${customerListHtml()}</div>`;const si=$('customerSearch');const run=()=>{customerQuery=si.value;refreshCustomerList()};si.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();run();si.focus()}});$('customerSearchBtn').onclick=()=>{run();si.focus()};$('addCustomer').onclick=()=>{saveCustomerForm();data.customers.unshift({id:GuildUtils.uid('cust'),name:'新規冒険者',avatar:'🙂',level:1,title:'新米冒険者',visits:0,total:0,lastVisit:'',memo:''});save();refreshCustomerList()};$('saveCustomers').onclick=()=>{saveCustomerForm();toast('保存しました')};$('jsonCustomers').onclick=()=>textareaEditor('customers','customers.json');bindCustomerListEvents()}
   function customerCard(c,i){const sales=(data.sales||[]).filter(s=>s.customer===c.name);return `<div class="admin-card customer-card" data-customer-index="${i}"><div class="customer-head"><div class="admin-card-title">${GuildUtils.avatarTag(c)}${esc(c.name)}</div><span class="badge">${esc(c.id||'')}</span></div><div class="customer-mini-grid"><label>アイコン(絵文字1文字)<input data-field="avatar" value="${esc(c.avatar||'🙂')}" maxlength="4"></label><label>名前<input data-field="name" value="${esc(c.name||'')}"></label><label>Lv<input data-field="level" type="number" value="${c.level||1}"></label><label>二つ名<input data-field="title" value="${esc(c.title||'')}"></label><label>来店<input data-field="visits" type="number" value="${c.visits||0}"></label><label>累計<input data-field="total" type="number" value="${c.total||0}"></label><label>最終<input data-field="lastVisit" value="${esc(c.lastVisit||'')}"></label></div>${c.avatarImage?'<div class="tiny">📷 この端末で撮影/選択した画像アイコンが設定されています（他の端末には表示されません）</div>':''}<label class="wide-label">メモ<textarea data-field="memo">${esc(c.memo||'')}</textarea></label><div class="billbox">履歴 ${sales.length}件</div><div class="toolbar"><button class="btn small" data-sales-of="${i}">履歴を見る</button><button class="btn red small" data-del-customer="${i}">削除</button></div></div>`}
   function saveCustomerForm(){document.querySelectorAll('[data-customer-index]').forEach(card=>{const c=data.customers[+card.dataset.customerIndex];c.avatar=card.querySelector('[data-field="avatar"]').value.trim()||'🙂';c.name=card.querySelector('[data-field="name"]').value;c.level=+card.querySelector('[data-field="level"]').value||1;c.title=card.querySelector('[data-field="title"]').value;c.visits=+card.querySelector('[data-field="visits"]').value||0;c.total=+card.querySelector('[data-field="total"]').value||0;c.lastVisit=card.querySelector('[data-field="lastVisit"]').value;c.memo=card.querySelector('[data-field="memo"]').value});save()}
@@ -562,7 +567,9 @@
         FONT_TARGETS.forEach(([k])=>{ partial[k]=readFont(k); });
       }
       if(window.GuildTheme) GuildTheme.saveFontsOverride(partial);
-      toast('フォントを保存しました（この端末に反映）');
+      data.settings.themeFonts=Object.assign({},data.settings.themeFonts||{},partial);
+      save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
+      toast('フォントを保存しました（全端末に反映されます）');
     };
   }
   const WORD_FIELDS=[
@@ -605,7 +612,9 @@
       const partial={};
       document.querySelectorAll('[data-word-key]').forEach(inp=>{ const v=inp.value.trim(); if(v) partial[inp.dataset.wordKey]=v; });
       if(window.GuildTheme) GuildTheme.saveWordsOverride(partial);
-      toast('呼び名を保存しました（この端末に反映）');
+      data.settings.themeWords=Object.assign({},data.settings.themeWords||{},partial);
+      save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
+      toast('呼び名を保存しました（全端末に反映されます）');
     };
     $('saveThemeText').onclick=function(){
       Object.assign(c,{
@@ -943,6 +952,8 @@
   }
   function resetCustomers(){
     if(!confirmReset('顧客データ', '冒険者名・二つ名・来店回数・累計などを空にします。注文履歴と売上は残ります。'))return;
+    const ids=(data.customers||[]).map(c=>c&&c.id).filter(Boolean);
+    data.deletedCustomerIds=Array.from(new Set([...(data.deletedCustomerIds||[]),...ids]));
     data.customers=[];data.currentCustomer='';customerQuery='';
     pushAfterReset('顧客データを初期化しました');
   }
@@ -1052,7 +1063,7 @@
     const activeBillTotal=(data.activeBill||[]).reduce((a,i)=>a+(Number(i.subtotal)||0),0);
     const activeBillCount=(data.activeBill||[]).length;
     const curCustomer=data.currentCustomer||'-';
-    const pwWarning = (data.settings.adminPassword||'')==='OTAKU' ? `<div class="admin-card" style="border-color:var(--red)"><div class="admin-card-title" style="color:var(--red)">⚠️ 管理パスワードが初期値のままです</div><p class="tiny">このテンプレート共通の初期パスワード「OTAKU」のままだと、他の人にも管理画面を開かれてしまう可能性があります。「設定」→「基本設定」から今すぐ変更してください。</p></div>` : '';
+    const pwWarning = (data.settings.adminPassword||'')==='OTAKU' ? `<div class="admin-card" style="border-color:var(--red)"><div class="admin-card-title" style="color:var(--red)">⚠️ 管理パスワードが初期値のままです</div><p class="tiny">このテンプレート共通の初期パスワード「OTAKU」のままだと、他の人にも管理画面を開かれてしまう可能性があります。上のモード切替を「くわしい」にして、「設定」→「基本設定」から今すぐ変更してください。</p></div>` : '';
     $('adminContent').innerHTML=`
       <h2>ホーム</h2>
       ${pwWarning}

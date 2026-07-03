@@ -1,6 +1,11 @@
 window.GuildApp = {VERSION:'4.0'};
 (async function(){
   const {$}=GuildUtils; if(window.GuildTheme) await GuildTheme.init(); const data=await GuildStorage.init();
+  // 他端末で保存された呼び名・フォントをこの端末にも反映（クラウド同期分をテーマへ適用）
+  if(window.GuildTheme){
+    try{ if(data.settings.themeWords) GuildTheme.saveWordsOverride(data.settings.themeWords); }catch(e){}
+    try{ if(data.settings.themeFonts) GuildTheme.saveFontsOverride(data.settings.themeFonts); }catch(e){}
+  }
   GuildAudio.init(data.settings); GuildBattle.init(data); GuildMenu.init(data); GuildUI.renderNotice(data.settings);
   GuildApp.onSynced=function(){ try{ GuildMenu.init(data); GuildUI.renderNotice(data.settings); GuildBattle.render(); if(typeof renderParty==='function') renderParty(); }catch(e){} };
   if(data.currentCustomer) $('nameInput').value=data.currentCustomer;
