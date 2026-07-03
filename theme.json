@@ -44,5 +44,14 @@
     "masterDefault": "冷やかしか？さっさとメニューを開け",
     "checkoutDone": "おかえりなさい。クエスト達成（会計）を送信しました",
     "peace": "魔王を倒し、平和が訪れた。"
+  },
+
+  "fonts": {
+    "_comment": "空欄なら既定フォントのまま。Google Fontsの名前をそのまま入れると自動で読み込みます。",
+    "mode": "bulk",
+    "base": "",
+    "brand": "",
+    "battle": "",
+    "button": ""
   }
 }

@@ -411,6 +411,40 @@
     });
     $('clearPreset').onclick=function(){ if(!confirm('コンセプトを解除して既定に戻しますか？'))return; GuildTheme.clearOverride(); toast('解除しました。再読み込みで既定に戻ります'); };
   }
+  const FONT_TARGETS=[
+    ['brand','🏪 店名・見出し用'],['battle','⚔️ 討伐・戦闘UI用（敵名/撃破文字/HP等）'],['button','🔘 ボタンの文字']
+  ];
+  let fontMode='bulk';
+  function fontCardHtml(){
+    const fonts=(window.GuildTheme?GuildTheme.all().fonts:{})||{};
+    fontMode = fontMode || fonts.mode || 'bulk';
+    const modeBtns='<div class="toolbar"><button class="btn '+(fontMode==='bulk'?'gold':'')+'" data-font-mode="bulk">一括</button><button class="btn '+(fontMode==='detail'?'gold':'')+'" data-font-mode="detail">詳細</button></div>';
+    let fields;
+    if(fontMode==='bulk'){
+      fields='<label>フォント名（サイト全体に適用）<input id="fontBase" value="'+esc(fonts.base||'')+'" placeholder="例：Zen Maru Gothic / 游ゴシック"></label>';
+    }else{
+      fields='<label>基本フォント（他が空欄の時のフォールバック）<input id="fontBase" value="'+esc(fonts.base||'')+'" placeholder="例：Zen Maru Gothic"></label>'+
+        FONT_TARGETS.map(([k,label])=>'<label>'+esc(label)+'<input id="font_'+k+'" value="'+esc(fonts[k]||'')+'" placeholder="空欄なら基本フォントを使用"></label>').join('');
+    }
+    return '<div class="admin-card"><div class="admin-card-title">🔤 フォント設定</div>'+
+      '<p class="tiny">Google Fontsの名前をそのまま入力すると自動で読み込みます（例：Zen Maru Gothic、Kaisei Decol）。空欄なら元のフォントのままです。一括はサイト全体、詳細は場所ごとに変えられます。</p>'+
+      modeBtns+fields+
+      '<div class="toolbar"><button class="btn gold" id="saveThemeFonts">フォントを保存</button></div></div>';
+  }
+  function bindFontCard(){
+    document.querySelectorAll('[data-font-mode]').forEach(b=>b.onclick=()=>{ fontMode=b.dataset.fontMode; renderThemeText(); });
+    $('saveThemeFonts').onclick=function(){
+      let partial;
+      if(fontMode==='bulk'){
+        partial={ mode:'bulk', base:$('fontBase').value.trim(), brand:'', battle:'', button:'' };
+      }else{
+        partial={ mode:'detail', base:$('fontBase').value.trim() };
+        FONT_TARGETS.forEach(([k])=>{ partial[k]=$('font_'+k).value.trim(); });
+      }
+      if(window.GuildTheme) GuildTheme.saveFontsOverride(partial);
+      toast('フォントを保存しました（この端末に反映）');
+    };
+  }
   const WORD_FIELDS=[
     ['customer','対象の呼び方（例：冒険者）'],['boss','ラスボス呼び方（例：魔王）'],['enemy','敵の呼び方（例：敵）'],
     ['quest','注文の呼び方（例：クエスト）'],['questClear','クリア文字（例：クエスト達成）'],['defeat','撃破文字（例：撃破）'],
@@ -423,6 +457,7 @@
     const c=ensureThemeCustom();
     const words=(window.GuildTheme?GuildTheme.all().words:{})||{};
     $('themeSubContent').innerHTML=
+      fontCardHtml()+
       '<div class="admin-card"><div class="admin-card-title">🏷️ 呼び名・固定文字</div>'+
       '<p class="tiny">画面のあちこちに出てくる固定の言葉をここでまとめて変えられます。例：「冒険者」→「お客様」、「魔王」→「ラスボス」など。</p>'+
       WORD_FIELDS.map(([k,label])=>'<label>'+esc(label)+'<input data-word-key="'+k+'" value="'+esc(words[k]||'')+'"></label>').join('')+
@@ -441,6 +476,7 @@
       '<label>セリフ<input id="tcMasterMessage" value="'+esc(c.masterMessage||'冷やかしか？さっさとメニューを開け')+'"></label>'+
       '</div>'+
       '<div class="toolbar"><button class="btn gold" id="saveThemeText">テキストを保存</button><button class="btn" id="clearThemeCustom">すべて初期化</button></div>';
+    bindFontCard();
     $('saveThemeWords').onclick=function(){
       const partial={};
       document.querySelectorAll('[data-word-key]').forEach(inp=>{ const v=inp.value.trim(); if(v) partial[inp.dataset.wordKey]=v; });
