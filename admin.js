@@ -2,8 +2,15 @@
   const {$, esc, yen} = GuildUtils;
   if(window.GuildTheme) await GuildTheme.init();
   const data = await GuildStorage.init();
-  // 他端末で保存された呼び名・フォントをこの端末にも反映
+  // 他端末で選ばれたコンセプト（RPG/SF/魔法学校）と、呼び名・フォント・カラーをこの端末にも反映
   if(window.GuildTheme){
+    try{
+      if(data.settings.currentPresetId && GuildTheme.loadPresets){
+        const presets=await GuildTheme.loadPresets();
+        const p=(presets||[]).find(x=>x.id===data.settings.currentPresetId);
+        if(p) GuildTheme.applyPresetTheme(p);
+      }
+    }catch(e){}
     try{ if(data.settings.themeWords) GuildTheme.saveWordsOverride(data.settings.themeWords); }catch(e){}
     try{ if(data.settings.themeFonts) GuildTheme.saveFontsOverride(data.settings.themeFonts); }catch(e){}
     try{ if(data.settings.themeColors) GuildTheme.saveColorsOverride(data.settings.themeColors); }catch(e){}
@@ -483,14 +490,90 @@
   function renderThemeEditor(){
     $('adminContent').innerHTML='<h2>🎭 テーマ編集</h2>'+
       '<div class="admin-card"><p class="tiny">店舗情報・文言・画像・BGM・キャラクターをここでまとめて編集できます。JSON編集やGitHub編集は不要です。</p></div>'+
-      '<h3>コンセプト一括切替</h3>'+
+      '<div class="admin-card"><div class="admin-card-title">📸 マイテーマ（自分だけの保存テーマ）</div>'+
+      '<p class="tiny">今のテーマ(色・呼び名・フォント・画像・BGM・キャラクター構成)に名前を付けて保存できます。イベントで大きく変えても、保存したテーマにボタン一つで戻せます。</p>'+
+      '<div id="myThemeList"></div>'+
+      '<label>新しく保存する名前<input id="myThemeName" placeholder="例：いつもの／夏祭りイベント"></label>'+
+      '<div class="toolbar"><button class="btn gold" id="saveMyTheme">今のテーマを保存</button><button class="btn" id="exportMyTheme">JSONで書き出し（バックアップ用）</button></div>'+
+      '</div>'+
+      '<h3>コンセプト一括切替（サンプルテーマから作り直す）</h3>'+
       '<div id="presetList" class="grid"><div class="tiny">読み込み中...</div></div>'+
       '<div class="admin-card"><div class="admin-card-title">元に戻す</div><p class="tiny">選んだコンセプトを解除して、既定(theme.json)に戻します。</p><button class="btn" id="clearPreset">コンセプトを解除</button></div>'+
       '<nav class="theme-subnav" id="themeSubNav"></nav>'+
       '<div id="themeSubContent"></div>';
+    renderMyThemeList();
     renderPresetPicker();
     renderThemeSubNav();
     renderThemeSub();
+    $('saveMyTheme').onclick=function(){
+      const name=$('myThemeName').value.trim();
+      if(!name){ toast('名前を入力してください'); return; }
+      data.settings.themeSnapshots=data.settings.themeSnapshots||{};
+      data.settings.themeSnapshots[name]=captureThemeSnapshot();
+      save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
+      toast('「'+name+'」として保存しました');
+      $('myThemeName').value='';
+      renderMyThemeList();
+    };
+    $('exportMyTheme').onclick=function(){
+      const snap=captureThemeSnapshot();
+      const blob=new Blob([JSON.stringify(snap,null,2)],{type:'application/json'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url; a.download='theme_backup_'+Date.now()+'.json';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast('ダウンロードしました');
+    };
+  }
+  function captureThemeSnapshot(){
+    const s=data.settings;
+    return {
+      currentPresetId:s.currentPresetId||'',
+      themeColors:s.themeColors?JSON.parse(JSON.stringify(s.themeColors)):{},
+      themeWords:s.themeWords?JSON.parse(JSON.stringify(s.themeWords)):{},
+      themeFonts:s.themeFonts?JSON.parse(JSON.stringify(s.themeFonts)):{},
+      themeCustom:s.themeCustom?JSON.parse(JSON.stringify(s.themeCustom)):{},
+      audioFiles:s.audioFiles?JSON.parse(JSON.stringify(s.audioFiles)):{},
+      monsters:JSON.parse(JSON.stringify(data.monsters||[])),
+      savedAt:new Date().toISOString()
+    };
+  }
+  function applyThemeSnapshot(snap){
+    if(!snap) return;
+    const s=data.settings;
+    if(snap.currentPresetId) s.currentPresetId=snap.currentPresetId;
+    if(snap.themeColors){ s.themeColors=snap.themeColors; if(window.GuildTheme) GuildTheme.saveColorsOverride(snap.themeColors); }
+    if(snap.themeWords){ s.themeWords=snap.themeWords; if(window.GuildTheme) GuildTheme.saveWordsOverride(snap.themeWords); }
+    if(snap.themeFonts){ s.themeFonts=snap.themeFonts; if(window.GuildTheme) GuildTheme.saveFontsOverride(snap.themeFonts); }
+    if(snap.themeCustom) s.themeCustom=snap.themeCustom;
+    if(snap.audioFiles) s.audioFiles=snap.audioFiles;
+    if(Array.isArray(snap.monsters)) data.monsters=snap.monsters.map(normalizeMonster);
+    save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
+    toast('テーマを切り替えました（全端末に反映されます）');
+    renderThemeEditor();
+  }
+  function renderMyThemeList(){
+    const box=$('myThemeList'); if(!box) return;
+    const snaps=data.settings.themeSnapshots||{};
+    const names=Object.keys(snaps);
+    box.innerHTML = names.length ? names.map(name=>
+      '<div class="row" style="align-items:center;gap:6px;margin:4px 0">'+
+      '<span style="flex:2">🏷️ '+esc(name)+'</span>'+
+      '<button class="btn small gold" data-theme-apply="'+esc(name)+'">適用</button>'+
+      '<button class="btn small red" data-theme-del="'+esc(name)+'">削除</button>'+
+      '</div>'
+    ).join('') : '<p class="tiny">まだ保存されたテーマはありません</p>';
+    document.querySelectorAll('[data-theme-apply]').forEach(b=>b.onclick=()=>{
+      if(!confirm('「'+b.dataset.themeApply+'」を適用しますか？今の状態は上書きされます（先に保存推奨）'))return;
+      applyThemeSnapshot(snaps[b.dataset.themeApply]);
+    });
+    document.querySelectorAll('[data-theme-del]').forEach(b=>b.onclick=()=>{
+      if(!confirm('「'+b.dataset.themeDel+'」を削除しますか？'))return;
+      delete data.settings.themeSnapshots[b.dataset.themeDel];
+      save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
+      renderMyThemeList();
+    });
   }
   function renderThemeSubNav(){
     $('themeSubNav').innerHTML=THEME_SUBTABS.map(t=>`<button class="tab subtab ${themeSubTab===t[0]?'active':''}" data-subtab="${t[0]}">${t[1]}</button>`).join('');
