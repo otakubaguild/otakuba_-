@@ -222,9 +222,64 @@
   function saveMenuForm(){document.querySelectorAll('[data-menu-index]').forEach(card=>{const p=data.menu[+card.dataset.menuIndex];p.name=card.querySelector('[data-field="name"]').value;p.cat=card.querySelector('[data-field="cat"]').value;p.category=p.cat;p.price=+card.querySelector('[data-field="price"]').value||0;p.emoji=card.querySelector('[data-field="emoji"]').value||'🍽️';p.icon=p.emoji;p.image=card.querySelector('[data-field="image"]').value;p.desc=card.querySelector('[data-field="desc"]').value;p.stock=card.querySelector('[data-field="stock"]').value===''?'':Math.max(0,+card.querySelector('[data-field="stock"]').value||0);p.recommended=card.querySelector('[data-field="recommended"]').checked;p.limited=card.querySelector('[data-field="limited"]').checked;p.soldOut=card.querySelector('[data-field="soldOut"]').checked;p.hidden=card.querySelector('[data-field="hidden"]').checked});data.settings.menuPushedAt=new Date().toISOString();save();if(GuildStorage.pushCloud)GuildStorage.pushCloud();}
   function customerListHtml(){const q=customerQuery.toLowerCase();const list=(data.customers||[]).map((c,i)=>({c,i})).filter(({c})=>!q||[c.name,c.title,c.memo,c.id].some(v=>String(v||'').toLowerCase().includes(q)));return list.length?list.map(({c,i})=>customerCard(c,i)).join(''):'<div class="empty">なし</div>';}
   function refreshCustomerList(){const box=$('customerListBox');if(box)box.innerHTML=customerListHtml();bindCustomerListEvents();}
-  function bindCustomerListEvents(){document.querySelectorAll('[data-del-customer]').forEach(b=>b.onclick=()=>{if(confirm('削除しますか？')){const idx=+b.dataset.delCustomer;const c=data.customers[idx];if(c&&c.id){data.deletedCustomerIds=Array.from(new Set([...(data.deletedCustomerIds||[]),c.id]));if(GuildStorage.markCustomerDeleted)GuildStorage.markCustomerDeleted(c);}data.customers.splice(idx,1);save();if(GuildStorage.pushCloud)GuildStorage.pushCloud();refreshCustomerList();toast('削除しました')}});document.querySelectorAll('[data-sales-of]').forEach(b=>b.onclick=()=>{salesQuery=data.customers[+b.dataset.salesOf].name;current='sales';renderTabs();renderSales()})}
+  function bindCustomerListEvents(){document.querySelectorAll('[data-del-customer]').forEach(b=>b.onclick=()=>{if(confirm('削除しますか？')){const idx=+b.dataset.delCustomer;const c=data.customers[idx];if(c&&c.id){data.deletedCustomerIds=Array.from(new Set([...(data.deletedCustomerIds||[]),c.id]));if(GuildStorage.markCustomerDeleted)GuildStorage.markCustomerDeleted(c);}data.customers.splice(idx,1);save();if(GuildStorage.pushCloud)GuildStorage.pushCloud();refreshCustomerList();toast('削除しました')}});document.querySelectorAll('[data-sales-of]').forEach(b=>b.onclick=()=>{salesQuery=data.customers[+b.dataset.salesOf].name;current='sales';renderTabs();renderSales()});bindOpenBillEvents()}
   function renderCustomers(){$('adminContent').innerHTML=`<h2>👤 顧客管理</h2><div class="toolbar searchbar"><input id="customerSearch" placeholder="顧客検索（Enterで検索）" value="${esc(customerQuery)}" enterkeyhint="search"><button class="btn" id="customerSearchBtn">検索</button><button class="btn gold" id="addCustomer">追加</button><button class="btn green" id="saveCustomers">保存</button><button class="btn" id="jsonCustomers">JSON</button></div><div class="customer-list" id="customerListBox">${customerListHtml()}</div>`;const si=$('customerSearch');const run=()=>{customerQuery=si.value;refreshCustomerList()};si.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();run();si.focus()}});$('customerSearchBtn').onclick=()=>{run();si.focus()};$('addCustomer').onclick=()=>{saveCustomerForm();data.customers.unshift({id:GuildUtils.uid('cust'),name:'新規冒険者',avatar:'🙂',level:1,title:'新米冒険者',visits:0,total:0,lastVisit:'',memo:''});save();refreshCustomerList()};$('saveCustomers').onclick=()=>{saveCustomerForm();toast('保存しました')};$('jsonCustomers').onclick=()=>textareaEditor('customers','customers.json');bindCustomerListEvents()}
-  function customerCard(c,i){const sales=(data.sales||[]).filter(s=>s.customer===c.name);return `<div class="admin-card customer-card" data-customer-index="${i}"><div class="customer-head"><div class="admin-card-title">${GuildUtils.avatarTag(c)}${esc(c.name)}</div><span class="badge">${esc(c.id||'')}</span></div><div class="customer-mini-grid"><label>アイコン(絵文字1文字)<input data-field="avatar" value="${esc(c.avatar||'🙂')}" maxlength="4"></label><label>名前<input data-field="name" value="${esc(c.name||'')}"></label><label>Lv<input data-field="level" type="number" value="${c.level||1}"></label><label>二つ名<input data-field="title" value="${esc(c.title||'')}"></label><label>来店<input data-field="visits" type="number" value="${c.visits||0}"></label><label>累計<input data-field="total" type="number" value="${c.total||0}"></label><label>最終<input data-field="lastVisit" value="${esc(c.lastVisit||'')}"></label></div>${c.avatarImage?'<div class="tiny">📷 この端末で撮影/選択した画像アイコンが設定されています（他の端末には表示されません）</div>':''}<label class="wide-label">メモ<textarea data-field="memo">${esc(c.memo||'')}</textarea></label><div class="billbox">履歴 ${sales.length}件</div><div class="toolbar"><button class="btn small" data-sales-of="${i}">履歴を見る</button><button class="btn red small" data-del-customer="${i}">削除</button></div></div>`}
+  function menuOptionsHtml(){
+    const cs=cats();
+    return cs.map(c=>{
+      const items=(data.menu||[]).filter(p=>p.cat===c.id && !p.hidden && !p.soldOut);
+      if(!items.length) return '';
+      return '<optgroup label="'+esc((c.icon?c.icon+' ':'')+c.name)+'">'+items.map(p=>'<option value="'+esc(p.id)+'">'+esc(p.name)+'（'+yen(p.price,data.settings.currency)+'）</option>').join('')+'</optgroup>';
+    }).join('');
+  }
+  function customerOpenBillHtml(c,i){
+    const bill=c.openBill||[];
+    const total=bill.reduce((s,it)=>s+(Number(it.subtotal)||0),0);
+    return '<div class="admin-card" style="border-color:var(--gold)"><div class="admin-card-title">🗣️ 口頭注文（この人専用の伝票）</div>'+
+      (bill.length?'<div class="billbox">'+bill.map((it,bi)=>'・'+esc(it.name)+' ×'+it.qty+' = '+yen(it.subtotal,data.settings.currency)+' <button class="btn small red" data-openbill-del="'+i+':'+bi+'">×</button>').join('<br>')+'</div>'
+        :'<p class="tiny">まだ注文はありません</p>')+
+      '<div class="row" style="align-items:center;gap:6px;margin-top:6px">'+
+      '<select data-openbill-item="'+i+'" style="flex:2">'+menuOptionsHtml()+'</select>'+
+      '<input type="number" data-openbill-qty="'+i+'" value="1" min="1" style="flex:0 0 60px">'+
+      '<button class="btn small gold" data-openbill-add="'+i+'">追加</button>'+
+      '</div>'+
+      (bill.length?'<div class="toolbar"><b>合計 '+yen(total,data.settings.currency)+'</b><button class="btn green" data-openbill-checkout="'+i+'">この内容で会計する</button></div>':'')+
+      '</div>';
+  }
+  function bindOpenBillEvents(){
+    document.querySelectorAll('[data-openbill-add]').forEach(b=>b.onclick=()=>{
+      const i=+b.dataset.openbillAdd; const c=data.customers[i]; if(!c) return;
+      const sel=document.querySelector('[data-openbill-item="'+i+'"]');
+      const qtyInp=document.querySelector('[data-openbill-qty="'+i+'"]');
+      const p=(data.menu||[]).find(x=>x.id===sel.value); if(!p){ toast('商品を選んでください'); return; }
+      const qty=Math.max(1,+qtyInp.value||1);
+      c.openBill=c.openBill||[];
+      const existing=c.openBill.find(it=>it.id===p.id);
+      if(existing){ existing.qty+=qty; existing.subtotal=existing.qty*p.price; }
+      else c.openBill.push({id:p.id,name:p.name,price:p.price,qty,subtotal:p.price*qty});
+      if(p.stock!==''&&typeof p.stock!=='undefined'){ p.stock=Math.max(0,Number(p.stock||0)-qty); if(p.stock<=0)p.soldOut=true; }
+      save(); refreshCustomerList();
+    });
+    document.querySelectorAll('[data-openbill-del]').forEach(b=>b.onclick=()=>{
+      const [i,bi]=b.dataset.openbillDel.split(':').map(Number);
+      const c=data.customers[i]; if(!c||!c.openBill) return;
+      c.openBill.splice(bi,1); save(); refreshCustomerList();
+    });
+    document.querySelectorAll('[data-openbill-checkout]').forEach(b=>b.onclick=()=>{
+      const i=+b.dataset.openbillCheckout; const c=data.customers[i]; if(!c||!c.openBill||!c.openBill.length) return;
+      if(!confirm(c.name+'さんの口頭注文分（'+c.openBill.length+'品）を会計しますか？'))return;
+      const total=c.openBill.reduce((s,it)=>s+(Number(it.subtotal)||0),0);
+      const rec={id:GuildUtils.uid('sale'),type:'checkout',customer:c.name,customerId:c.id||'',items:c.openBill,total,partyCount:1,time:new Date().toISOString(),timeText:GuildUtils.todayText(),reason:'口頭注文（管理画面入力）',accountingMonth:(salesSettings().currentMonth)};
+      data.sales=data.sales||[]; data.sales.push(rec);
+      c.total=(Number(c.total)||0)+total; c.lastVisit=rec.timeText;
+      if(GuildCustomer&&GuildCustomer.recheckLevelAfterCheckout) GuildCustomer.recheckLevelAfterCheckout(c);
+      c.openBill=[];
+      save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
+      toast('会計しました：'+yen(total,data.settings.currency));
+      refreshCustomerList();
+    });
+  }
+  function customerCard(c,i){const sales=(data.sales||[]).filter(s=>s.customer===c.name);return `<div class="admin-card customer-card" data-customer-index="${i}"><div class="customer-head"><div class="admin-card-title">${GuildUtils.avatarTag(c)}${esc(c.name)}</div><span class="badge">${esc(c.id||'')}</span></div><div class="customer-mini-grid"><label>アイコン(絵文字1文字)<input data-field="avatar" value="${esc(c.avatar||'🙂')}" maxlength="4"></label><label>名前<input data-field="name" value="${esc(c.name||'')}"></label><label>Lv<input data-field="level" type="number" value="${c.level||1}"></label><label>二つ名<input data-field="title" value="${esc(c.title||'')}"></label><label>来店<input data-field="visits" type="number" value="${c.visits||0}"></label><label>累計<input data-field="total" type="number" value="${c.total||0}"></label><label>最終<input data-field="lastVisit" value="${esc(c.lastVisit||'')}"></label></div>${c.avatarImage?'<div class="tiny">📷 この端末で撮影/選択した画像アイコンが設定されています（他の端末には表示されません）</div>':''}<label class="wide-label">メモ<textarea data-field="memo">${esc(c.memo||'')}</textarea></label>${customerOpenBillHtml(c,i)}<div class="billbox">履歴 ${sales.length}件</div><div class="toolbar"><button class="btn small" data-sales-of="${i}">履歴を見る</button><button class="btn red small" data-del-customer="${i}">削除</button></div></div>`}
   function saveCustomerForm(){document.querySelectorAll('[data-customer-index]').forEach(card=>{const c=data.customers[+card.dataset.customerIndex];c.avatar=card.querySelector('[data-field="avatar"]').value.trim()||'🙂';c.name=card.querySelector('[data-field="name"]').value;c.level=+card.querySelector('[data-field="level"]').value||1;c.title=card.querySelector('[data-field="title"]').value;c.visits=+card.querySelector('[data-field="visits"]').value||0;c.total=+card.querySelector('[data-field="total"]').value||0;c.lastVisit=card.querySelector('[data-field="lastVisit"]').value;c.memo=card.querySelector('[data-field="memo"]').value});save()}
   function saleDate(s){const raw=s.time||s.timeText||'';const d=raw?new Date(raw):null;return d&&!isNaN(d)?d:null;}
   function saleDay(s){const d=saleDate(s);return d?d.toISOString().slice(0,10):String(s.timeText||'').slice(0,10).replace(/[\/]/g,'-');}
@@ -372,6 +427,8 @@
     '<label>通貨単位<input id="setCurrency" value="'+esc(s.currency||'G')+'"></label>'+
     '<label>チャージ（1人）<input id="setCover" type="number" value="'+(s.coverCharge??500)+'"></label>'+
     '<label>管理パスワード<input id="setPass" value="'+esc(s.adminPassword||'OTAKU')+'"></label>'+
+    '<label class="check-row"><input id="setCartMode" type="checkbox" '+(s.cartMode?'checked':'')+'>カートモード（複数商品をまとめて注文できるようにする）</label>'+
+    '<p class="tiny">オフ＝今まで通り、商品ごとに即注文（バー向け）。オン＝カートに追加してからまとめて注文（複数人・フード店など向け）。</p>'+
     '<div class="toolbar"><button class="btn gold" id="saveBasic">この項目だけ保存</button></div>'+
     '<button class="btn" id="resetSetupWizard">初回セットアップを確認する</button>'+
     '</div><div class="admin-card"><div class="admin-card-title">🔔 通知・連携</div>'+
@@ -396,7 +453,7 @@
     '<div class="toolbar"><button class="btn gold" id="saveNotice">この項目だけ保存</button></div>'+
     '</div><div class="toolbar"><button class="btn" id="jsonSettings">詳細JSON</button></div>';
     function pushToast(msg){ save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud(); toast(msg+'（クラウドにも送信）'); }
-    $('saveBasic').onclick=function(){ s.currency=$('setCurrency').value||'G'; s.coverCharge=+$('setCover').value||0; s.adminPassword=$('setPass').value||'OTAKU'; pushToast('基本設定を保存しました'); };
+    $('saveBasic').onclick=function(){ s.currency=$('setCurrency').value||'G'; s.coverCharge=+$('setCover').value||0; s.adminPassword=$('setPass').value||'OTAKU'; s.cartMode=$('setCartMode').checked; pushToast('基本設定を保存しました'); };
     $('saveNotify').onclick=function(){ s.notifyOn=$('setNotify').checked; s.gasUrl=$('setGas').value.trim(); s.discordWebhookUrl=$('setHook').value.trim(); pushToast('通知・連携設定を保存しました'); };
     $('saveNotice').onclick=function(){ s.notice={enabled:$('noticeEnabled').checked,title:$('noticeTitle').value||'本日のお知らせ',body:$('noticeBody').value||'',position:$('noticePosition').value||'top'}; pushToast('お知らせを保存しました'); };
     $('setLevelMode').onchange=function(){s.levelMode=$('setLevelMode').value; $('levelThresholdBox').style.display=s.levelMode==='total'?'':'none'; pushToast('レベル計算方式を保存しました');};

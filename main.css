@@ -36,6 +36,7 @@ input,textarea,select{color:var(--white);background:rgba(0,0,0,.62);border:2px s
 .toast{position:fixed;left:14px;right:14px;bottom:calc(20px + env(safe-area-inset-bottom));z-index:9999;display:none;background:rgba(0,0,0,.92);border:2px solid var(--gold);border-radius:12px;padding:14px;text-align:center;font-weight:bold;box-shadow:0 6px 24px rgba(0,0,0,.6)}
 .toast.show{display:block;animation:pop .2s ease both}
 .modal{position:absolute;inset:0;z-index:20;background:rgba(0,0,0,.92);display:none;flex-direction:column;padding:14px}
+.cart-float-btn{position:absolute;left:14px;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:25;box-shadow:0 4px 16px rgba(0,0,0,.6)}
 .modal.active{display:flex}
 .modal-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
 .modal-head h2{flex:1;margin:0;color:var(--gold);font-size:20px;text-shadow:2px 2px 0 #000}

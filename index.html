@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#050505">
   <title data-theme-title>冒険者ギルド</title>
-  <link rel="stylesheet" href="main.css?v=1.30-categoryfix">
-  <link rel="stylesheet" href="battle.css?v=1.30-categoryfix">
-  <link rel="stylesheet" href="menu.css?v=1.30-categoryfix">
-  <link rel="stylesheet" href="effects.css?v=1.30-categoryfix">
+  <link rel="stylesheet" href="main.css?v=1.32-cartmode">
+  <link rel="stylesheet" href="battle.css?v=1.32-cartmode">
+  <link rel="stylesheet" href="menu.css?v=1.32-cartmode">
+  <link rel="stylesheet" href="effects.css?v=1.32-cartmode">
 
   <style>
     .setup-wizard-overlay{z-index:10050}
@@ -127,6 +127,23 @@
         <button class="btn small" id="btnCloseMenu">閉じる</button>
       </div>
       <div class="scroll" id="productList"></div>
+      <button class="btn gold cart-float-btn" id="btnCartOpen" style="display:none">🛒 カートを見る（<span id="cartBadge">0</span>）</button>
+    </div>
+
+    <div class="modal" id="modalCartReview">
+      <div class="modal-head">
+        <h2>🛒 カートの確認</h2>
+        <button class="btn small" id="btnCartBack">戻る</button>
+      </div>
+      <div class="scroll">
+        <div class="panel">
+          <div id="cartReviewBody" class="confirm-text"></div>
+          <div class="row mt">
+            <button class="btn gold" id="btnCartConfirm">この内容で注文する</button>
+            <button class="btn" id="btnCartCancel">やめる</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="modal" id="modalOrderConfirm">
@@ -273,16 +290,16 @@
 
 </div>
 
-  <script src="theme.js?v=1.30-categoryfix"></script>
-  <script src="utils.js?v=1.30-categoryfix"></script>
-  <script src="storage.js?v=1.30-categoryfix"></script>
-  <script src="audio.js?v=1.30-categoryfix"></script>
-  <script src="ui.js?v=1.30-categoryfix"></script>
-  <script src="customer.js?v=1.30-categoryfix"></script>
-  <script src="battle.js?v=1.30-categoryfix"></script>
-  <script src="discord.js?v=1.30-categoryfix"></script>
-  <script src="menu.js?v=1.30-categoryfix"></script>
-  <script src="order.js?v=1.30-categoryfix"></script>
-  <script src="app.js?v=1.30-categoryfix"></script>
+  <script src="theme.js?v=1.32-cartmode"></script>
+  <script src="utils.js?v=1.32-cartmode"></script>
+  <script src="storage.js?v=1.32-cartmode"></script>
+  <script src="audio.js?v=1.32-cartmode"></script>
+  <script src="ui.js?v=1.32-cartmode"></script>
+  <script src="customer.js?v=1.32-cartmode"></script>
+  <script src="battle.js?v=1.32-cartmode"></script>
+  <script src="discord.js?v=1.32-cartmode"></script>
+  <script src="menu.js?v=1.32-cartmode"></script>
+  <script src="order.js?v=1.32-cartmode"></script>
+  <script src="app.js?v=1.32-cartmode"></script>
 </body>
 </html>

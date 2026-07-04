@@ -1,8 +1,15 @@
 window.GuildApp = {VERSION:'4.0'};
 (async function(){
   const {$}=GuildUtils; if(window.GuildTheme) await GuildTheme.init(); const data=await GuildStorage.init();
-  // 他端末で保存された呼び名・フォントをこの端末にも反映（クラウド同期分をテーマへ適用）
+  // 他端末で選ばれたコンセプト（RPG/SF/魔法学校）と、呼び名・フォント・カラーをこの端末にも反映
   if(window.GuildTheme){
+    try{
+      if(data.settings.currentPresetId && GuildTheme.loadPresets){
+        const presets=await GuildTheme.loadPresets();
+        const p=(presets||[]).find(x=>x.id===data.settings.currentPresetId);
+        if(p) GuildTheme.applyPresetTheme(p);
+      }
+    }catch(e){}
     try{ if(data.settings.themeWords) GuildTheme.saveWordsOverride(data.settings.themeWords); }catch(e){}
     try{ if(data.settings.themeFonts) GuildTheme.saveFontsOverride(data.settings.themeFonts); }catch(e){}
     try{ if(data.settings.themeColors) GuildTheme.saveColorsOverride(data.settings.themeColors); }catch(e){}
@@ -371,6 +378,10 @@ window.GuildApp = {VERSION:'4.0'};
   $('btnDoCharge').onclick=()=>{ GuildAudio.playSe('ok'); applyCoverCharge(); GuildUI.closeModals(); GuildUI.renderNotice(data.settings); GuildUI.show('screenMain'); applyBattleThemeBg(); GuildBattle.render(); };
   $('btnBackTitle').onclick=()=>{ GuildAudio.playSe('cancel'); GuildUI.closeModals(); welcomeText('メニューを開きますか？'); showWelcomeScreen(); };
   $('btnCloseMenu').onclick=()=>GuildUI.closeModals(); $('btnCancelOrder').onclick=GuildOrder.cancelPending; $('btnNoOrder').onclick=GuildOrder.cancelPending; $('btnDoOrder').onclick=GuildOrder.confirmOrder; $('btnCheckout').onclick=GuildOrder.checkoutAsk; $('btnCancelCheckout').onclick=()=>GuildUI.closeModals(); $('btnNoCheckout').onclick=()=>GuildUI.closeModals(); $('btnDoCheckout').onclick=GuildOrder.checkoutDo;
+  if($('btnCartOpen')) $('btnCartOpen').onclick=()=>GuildOrder.openCartReview();
+  if($('btnCartBack')) $('btnCartBack').onclick=()=>{ GuildUI.closeModals(); GuildUI.openModal('modalMenu'); };
+  if($('btnCartCancel')) $('btnCartCancel').onclick=()=>GuildOrder.cancelCartReview();
+  if($('btnCartConfirm')) $('btnCartConfirm').onclick=()=>GuildOrder.confirmCart();
   showWelcomeScreen();
   const forceSetup = (function(){ try{ return new URLSearchParams(location.search||'').get('setup')==='1'; }catch(e){ return false; } })();
   if(forceSetup || (GuildStorage.needsInitialSetup&&GuildStorage.needsInitialSetup())) showSetupWizard();

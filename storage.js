@@ -171,7 +171,7 @@ window.GuildStorage = (() => {
       currentCustomer:'', activeBill:[], currentEnemyIndex:0, partyCount:1
     };
     defaults.settings = Object.assign({
-      currency:'G', coverCharge:500, levelMode:'visits', levelStep:3000, levelThresholds:[3000], adminPassword:'OTAKU', notifyOn:true, setupDone:false, gasUrl:'', discordWebhookUrl:'', storeId:'',
+      currency:'G', coverCharge:500, levelMode:'visits', levelStep:3000, levelThresholds:[3000], adminPassword:'OTAKU', notifyOn:true, setupDone:false, gasUrl:'', discordWebhookUrl:'', storeId:'', cartMode:false,
       categories:[
         {id:'beer_sour', name:'ビール・サワー', icon:'🍺'}, {id:'shochu_cocktail', name:'焼酎・カクテル', icon:'🍸'},
         {id:'shot_bottle', name:'ショット・ボトル', icon:'🥂'}, {id:'soft', name:'ソフトドリンク', icon:'🥤'},
