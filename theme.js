@@ -140,6 +140,12 @@ window.GuildTheme = (() => {
     applyFonts();
     try{ localStorage.setItem('otakuba.theme.override', JSON.stringify(theme)); }catch(e){}
   }
+  // 管理画面から「テーマカラー」だけを部分保存する。他の項目は保持したまま color だけ上書き
+  function saveColorsOverride(partialColors){
+    theme = { brand:Object.assign({},theme.brand), color:Object.assign({},theme.color,partialColors||{}), words:Object.assign({},theme.words), messages:Object.assign({},theme.messages), fonts:Object.assign({},theme.fonts) };
+    applyColors();
+    try{ localStorage.setItem('otakuba.theme.override', JSON.stringify(theme)); }catch(e){}
+  }
   // 起動時、保存済みテーマがあればそれを優先
   function loadOverride(){
     try{ const s=localStorage.getItem('otakuba.theme.override'); if(s){ const o=JSON.parse(s); if(o&&o.words){ theme=o; return true; } } }catch(e){}
@@ -147,5 +153,5 @@ window.GuildTheme = (() => {
   }
   function clearOverride(){ try{ localStorage.removeItem('otakuba.theme.override'); }catch(e){} }
 
-  return { init, w, m, b, all, applyColors, applyFonts, applyDomText, lookup, loadPresets, applyPresetTheme, saveWordsOverride, saveFontsOverride, loadOverride, clearOverride };
+  return { init, w, m, b, all, applyColors, applyFonts, applyDomText, lookup, loadPresets, applyPresetTheme, saveWordsOverride, saveFontsOverride, saveColorsOverride, loadOverride, clearOverride };
 })();

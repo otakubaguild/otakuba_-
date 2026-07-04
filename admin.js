@@ -6,6 +6,7 @@
   if(window.GuildTheme){
     try{ if(data.settings.themeWords) GuildTheme.saveWordsOverride(data.settings.themeWords); }catch(e){}
     try{ if(data.settings.themeFonts) GuildTheme.saveFontsOverride(data.settings.themeFonts); }catch(e){}
+    try{ if(data.settings.themeColors) GuildTheme.saveColorsOverride(data.settings.themeColors); }catch(e){}
   }
   const SESSION='otakuba.v3.final.admin.session';
   // モード（Easy/Normal/Hard）: 各タブがどのモード以上で表示されるかを持つ。上位モードは下位モードのタブも全て含む（累積表示）
@@ -25,7 +26,7 @@
     ['reset','🧹 reset','hard'],
   ];
   // テーマ編集タブ内のサブナビ（Phase4-3: 店舗情報/テキスト/画像/BGM/キャラクター/ステージ/プレビューを1画面にまとめる）
-  const THEME_SUBTABS=[['store','🏪 店舗情報'],['text','✏️ テキスト'],['image','🖼️ 画像'],['bgm','🎵 BGM'],['character','⚔️ キャラクター'],['stage','🗺️ ステージ'],['preview','👁️ プレビュー']];
+  const THEME_SUBTABS=[['store','🏪 店舗情報'],['text','✏️ テキスト'],['color','🎨 カラー'],['image','🖼️ 画像'],['bgm','🎵 BGM'],['character','⚔️ キャラクター'],['stage','🗺️ ステージ'],['preview','👁️ プレビュー']];
   let themeSubTab='store';
   const MODE_KEY='otakuba.admin.mode';
   // 既存ユーザーの操作感を壊さないよう、初回デフォルトは「くわしい」＝これまで通り全タブ表示。新規は店側の判断でモード変更可能。
@@ -73,15 +74,57 @@
       {id:'dessert',name:'デザート',icon:'🍰'},
       {id:'event',name:'イベント',icon:'🎉'}
     ];
-    data.settings.categories=fixed;
-    return fixed;
+    // 既にカテゴリが保存済みならそれを尊重する（以前は毎回ここで強制的にバー向け固定リストへ戻してしまっていた）
+    if(!Array.isArray(data.settings.categories) || !data.settings.categories.length){
+      data.settings.categories=fixed;
+    }
+    return data.settings.categories;
   }
   function normalizeProduct(p,i){p=p||{};p.id=p.id||GuildUtils.uid('menu');p.cat=p.cat||p.category||'food';p.category=p.cat;p.name=p.name||'商品';p.price=Number(p.price)||0;p.emoji=p.emoji||p.icon||'🍽️';p.icon=p.emoji;p.desc=p.desc||'';p.image=p.image||'';p.hidden=!!p.hidden;p.soldOut=!!p.soldOut;p.recommended=!!p.recommended;p.limited=!!p.limited;if(p.stock===null||typeof p.stock==='undefined')p.stock='';else if(p.stock!=='')p.stock=Math.max(0,Number(p.stock)||0);p.sort=Number(p.sort||i);return p}
+  function categoryManagerHtml(cs){
+    return '<div class="admin-card"><div class="admin-card-title">🗂️ カテゴリ管理</div>'+
+      '<p class="tiny">お店の業態に合わせてカテゴリを自由に編集できます（アイコンは絵文字1文字）。</p>'+
+      '<div id="catManagerList">'+cs.map((c,i)=>
+        '<div class="row" style="align-items:center;gap:6px;margin:4px 0">'+
+        '<input data-cat-icon="'+i+'" value="'+esc(c.icon||'🍽️')+'" style="flex:0 0 52px;text-align:center" maxlength="4">'+
+        '<input data-cat-name="'+i+'" value="'+esc(c.name||'')+'" style="flex:2">'+
+        '<button class="btn small" data-cat-up="'+i+'" '+(i===0?'disabled':'')+'>↑</button>'+
+        '<button class="btn small" data-cat-down="'+i+'" '+(i===cs.length-1?'disabled':'')+'>↓</button>'+
+        '<button class="btn small red" data-cat-del="'+i+'">×</button>'+
+        '</div>'
+      ).join('')+'</div>'+
+      '<div class="toolbar"><button class="btn" id="addCategory">＋ カテゴリを追加</button><button class="btn gold" id="saveCategories">カテゴリを保存</button></div>'+
+      '</div>';
+  }
+  function bindCategoryManager(){
+    document.querySelectorAll('[data-cat-up]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.catUp; const cs=cats(); if(i>0){ [cs[i-1],cs[i]]=[cs[i],cs[i-1]]; save(); renderMenu(); } });
+    document.querySelectorAll('[data-cat-down]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.catDown; const cs=cats(); if(i<cs.length-1){ [cs[i+1],cs[i]]=[cs[i],cs[i+1]]; save(); renderMenu(); } });
+    document.querySelectorAll('[data-cat-del]').forEach(b=>b.onclick=()=>{
+      const i=+b.dataset.catDel; const cs=cats(); const target=cs[i];
+      const inUse=(data.menu||[]).some(p=>p.cat===target.id);
+      if(inUse){ toast('⚠️ このカテゴリの商品が残っているため削除できません。先に商品を別カテゴリへ移してください'); return; }
+      if(!confirm('「'+target.name+'」を削除しますか？'))return;
+      cs.splice(i,1); save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud(); renderMenu();
+    });
+    $('addCategory').onclick=()=>{
+      const cs=cats(); cs.push({id:GuildUtils.uid('cat'),name:'新しいカテゴリ',icon:'🍽️'});
+      save(); renderMenu();
+    };
+    $('saveCategories').onclick=()=>{
+      const cs=cats();
+      document.querySelectorAll('[data-cat-name]').forEach(inp=>{ const i=+inp.dataset.catName; if(cs[i]) cs[i].name=inp.value.trim()||cs[i].name; });
+      document.querySelectorAll('[data-cat-icon]').forEach(inp=>{ const i=+inp.dataset.catIcon; if(cs[i]) cs[i].icon=inp.value.trim()||cs[i].icon; });
+      save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
+      toast('カテゴリを保存しました（全端末に反映されます）');
+      renderMenu();
+    };
+  }
   function renderMenu(){
     data.menu=(data.menu||[]).map(normalizeProduct);
     const cs=cats();
     const opts=cs.map(c=>`<option value="${esc(c.id)}">${esc((c.icon?c.icon+' ':'')+c.name)}</option>`).join('');
     $('adminContent').innerHTML=`<h2>🍴 メニュー管理</h2>
+      ${categoryManagerHtml(cs)}
       <div class="toolbar">
         <button class="btn gold" id="addProduct">商品追加</button>
         <button class="btn green" id="saveMenu">保存</button>
@@ -100,6 +143,7 @@
           <div class="category-body">${items.length?items.map(({p,i})=>productCard(p,i,opts)).join(''):'<div class="empty">なし</div>'}</div>
         </section>`;
       }).join('')}</div>`;
+    bindCategoryManager();
 
     document.querySelectorAll('.category-head').forEach(h=>h.onclick=()=>{
       const b=h.closest('.category-block');
@@ -452,9 +496,35 @@
     $('themeSubNav').innerHTML=THEME_SUBTABS.map(t=>`<button class="tab subtab ${themeSubTab===t[0]?'active':''}" data-subtab="${t[0]}">${t[1]}</button>`).join('');
     document.querySelectorAll('[data-subtab]').forEach(b=>b.onclick=()=>{themeSubTab=b.dataset.subtab;renderThemeSubNav();renderThemeSub();});
   }
+  function renderThemeColors(){
+    const col=(window.GuildTheme?GuildTheme.all().color:{})||{};
+    const COLOR_FIELDS=[['gold','メインカラー（見出し・ボタンなど）'],['green','サブカラー（決定ボタンなど）'],['white','文字色（明るい背景用）'],['red','警告・危険表示色'],['bgDark','背景の暗さ']];
+    $('themeSubContent').innerHTML=
+      '<div class="admin-card"><div class="admin-card-title">🎨 テーマカラー</div>'+
+      '<p class="tiny">プリセットの色そのものを自由に変更できます。ここを変えるだけで、既存のRPG/SF/魔法学校とは違う「自分だけの配色」が作れます。</p>'+
+      COLOR_FIELDS.map(([k,label])=>'<label>'+esc(label)+'<input type="color" data-color-key="'+k+'" value="'+esc(col[k]||'#f6c84f')+'" style="height:44px;padding:2px"></label>').join('')+
+      '<div class="toolbar"><button class="btn gold" id="saveThemeColors">カラーを保存</button><button class="btn" id="resetThemeColors">プリセットの色に戻す</button></div>'+
+      '</div>';
+    $('saveThemeColors').onclick=function(){
+      const partial={};
+      document.querySelectorAll('[data-color-key]').forEach(inp=>{ partial[inp.dataset.colorKey]=inp.value; });
+      if(window.GuildTheme) GuildTheme.saveColorsOverride(partial);
+      data.settings.themeColors=Object.assign({},data.settings.themeColors||{},partial);
+      save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
+      toast('カラーを保存しました（全端末に反映されます）');
+    };
+    $('resetThemeColors').onclick=function(){
+      if(!confirm('今のコンセプト本来の色に戻しますか？'))return;
+      delete data.settings.themeColors;
+      save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
+      GuildTheme.clearOverride();
+      toast('色をリセットしました。ページを再読み込みすると反映されます');
+    };
+  }
   function renderThemeSub(){
     if(themeSubTab==='store') renderStoreInfoAdmin('themeSubContent');
     if(themeSubTab==='text') renderThemeText();
+    if(themeSubTab==='color') renderThemeColors();
     if(themeSubTab==='image') renderThemeImage();
     if(themeSubTab==='bgm') renderThemeBgm();
     if(themeSubTab==='character') renderMonsters('themeSubContent');
@@ -679,7 +749,14 @@
     const bgmMap=s.audioFiles.bgm;
     const seMap=s.audioFiles.se;
     const SE_LABELS={ok:'決定',cancel:'キャンセル',bad:'エラー・売切れ',add:'注文追加',confirm:'確認',damage:'ダメージ',defeat:'撃破',victory:'会計・勝利',levelup:'レベルアップ'};
+    const bgmVol=Math.round((s.bgmVolume??0.45)*100);
+    const seVol=Math.round((s.seVolume??0.9)*100);
     $('themeSubContent').innerHTML=
+      '<div class="admin-card"><div class="admin-card-title">🔊 音量</div>'+
+      '<label>BGM音量（<span id="bgmVolVal">'+bgmVol+'</span>%）<input type="range" id="tcBgmVolume" min="0" max="100" value="'+bgmVol+'"></label>'+
+      '<label>効果音（SE）音量（<span id="seVolVal">'+seVol+'</span>%）<input type="range" id="tcSeVolume" min="0" max="100" value="'+seVol+'"></label>'+
+      '<div class="toolbar"><button class="btn gold" id="saveVolume">音量を保存</button></div>'+
+      '</div>'+
       '<div class="admin-card"><div class="admin-card-title">🎬 場面BGM</div>'+
       '<label>スタート画面BGM（キー or URL）<input id="tcStartBgm" value="'+esc(c.startBgm||'title')+'" placeholder="例：title / https://...mp3"></label>'+
       '<div class="toolbar"><button class="btn small" data-preview-input="tcStartBgm">▶ 試聴</button><button class="btn small" data-preview-stop="1">■ 停止</button></div>'+
@@ -701,6 +778,14 @@
       '<div class="toolbar"><button class="btn gold" id="saveThemeBgm">BGM・SE設定を保存</button><button class="btn" id="clearThemeCustom">場面BGMを初期化</button></div>'+
       '<h3>音源をアップロードする</h3>'+uploadWidgetHtml();
     bindAudioSelects('bgm'); bindAudioSelects('se');
+    $('tcBgmVolume').oninput=()=>{ $('bgmVolVal').textContent=$('tcBgmVolume').value; };
+    $('tcSeVolume').oninput=()=>{ $('seVolVal').textContent=$('tcSeVolume').value; };
+    $('saveVolume').onclick=()=>{
+      s.bgmVolume=(+$('tcBgmVolume').value)/100;
+      s.seVolume=(+$('tcSeVolume').value)/100;
+      save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
+      toast('音量を保存しました（全端末に反映されます）');
+    };
     function currentAudioValue(dataAttr,key){
       var sel=document.querySelector('[data-'+dataAttr+'-select="'+key+'"]');
       if(!sel) return '';
