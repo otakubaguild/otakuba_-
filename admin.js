@@ -336,8 +336,39 @@
   function normalizeMonster(m,i){m=m||{};var hpMax=Number(m.maxHp||m.hp||500)||500;m.id=m.id||GuildUtils.uid('enemy');m.name=m.name||('敵'+(i+1));m.stage=m.stage||'草原';m.maxHp=hpMax;m.hp=Number.isFinite(Number(m.hp))?Number(m.hp):hpMax;m.bg=fixAssetPath(m.bg||m.background)||'presets/rpg/grass.png';m.background=m.bg;m.image=fixAssetPath(m.image)||'presets/rpg/slime.png';m.bgm=m.bgm||'slime';m.sort=Number(m.sort||i);return m;}
   function optList(arr,sel){return arr.map(function(v){return '<option value="'+esc(v)+'"'+(v===sel?' selected':'')+'>'+esc(v)+'</option>';}).join('');}
   var BGM_LABELS={title:'タイトル',slime:'序盤・スライム系',goblin:'中盤・ゴブリン系',orc:'オーク系',cave:'洞窟',ruins:'遺跡',maou:'魔王',daimaou:'大魔王',ending:'ファンファーレ（クリア）'};
+  const BGM_SOURCE_LABELS={
+    'bgm/bgm_1.mp3':'ファンタジー07','bgm/bgm_2.mp3':'ファンタジー10','bgm/bgm_3.mp3':'ネオロック83','bgm/bgm_4.mp3':'ファンタジー02',
+    'bgm/bgm_5.mp3':'ファンタジー11','bgm/bgm_6.mp3':'ファンタジー06','bgm/bgm_7.mp3':'ファンタジー14','bgm/bgm_8.mp3':'ファンタジー09',
+    'bgm/bgm_9.mp3':'大魔王（パンダの中のパンダ）','bgm/bgm_10.mp3':'スライム（魔王魂・元ファイル不明）',
+    'bgm/bgm_11.mp3':'ファンタジー12','bgm/bgm_12.mp3':'ファンタジー05','bgm/bgm_13.mp3':'ファンタジー01','bgm/bgm_14.mp3':'ファンタジー04',
+    'bgm/bgm_15.mp3':'ファンタジー13','bgm/bgm_16.mp3':'ファンタジー08','bgm/bgm_17.mp3':'ファンタジー03','bgm/bgm_18.mp3':'サイバー45',
+    'bgm/bgm_19.mp3':'オーケストラ23','bgm/bgm_20.mp3':'戦闘24','bgm/bgm_21.mp3':'戦闘25','bgm/bgm_22.mp3':'戦闘22','bgm/bgm_23.mp3':'戦闘23',
+    'bgm/bgm_24.mp3':'戦闘28','bgm/bgm_25.mp3':'戦闘26','bgm/bgm_26.mp3':'オーケストラ25','bgm/bgm_27.mp3':'戦闘20','bgm/bgm_28.mp3':'オーケストラ26',
+    'bgm/bgm_29.mp3':'オーケストラ24','bgm/bgm_30.mp3':'戦闘27','bgm/bgm_31.mp3':'オーケストラ19','bgm/bgm_32.mp3':'オーケストラ20',
+    'bgm/bgm_33.mp3':'オーケストラ17','bgm/bgm_34.mp3':'オーケストラ18','bgm/bgm_35.mp3':'オーケストラ22','bgm/bgm_36.mp3':'オーケストラ21',
+    'bgm/bgm_37.mp3':'戦闘30','bgm/bgm_38.mp3':'戦闘31','bgm/bgm_39.mp3':'戦闘35','bgm/bgm_40.mp3':'戦闘32','bgm/bgm_41.mp3':'戦闘36',
+    'bgm/bgm_42.mp3':'戦闘33','bgm/bgm_43.mp3':'戦闘37','bgm/bgm_44.mp3':'ボス07','bgm/bgm_45.mp3':'ボス08','bgm/bgm_46.mp3':'ボス01',
+    'bgm/bgm_47.mp3':'戦闘34','bgm/bgm_48.mp3':'ボス05','bgm/bgm_49.mp3':'ボス06','bgm/bgm_50.mp3':'ボス02','bgm/bgm_51.mp3':'戦闘29',
+    'bgm/bgm_52.mp3':'ボス03','bgm/bgm_53.mp3':'ボス04','bgm/bgm_54.mp3':'ラスボス01',
+    'bgm/bgm_55.mp3':'ラスボス04','bgm/bgm_56.mp3':'ラスボス03','bgm/bgm_57.mp3':'メドレー01','bgm/bgm_58.mp3':'メドレー02','bgm/bgm_59.mp3':'ラスボス02',
+    'bgm/bgm_60.mp3':'ファミコン風15','bgm/bgm_61.mp3':'ファミコン風02','bgm/bgm_62.mp3':'ファミコン風16','bgm/bgm_63.mp3':'ファミコン風01','bgm/bgm_64.mp3':'ファミコン風04',
+    'bgm/bgm_65.mp3':'ファミコン風03','bgm/bgm_66.mp3':'ファミコン風20','bgm/bgm_67.mp3':'ファミコン風08','bgm/bgm_68.mp3':'ファミコン風06','bgm/bgm_69.mp3':'ファミコン風07',
+    'bgm/bgm_70.mp3':'ファミコン風19','bgm/bgm_71.mp3':'ファミコン風05','bgm/bgm_72.mp3':'ファミコン風17','bgm/bgm_73.mp3':'ファミコン風18','bgm/bgm_74.mp3':'ファミコン風10',
+    'bgm/bgm_75.mp3':'ファミコン風14','bgm/bgm_76.mp3':'ファミコン風09','bgm/bgm_77.mp3':'ファミコン風11','bgm/bgm_78.mp3':'ファミコン風12','bgm/bgm_79.mp3':'ファミコン風13',
+    'bgm/bgm_80.mp3':'ファミコン風21','bgm/bgm_81.mp3':'ファミコン風27','bgm/bgm_82.mp3':'ファミコン風28','bgm/bgm_83.mp3':'ファミコン風25',
+    'bgm/bgm_84.mp3':'ファミコン風22','bgm/bgm_85.mp3':'ファミコン風26','bgm/bgm_86.mp3':'ファミコン風23','bgm/bgm_87.mp3':'ファミコン風24'
+  };
+  const SE_SOURCE_LABELS={
+    'se/se_1.mp3':'決定音','se/se_2.mp3':'会計・勝利音','se/se_3.mp3':'システム05','se/se_4.mp3':'ダメージ音','se/se_5.mp3':'システム04',
+    'se/se_6.mp3':'キャンセル音','se/se_7.mp3':'撃破音','se/se_8.mp3':'追加音','se/se_9.mp3':'レベルアップ音',
+    'se/se_10.mp3':'システム18','se/se_11.mp3':'システム25','se/se_12.mp3':'システム24','se/se_13.mp3':'システム13','se/se_14.mp3':'システム16',
+    'se/se_15.mp3':'システム10','se/se_16.mp3':'システム03','se/se_17.mp3':'システム01','se/se_18.mp3':'システム02',
+    'se/se_19.mp3':'エフェクト11','se/se_20.mp3':'エフェクト06','se/se_21.mp3':'エフェクト08','se/se_22.mp3':'エフェクト09','se/se_23.mp3':'エフェクト10'
+  };
   function bgmLabelFor(v){
     if(BGM_LABELS[v]) return BGM_LABELS[v];
+    if(BGM_SOURCE_LABELS[v]) return BGM_SOURCE_LABELS[v]+'（'+v.split('/').pop()+'）';
+    if(SE_SOURCE_LABELS[v]) return SE_SOURCE_LABELS[v]+'（'+v.split('/').pop()+'）';
     var m=/bgm_(\d+)\.mp3$/.exec(v); if(m) return '曲 No.'+m[1];
     var s=/se_(\d+)\.mp3$/.exec(v); if(s) return '効果音 No.'+s[1];
     return v;
