@@ -5,6 +5,9 @@
 .enemy[data-enemy-id*="orc"],.enemy[data-enemy-id*="minotaur"]{width:min(80vw,260px);height:min(44dvh,260px)}
 .enemy.hit{animation:battleHit .36s ease!important}.enemy.defeated{animation:battleDefeat .8s ease forwards!important}
 .damage{position:absolute;left:50%;top:24%;transform:translateX(-50%);z-index:5;font-size:28px;color:#fff;text-shadow:0 0 10px #f00,3px 3px #000;opacity:0;font-weight:900}
+.enemy-speech{position:absolute;left:50%;top:8%;transform:translateX(-50%);z-index:7;max-width:82%;background:rgba(0,0,0,.72);border:2px solid var(--gold);border-radius:14px;padding:8px 14px;color:#fff;font-size:14px;font-weight:700;text-align:center;line-height:1.4;opacity:0;pointer-events:none}
+.enemy-speech.on{animation:speechPop 2.6s ease}
+@keyframes speechPop{0%{opacity:0;transform:translateX(-50%) translateY(8px) scale(.92)}12%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}82%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(-6px) scale(.98)}}
 .damage.on{animation:damage 1.3s ease}
 .defeat{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:6;font-size:48px;color:var(--gold);text-shadow:4px 4px #000,0 0 22px var(--gold);font-weight:900;font-family:var(--font-battle,var(--font-base,inherit))}
 .defeat.on{display:flex;animation:pop .35s ease}

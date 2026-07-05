@@ -16,9 +16,15 @@ window.GuildBattle = (() => {
     if(field) field.classList.remove('awaken-shake');
   }
   function bgmKey(e){ return (e&&e.bgm) || 'slime'; }
+  function pickText(e,cat){ const arr=(e&&e.texts&&Array.isArray(e.texts[cat]))?e.texts[cat].filter(t=>t&&t.trim()):[]; return arr.length? arr[Math.floor(Math.random()*arr.length)] : ''; }
+  function showSpeech(text){
+    const box=$('enemySpeech'); if(!box || !text) return;
+    box.textContent=text; box.classList.remove('on'); void box.offsetWidth; box.classList.add('on');
+  }
+  let lastShownEnemyId='';
   function nextEnemy(){ const list=data.monsters||[]; if((data.currentEnemyIndex||0) < list.length-1) data.currentEnemyIndex++; const e=enemy(); if(e && Number(e.hp)<=0) e.hp=e.maxHp; GuildStorage.save(); render(); }
   let suppressBgm=false;
-  function resetAudioFlag(){ suppressBgm=false; }
+  function resetAudioFlag(){ suppressBgm=false; lastShownEnemyId=''; }
   function render(quiet){
     const e=enemy(); const c=GuildCustomer.current(); if(!e) return;
     if(!suppressBgm && !quiet){ const bk=bgmKey(e); GuildAudio.playBgm(bk); }
@@ -34,6 +40,7 @@ window.GuildBattle = (() => {
     const sc=(Number(e.scale)||100)/100, ox=Number(e.offsetX)||0, oy=Number(e.offsetY)||0;
     sprite.style.setProperty('--enemy-scale', sc); sprite.style.setProperty('--enemy-ox', ox+'%'); sprite.style.setProperty('--enemy-oy', oy+'%');
     sprite.innerHTML = e.image ? `<img src="${esc(GuildUtils.driveImg(e.image))}" alt="${esc(e.name)}" onload="this.parentNode && this.parentNode.classList.add('loaded')" onerror="this.replaceWith(document.createTextNode('👾'))">` : '👾';
+    if((e.id||e.name)!==lastShownEnemyId){ lastShownEnemyId=e.id||e.name; const t=pickText(e,'appear'); if(t) showSpeech(t); }
     GuildUI.renderNotice(data.settings); GuildStorage.save();
   }
   async function applyDamage(total, done){
@@ -57,9 +64,12 @@ window.GuildBattle = (() => {
       const chunk=Math.min(remaining,e.hp); remaining-=chunk; GuildAudio.playSe('damage');
       const sprite=$('enemySprite'); sprite.classList.remove('hit'); void sprite.offsetWidth; sprite.classList.add('hit');
       const damagePop=$('damagePop'); damagePop.textContent='-'+yen(chunk,data.settings.currency); damagePop.classList.remove('on'); void damagePop.offsetWidth; damagePop.classList.add('on');
-      await sleep(420); e.hp=Math.max(0,Number(e.hp||0)-chunk); render(); GuildStorage.save(); await sleep(930);
+      await sleep(420); e.hp=Math.max(0,Number(e.hp||0)-chunk); render(); GuildStorage.save();
+      { const dt=pickText(e,'damage'); if(dt) showSpeech(dt); }
+      await sleep(930);
       if(e.hp<=0){
         defeatedAny=true; const finalBoss=isFinalEnemy(e); if(finalBoss) finalDefeated=true; sprite.classList.add('defeated');
+        { const ft=pickText(e,'defeat'); if(ft) showSpeech(ft); }
         const defeatPop=$('defeatPop'); defeatPop.textContent=finalBoss?(window.GuildTheme?GuildTheme.w('bossDefeatText'):'魔王討伐！'):((window.GuildTheme?GuildTheme.w('defeat'):'撃破')+'！'); defeatPop.classList.add('on');
         if(finalBoss){ suppressBgm=true; GuildAudio.stopBgm(); GuildAudio.playSe('victory');
           setTimeout(()=>{ defeatPop.classList.remove('on'); if(window.GuildApp && GuildApp.showVictoryClear) GuildApp.showVictoryClear(); }, 1600);

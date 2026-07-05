@@ -334,7 +334,7 @@
   function themeScopedBgList(){ return scopedList(BG_LIST,activePresetId()); }
   function themeScopedImgList(){ return scopedList(IMG_LIST,activePresetId()); }
   function fixAssetPath(v){ return (v && RPG_BARE_FILES.indexOf(v)!==-1) ? ('presets/rpg/'+v) : v; }
-  function normalizeMonster(m,i){m=m||{};var hpMax=Number(m.maxHp||m.hp||500)||500;m.id=m.id||GuildUtils.uid('enemy');m.name=m.name||('敵'+(i+1));m.stage=m.stage||'草原';m.maxHp=hpMax;m.hp=Number.isFinite(Number(m.hp))?Number(m.hp):hpMax;m.bg=fixAssetPath(m.bg||m.background)||'presets/rpg/grass.png';m.background=m.bg;m.image=fixAssetPath(m.image)||'presets/rpg/slime.png';m.bgm=m.bgm||'slime';m.sort=Number(m.sort||i);return m;}
+  function normalizeMonster(m,i){m=m||{};var hpMax=Number(m.maxHp||m.hp||500)||500;m.id=m.id||GuildUtils.uid('enemy');m.name=m.name||('敵'+(i+1));m.stage=m.stage||'草原';m.maxHp=hpMax;m.hp=Number.isFinite(Number(m.hp))?Number(m.hp):hpMax;m.bg=fixAssetPath(m.bg||m.background)||'presets/rpg/grass.png';m.background=m.bg;m.image=fixAssetPath(m.image)||'presets/rpg/slime.png';m.bgm=m.bgm||'slime';m.sort=Number(m.sort||i);m.texts=(m.texts&&typeof m.texts==='object')?m.texts:{};['appear','damage','defeat'].forEach(function(c){if(!Array.isArray(m.texts[c]))m.texts[c]=[];});return m;}
   function optList(arr,sel){return arr.map(function(v){return '<option value="'+esc(v)+'"'+(v===sel?' selected':'')+'>'+esc(v)+'</option>';}).join('');}
   var BGM_LABELS={title:'タイトル',slime:'序盤・スライム系',goblin:'中盤・ゴブリン系',orc:'オーク系',cave:'洞窟',ruins:'遺跡',maou:'魔王',daimaou:'大魔王',ending:'ファンファーレ（クリア）'};
   const BGM_SOURCE_LABELS={
@@ -401,6 +401,17 @@
     if(files.length) out+='<optgroup label="個別の曲・効果音を直接指定">'+files.map(function(v){return '<option value="'+esc(v)+'"'+(v===sel?' selected':'')+'>'+esc(bgmLabelFor(v))+'</option>';}).join('')+'</optgroup>';
     return out;
   }
+  function textCatBlock(m,i,cat,label,ph){
+    var arr=(m.texts&&m.texts[cat])||[];
+    var rows=arr.map(function(t){return '<div class="text-row" style="display:flex;gap:6px;margin:4px 0">'+
+      '<input data-text-input style="flex:1" value="'+esc(t)+'" placeholder="'+esc(ph)+'">'+
+      '<button type="button" class="btn small red" data-text-remove>×</button></div>';}).join('');
+    return '<div class="text-cat-block" style="margin:8px 0">'+
+      '<div class="tiny" style="font-weight:800;margin-bottom:4px">'+esc(label)+'</div>'+
+      '<div class="text-list" data-text-cat="'+cat+'">'+rows+'</div>'+
+      '<button type="button" class="btn small" data-text-add="'+cat+'">＋ セリフを追加</button>'+
+    '</div>';
+  }
   function monsterCard(m,i){var thumb=m.image?('<img src="'+esc(GuildUtils.driveImg(m.image))+'" alt="" style="width:36px;height:36px;object-fit:contain;vertical-align:middle;margin-right:8px" onerror="this.style.display=\'none\'">'):'';return '<section class="category-block" data-monster-index="'+i+'"><button type="button" class="category-head" data-monster-toggle="'+i+'"><span>'+thumb+(i+1)+'. '+esc(m.name)+' <b style="opacity:.7;font-weight:normal">'+esc(m.stage)+'</b></span><span class="category-toggle">開く</span></button><div class="category-body">'+
     '<label>敵名<input data-field="name" value="'+esc(m.name)+'"></label>'+
     '<label>ステージ<input data-field="stage" value="'+esc(m.stage)+'"></label>'+
@@ -416,9 +427,14 @@
     '<label>大きさ <span data-scale-val>'+(Number(m.scale)||100)+'</span>%<input data-field="scale" type="range" min="30" max="250" value="'+(Number(m.scale)||100)+'"></label>'+
     '<label>左右 <span data-ox-val>'+(Number(m.offsetX)||0)+'</span>%<input data-field="offsetX" type="range" min="-60" max="60" value="'+(Number(m.offsetX)||0)+'"></label>'+
     '<label>上下 <span data-oy-val>'+(Number(m.offsetY)||0)+'</span>%<input data-field="offsetY" type="range" min="-60" max="60" value="'+(Number(m.offsetY)||0)+'"></label>'+
+    '<div class="admin-card" style="margin:10px 0"><div class="admin-card-title">🗨️ 専用セリフ（未入力なら何も表示されません）</div>'+
+    textCatBlock(m,i,'appear','登場時のセリフ','例：よくぞ来たな、冒険者よ')+
+    textCatBlock(m,i,'damage','ダメージを受けた時のセリフ','例：ぐぬぬ…！')+
+    textCatBlock(m,i,'defeat','倒された時のセリフ','例：まさか…このわしが…')+
+    '<p class="tiny">複数追加した場合は、その中からランダムで1つ表示されます。</p></div>'+
     '<div class="toolbar"><button class="btn gold small" data-save-monster="'+i+'">この敵を保存</button><button class="btn small" data-current-monster="'+i+'">現在の敵にする</button><button class="btn small" data-dup-monster="'+i+'">複製</button><button class="btn red small" data-del-monster="'+i+'">削除</button></div></div></section>';}
   function monstersListHtml(){data.monsters=(data.monsters||[]).map(normalizeMonster);return data.monsters.length?data.monsters.map(function(m,i){return monsterCard(m,i);}).join(''):'<div class="empty">なし</div>';}
-  function readMonsterCard(card){var m=data.monsters[+card.dataset.monsterIndex];m.name=card.querySelector('[data-field=name]').value;m.stage=card.querySelector('[data-field=stage]').value;var bgmUrl=(card.querySelector('[data-field=bgmUrl]')||{}).value||'';m.bgm=bgmUrl.trim()?bgmUrl.trim():card.querySelector('[data-field=bgm]').value;m.hp=+card.querySelector('[data-field=hp]').value||0;m.maxHp=+card.querySelector('[data-field=maxHp]').value||500;m.bg=card.querySelector('[data-field=bg]').value;m.background=m.bg;var imgUrl=(card.querySelector('[data-field=imageUrl]')||{}).value||'';m.image=imgUrl.trim()?imgUrl.trim():card.querySelector('[data-field=image]').value;m.scale=+card.querySelector('[data-field=scale]').value||100;m.offsetX=+card.querySelector('[data-field=offsetX]').value||0;m.offsetY=+card.querySelector('[data-field=offsetY]').value||0;return m;}
+  function readMonsterCard(card){var m=data.monsters[+card.dataset.monsterIndex];m.name=card.querySelector('[data-field=name]').value;m.stage=card.querySelector('[data-field=stage]').value;var bgmUrl=(card.querySelector('[data-field=bgmUrl]')||{}).value||'';m.bgm=bgmUrl.trim()?bgmUrl.trim():card.querySelector('[data-field=bgm]').value;m.hp=+card.querySelector('[data-field=hp]').value||0;m.maxHp=+card.querySelector('[data-field=maxHp]').value||500;m.bg=card.querySelector('[data-field=bg]').value;m.background=m.bg;var imgUrl=(card.querySelector('[data-field=imageUrl]')||{}).value||'';m.image=imgUrl.trim()?imgUrl.trim():card.querySelector('[data-field=image]').value;m.scale=+card.querySelector('[data-field=scale]').value||100;m.offsetX=+card.querySelector('[data-field=offsetX]').value||0;m.offsetY=+card.querySelector('[data-field=offsetY]').value||0;m.texts=m.texts&&typeof m.texts==='object'?m.texts:{};['appear','damage','defeat'].forEach(function(cat){var list=card.querySelector('[data-text-cat="'+cat+'"]');m.texts[cat]=list?Array.from(list.querySelectorAll('[data-text-input]')).map(function(inp){return inp.value.trim();}).filter(function(v){return !!v;}):[];});return m;}
   function saveMonsterForm(){document.querySelectorAll('[data-monster-index]').forEach(readMonsterCard);save();}
   let monsterContainerId='adminContent';
   function renderMonsters(containerId){monsterContainerId=containerId||monsterContainerId;$(monsterContainerId).innerHTML='<h2>⚔️ 討伐モンスター管理</h2><div class="admin-card"><div class="admin-card-title">現在のテーマ：'+esc(PRESET_LABELS[activePresetId()]||activePresetId())+'</div><p class="tiny">背景・敵画像の選択肢は、このテーマの素材だけに絞り込んで表示されます。テーマを変えたい場合は「テーマ編集」の上部から選び直してください。</p></div><div class="toolbar"><button class="btn gold" id="addMonster">追加</button><button class="btn green" id="saveMonsters">全体保存</button><button class="btn" id="monOpenAll">全部開く</button><button class="btn" id="monCloseAll">全部閉じる</button><button class="btn" id="jsonMonsters">JSON</button></div><div class="category-list" id="monsterListBox">'+monstersListHtml()+'</div>';bindMonsterEvents();
@@ -442,7 +458,28 @@
     document.querySelectorAll('[data-save-monster]').forEach(function(b){b.onclick=function(){var card=b.closest('[data-monster-index]');readMonsterCard(card);save();if(GuildStorage.pushCloud)GuildStorage.pushCloud();toast('保存しました');var orig=b.textContent;b.textContent='✓ 保存しました';b.classList.add('green');setTimeout(function(){b.textContent=orig;b.classList.remove('green');},1400);};});
     document.querySelectorAll('[data-current-monster]').forEach(function(b){b.onclick=function(){saveMonsterForm();data.currentEnemyIndex=+b.dataset.currentMonster;save();toast('現在の敵にしました');if(GuildStorage.pushCloud)GuildStorage.pushCloud();};});
     document.querySelectorAll('[data-dup-monster]').forEach(function(b){b.onclick=function(){saveMonsterForm();var src=data.monsters[+b.dataset.dupMonster];var copy=JSON.parse(JSON.stringify(src));copy.id=GuildUtils.uid('enemy');copy.name=src.name+'（複製）';data.monsters.splice(+b.dataset.dupMonster+1,0,copy);save();renderMonsters();};});
-    document.querySelectorAll('[data-del-monster]').forEach(function(b){b.onclick=function(){if(confirm('削除しますか？')){saveMonsterForm();data.monsters.splice(+b.dataset.delMonster,1);save();renderMonsters();}};});}
+    document.querySelectorAll('[data-del-monster]').forEach(function(b){b.onclick=function(){if(confirm('削除しますか？')){saveMonsterForm();data.monsters.splice(+b.dataset.delMonster,1);save();renderMonsters();}};});
+    var listBox=document.getElementById('monsterListBox');
+    if(listBox){
+      listBox.addEventListener('click',function(e){
+        var addBtn=e.target.closest('[data-text-add]');
+        if(addBtn){
+          var cat=addBtn.getAttribute('data-text-add');
+          var block=addBtn.previousElementSibling;
+          if(block && block.getAttribute('data-text-cat')===cat){
+            var row=document.createElement('div');
+            row.className='text-row'; row.style.cssText='display:flex;gap:6px;margin:4px 0';
+            row.innerHTML='<input data-text-input style="flex:1" placeholder="セリフを入力"><button type="button" class="btn small red" data-text-remove>×</button>';
+            block.appendChild(row);
+            var inp=row.querySelector('input'); if(inp) inp.focus();
+          }
+          return;
+        }
+        var rmBtn=e.target.closest('[data-text-remove]');
+        if(rmBtn){ var row2=rmBtn.closest('.text-row'); if(row2) row2.remove(); return; }
+      });
+    }
+  }
 
   // ===== 設定ボタン編集 =====
   function levelThresholdRowsHtml(s){
@@ -1285,7 +1322,7 @@
         '<li><b>🎨 カラー</b>：画面の配色（ゴールドなど基調色）を変更できます。</li>'+
         '<li><b>🖼️ 画像</b>：タイトル背景・戦闘背景などの画像を差し替えます。</li>'+
         '<li><b>🎵 BGM</b>：タイトル画面・戦闘・討伐後（エンディング）などのBGMを個別に設定できます。</li>'+
-        '<li><b>⚔️ キャラクター</b>：注文に応じて登場する「敵」の名前・画像・体力（何注文で倒れるか）を設定します。</li>'+
+        '<li><b>⚔️ キャラクター</b>：注文に応じて登場する「敵」の名前・画像・体力（何注文で倒れるか）を設定します。各敵ごとに「登場時／被弾時／撃破時」のセリフを自由に追加でき、複数登録するとその中からランダムで1つ表示されます（未入力なら何も表示されません）。</li>'+
         '<li><b>🗺️ ステージ</b>：ボスの出現条件や演出まわりの設定です。</li>'+
         '<li><b>👁️ プレビュー</b>：変更内容をお客様目線で確認できます。保存前に必ずここでチェックしてください。</li>'+
         '</ul><div class="guide-note">画像・BGMはご自身で用意したファイルをアップロードして使えます。ファイル形式に迷ったら画像はPNG/JPG、音声はMP3が安全です。</div>'
