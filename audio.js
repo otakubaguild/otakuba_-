@@ -1,6 +1,7 @@
 window.GuildAudio = (() => {
   let settings = {}; let bgmAudio = null; let currentKey = ''; let enabled = true;
   let endingAudio = null; let endingLock = false;
+  let bgmGen = 0; // 再生世代トークン：stopBgm/playBgmのたびに進み、古い再試行タイマーを無効化する
   function init(s){ settings = s || {}; preloadEnding(); }
   // data.settings は同期処理で丸ごと差し替わることがあるため、init時点のスナップショットだけに頼らず常に最新を見る
   function liveSettings(){ try{ if(window.GuildStorage && GuildStorage.getData) return GuildStorage.getData().settings||settings; }catch(e){} return settings; }
@@ -12,10 +13,11 @@ window.GuildAudio = (() => {
     if(!enabled) return;
     endingLock = true;              // これ以降、他のBGMに邪魔されない
     stopBgm(); currentKey='ending';
+    const gen=++bgmGen; // このplayEnding呼び出し専用の世代。以降stopBgm/playBgmが呼ばれると無効になる
     if(!endingAudio){ preloadEnding(); }
     const a = endingAudio || new Audio(path('bgm','ending'));
     a.loop=true; a.volume=volume('bgm'); try{ a.currentTime=0; }catch(e){}
-    const tryPlay=(n)=>{ const p=a.play(); if(p&&p.catch) p.catch(()=>{ if(n>0) setTimeout(()=>tryPlay(n-1),350); }); };
+    const tryPlay=(n)=>{ if(gen!==bgmGen) return; const p=a.play(); if(p&&p.catch) p.catch(()=>{ if(n>0) setTimeout(()=>tryPlay(n-1),350); }); };
     tryPlay(4); bgmAudio=a;
   }
   function releaseEnding(){ endingLock=false; }
@@ -29,16 +31,25 @@ window.GuildAudio = (() => {
     if(type==='bgm' && files[key]) return files[key];
     return '';
   }
-  function stopBgm(){ if(bgmAudio){ try{ bgmAudio.pause(); bgmAudio.currentTime=0; }catch(e){} } bgmAudio=null; currentKey=''; }
+  function stopBgm(){
+    bgmGen++; // 進行中の再試行タイマーをすべて無効化（古いAudioが後から鳴り出すのを防ぐ）
+    if(bgmAudio){ try{ bgmAudio.pause(); bgmAudio.currentTime=0; }catch(e){} }
+    bgmAudio=null; currentKey='';
+  }
   function playBgm(key){
     if(!enabled || !key) return;
     if(endingLock && key!=='ending') return;   // ファンファーレ中は他BGMを無視
     if(currentKey === key && bgmAudio && !bgmAudio.paused) return;
     const src = path('bgm', key); if(!src) return;
     stopBgm(); currentKey = key;
+    const gen=++bgmGen; // この再生専用の世代。以降stopBgm/別のplayBgmが呼ばれると再試行は自動的に無効になる
     const a = new Audio(src); a.loop=true; a.volume=volume('bgm'); a.preload='auto';
     bgmAudio = a;
-    const tryPlay=(retries)=>{ const p=a.play(); if(p&&p.catch) p.catch(()=>{ if(retries>0) setTimeout(()=>tryPlay(retries-1), 400); }); };
+    const tryPlay=(retries)=>{
+      if(gen!==bgmGen) return; // 世代が古くなっていたら（=すでに停止/切替済み）再試行しない
+      const p=a.play();
+      if(p&&p.catch) p.catch(()=>{ if(retries>0) setTimeout(()=>tryPlay(retries-1), 400); });
+    };
     tryPlay(3);
   }
   const sePool={};
