@@ -21,6 +21,7 @@
   const MODE_LABEL={easy:'🌱 かんたん',normal:'🛠 ふつう',hard:'⚙️ くわしい'};
   const tabs=[
     ['dash','🏠 ホーム','easy'],
+    ['guide','📖 使い方ガイド','easy'],
     ['business','🟢 営業','easy'],
     ['themeEditor','🎭 テーマ編集','easy'],
     ['menu','🍴 メニュー','easy'],
@@ -1266,6 +1267,66 @@
     };
     r.readAsText(f);
   }
+  function renderGuide(){
+    const sec=(title,body)=>`<details class="guide-section"><summary>${title}</summary><div class="guide-body">${body}</div></details>`;
+    $('adminContent').innerHTML='<h2>📖 使い方ガイド</h2>'+
+      '<div class="guide-note">困ったときはまずここを開いてください。各項目をタップすると詳しい説明が開きます。</div>'+
+      sec('① 最初にやること（初回セットアップ）',
+        '<ol>'+
+        '<li>画面上部の「🌱 かんたん／🛠 ふつう／⚙️ くわしい」で表示するタブの数を選べます。慣れないうちは「かんたん」がおすすめです。</li>'+
+        '<li>「⚙️ 設定」タブの<b>「初回セットアップを確認する」</b>ボタンから、コンセプト（RPG/宇宙/魔法学校）・呼び名・お店情報を最初から選び直せます。</li>'+
+        '<li>まずは「🎭 テーマ編集」で世界観を決めてから、「🍴 メニュー」で商品を登録するのがおすすめの順番です。</li>'+
+        '</ol>'
+      )+
+      sec('🎭 テーマ編集タブ（世界観・見た目の設定）',
+        '<p>画面上部のサブタブで切り替えます。</p><ul>'+
+        '<li><b>🏪 店舗情報</b>：お店の名前・住所・営業時間など、お客様向け画面にも表示される基本情報。</li>'+
+        '<li><b>✏️ テキスト</b>：タイトル画面の呼びかけ文や「冒険者」「戦闘」などの呼び名を変更できます。</li>'+
+        '<li><b>🎨 カラー</b>：画面の配色（ゴールドなど基調色）を変更できます。</li>'+
+        '<li><b>🖼️ 画像</b>：タイトル背景・戦闘背景などの画像を差し替えます。</li>'+
+        '<li><b>🎵 BGM</b>：タイトル画面・戦闘・討伐後（エンディング）などのBGMを個別に設定できます。</li>'+
+        '<li><b>⚔️ キャラクター</b>：注文に応じて登場する「敵」の名前・画像・体力（何注文で倒れるか）を設定します。</li>'+
+        '<li><b>🗺️ ステージ</b>：ボスの出現条件や演出まわりの設定です。</li>'+
+        '<li><b>👁️ プレビュー</b>：変更内容をお客様目線で確認できます。保存前に必ずここでチェックしてください。</li>'+
+        '</ul><div class="guide-note">画像・BGMはご自身で用意したファイルをアップロードして使えます。ファイル形式に迷ったら画像はPNG/JPG、音声はMP3が安全です。</div>'
+      )+
+      sec('🍴 メニュータブ（商品登録）',
+        '<p>ビール・サワー／焼酎・カクテル／ショット・ボトル／ソフトドリンク／フードなどのカテゴリごとに商品を登録・編集・削除できます。商品名・価格・ダメージ量（1杯で敵にどれだけダメージが入るか）を設定してください。</p>'
+      )+
+      sec('🟢 営業タブ',
+        '<p>「営業開始」を押すと当日の記録が始まり、「営業終了・日報作成」を押すとその日の売上サマリー（日報）が自動作成されます。過去の日報も一覧で確認できます。</p>'
+      )+
+      sec('💰 会計・売上タブ',
+        '<p>お客様ごとの会計内容や、期間ごとの売上集計を確認できます。</p>'
+      )+
+      sec('🔳 QRタブ',
+        '<p>お客様がスマホから注文画面を開くためのQRコードを発行できます。テーブルに設置する用途を想定しています。</p>'
+      )+
+      sec('👤 顧客タブ',
+        '<p>来店したお客様の一覧・レベル・来店回数を確認できます。名前で検索も可能です。</p>'
+      )+
+      sec('⚙️ 設定タブ（重要な設定はここに集約）',
+        '<ul>'+
+        '<li><b>基本設定</b>：通貨単位、チャージ料金、<b>管理パスワード</b>（この管理画面に入るためのパスワードです。必ず初期値から変更してください）、カートモードのON/OFF。</li>'+
+        '<li><b>通知・連携</b>：<b>GAS URL</b>（Googleスプレッドシートと連携するためのURL）と、<b>Discord通知URL</b>（注文や会計をDiscordに通知したい場合のウェブフックURL）を設定します。</li>'+
+        '<li><b>レベル計算方式</b>：お客様のレベルを「来店回数」か「合計金額」のどちらで上げるか選べます。</li>'+
+        '<li><b>本日のお知らせ</b>：お客様の注文画面に表示するお知らせ文を設定できます。</li>'+
+        '</ul>'
+      )+
+      sec('☁️ 同期タブ（データのバックアップ・連携）',
+        '<p>GAS URLを保存すると「接続テスト」ができます。<b>GASから全取得</b>で他端末のデータをこの端末に反映、<b>全データ送信</b>でこの端末の内容をクラウドに送れます。複数端末（スマホ+タブレットなど）で使う場合はここで同期してください。</p>'
+      )+
+      sec('🧹 resetタブ（取り扱い注意）',
+        '<div class="guide-note">⚠️ ここでのリセット操作は元に戻せません。テスト運用のデータを消して本番運用を始めたいときなど、内容をよく確認してから使ってください。</div>'
+      )+
+      sec('よくある質問',
+        '<ul>'+
+        '<li><b>Q. お客様の画面と管理画面は同じURLですか？</b><br>A. いいえ。お客様は index.html（トップ画面）、店舗側は admin.html（管理画面）を使います。</li>'+
+        '<li><b>Q. 画像やBGMを変えても反映されません</b><br>A. ブラウザのキャッシュが原因のことがあります。ページを再読み込みしてみてください。</li>'+
+        '<li><b>Q. 複数端末で内容がズレます</b><br>A. 「☁️ 同期」タブでGAS URLを設定し、こまめに送信/取得を行ってください。</li>'+
+        '</ul>'
+      );
+  }
   function renderReset(){
     const ss=salesSettings();
     const monthList=activeSales().filter(x=>saleMonth(x)===ss.currentMonth);
@@ -1341,6 +1402,6 @@
       </div>`;
     document.querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>goto(b.dataset.goto,b.dataset.sub));
   }
-  function render(){if(current==='dash')renderDash(); if(current==='business')renderBusiness(); if(current==='menu')renderMenu(); if(current==='inventory')renderInventory(); if(current==='settings')renderSettings(); if(current==='themeEditor')renderThemeEditor(); if(current==='qr')renderQR(); if(current==='customers')renderCustomers(); if(current==='sales')renderSales(); if(current==='sync')renderSync(); if(current==='reset')renderReset();}
+  function render(){if(current==='dash')renderDash(); if(current==='guide')renderGuide(); if(current==='business')renderBusiness(); if(current==='menu')renderMenu(); if(current==='inventory')renderInventory(); if(current==='settings')renderSettings(); if(current==='themeEditor')renderThemeEditor(); if(current==='qr')renderQR(); if(current==='customers')renderCustomers(); if(current==='sales')renderSales(); if(current==='sync')renderSync(); if(current==='reset')renderReset();}
   loginOk()?showApp():showLogin();
 })();

@@ -12,6 +12,16 @@ html,body{overflow:auto;min-height:100%;height:auto}
 .json-box{width:100%;min-height:54dvh;font-size:12px;line-height:1.45;white-space:pre;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 .admin-card{border:1px solid rgba(246,200,79,.45);border-radius:12px;background:rgba(0,0,0,.35);padding:10px}
+.guide-section{border:1px solid rgba(246,200,79,.35);border-radius:10px;background:rgba(0,0,0,.3);margin:8px 0;overflow:hidden}
+.guide-section summary{cursor:pointer;padding:12px;font-weight:800;color:var(--gold);list-style:none}
+.guide-section summary::-webkit-details-marker{display:none}
+.guide-section summary::before{content:'▶';display:inline-block;margin-right:8px;transition:transform .15s}
+.guide-section[open] summary::before{transform:rotate(90deg)}
+.guide-section .guide-body{padding:0 14px 14px;line-height:1.7;font-size:14px}
+.guide-body h4{color:var(--gold);margin:10px 0 4px}
+.guide-body ol,.guide-body ul{padding-left:1.3em;margin:4px 0}
+.guide-body li{margin:4px 0}
+.guide-note{background:rgba(246,200,79,.12);border-left:3px solid var(--gold);padding:8px 10px;border-radius:6px;margin:8px 0;font-size:13px}
 .admin-card-title{font-weight:900;color:var(--gold);margin-bottom:8px}
 .badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:3px 8px;font-size:12px;color:var(--gold);background:rgba(0,0,0,.35)}
 .searchbar input{min-width:220px;flex:1}
