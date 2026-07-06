@@ -502,7 +502,7 @@
     '<div class="admin-card"><div class="admin-card-title">🏪 基本設定</div>'+
     '<label>通貨単位<input id="setCurrency" value="'+esc(s.currency||'G')+'"></label>'+
     '<label>チャージ（1人）<input id="setCover" type="number" value="'+(s.coverCharge??500)+'"></label>'+
-    '<label>管理パスワード<input id="setPass" value="'+esc(s.adminPassword||'OTAKU')+'"></label>'+
+    '<label>管理パスワード（半角英数字のみ）<input id="setPass" value="'+esc(s.adminPassword||'OTAKU')+'" pattern="[A-Za-z0-9]*" inputmode="latin" autocapitalize="off" autocorrect="off" spellcheck="false"></label>'+
     '<label class="check-row"><input id="setCartMode" type="checkbox" '+(s.cartMode?'checked':'')+'>カートモード（複数商品をまとめて注文できるようにする）</label>'+
     '<p class="tiny">オフ＝今まで通り、商品ごとに即注文（バー向け）。オン＝カートに追加してからまとめて注文（複数人・フード店など向け）。</p>'+
     '<div class="toolbar"><button class="btn gold" id="saveBasic">この項目だけ保存</button></div>'+
@@ -529,7 +529,8 @@
     '<div class="toolbar"><button class="btn gold" id="saveNotice">この項目だけ保存</button></div>'+
     '</div><div class="toolbar"><button class="btn" id="jsonSettings">詳細JSON</button></div>';
     function pushToast(msg){ save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud(); toast(msg+'（クラウドにも送信）'); }
-    $('saveBasic').onclick=function(){ s.currency=$('setCurrency').value||'G'; s.coverCharge=+$('setCover').value||0; s.adminPassword=$('setPass').value||'OTAKU'; s.cartMode=$('setCartMode').checked; pushToast('基本設定を保存しました'); };
+    if($('setPass')) $('setPass').addEventListener('input',function(){ const c=this.value.replace(/[^A-Za-z0-9]/g,''); if(c!==this.value) this.value=c; });
+    $('saveBasic').onclick=function(){ s.currency=$('setCurrency').value||'G'; s.coverCharge=+$('setCover').value||0; s.adminPassword=($('setPass').value||'OTAKU').replace(/[^A-Za-z0-9]/g,'')||'OTAKU'; s.cartMode=$('setCartMode').checked; pushToast('基本設定を保存しました'); };
     $('saveNotify').onclick=function(){ s.notifyOn=$('setNotify').checked; s.gasUrl=$('setGas').value.trim(); s.discordWebhookUrl=$('setHook').value.trim(); pushToast('通知・連携設定を保存しました'); };
     $('saveNotice').onclick=function(){ s.notice={enabled:$('noticeEnabled').checked,title:$('noticeTitle').value||'本日のお知らせ',body:$('noticeBody').value||'',position:$('noticePosition').value||'top'}; pushToast('お知らせを保存しました'); };
     $('setLevelMode').onchange=function(){s.levelMode=$('setLevelMode').value; $('levelThresholdBox').style.display=s.levelMode==='total'?'':'none'; pushToast('レベル計算方式を保存しました');};

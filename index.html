@@ -284,7 +284,7 @@
         <div class="setup-step">
           <div class="admin-card-title">🔐 管理画面のパスワード</div>
           <p class="tiny">このテンプレートの初期パスワードは共通です。他の人に管理画面を開かれないよう、必ずここで変更してください。</p>
-          <label>新しい管理パスワード<input id="setupAdminPassword" placeholder="例：好きな文字列に変更してください"></label>
+          <label>新しい管理パスワード（半角英数字のみ）<input id="setupAdminPassword" placeholder="例：好きな文字列に変更してください" pattern="[A-Za-z0-9]*" inputmode="latin" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
         </div>
 
         <div class="setup-step">
@@ -351,6 +351,6 @@
   <script src="discord.js?v=1.32-cartmode"></script>
   <script src="menu.js?v=1.32-cartmode"></script>
   <script src="order.js?v=1.36-receipt"></script>
-  <script src="app.js?v=1.38-integrity"></script>
+  <script src="app.js?v=1.39-pwfix"></script>
 </body>
 </html>

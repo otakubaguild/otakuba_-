@@ -186,6 +186,14 @@ window.GuildApp = {VERSION:'4.0'};
 
   
   function wizardVal(id){ const el=$(id); return el ? el.value.trim() : ''; }
+  function sanitizeAlnumInput(el){
+    if(!el) return;
+    el.addEventListener('input', ()=>{
+      const cleaned = el.value.replace(/[^A-Za-z0-9]/g,'');
+      if(cleaned !== el.value) el.value = cleaned;
+    });
+  }
+  sanitizeAlnumInput($('setupAdminPassword'));
   function fillSetupWizard(){
     const c=themeCustom();
     const name=data.settings.storeName||data.settings.shopName||'';
@@ -332,7 +340,7 @@ window.GuildApp = {VERSION:'4.0'};
       storeId:wizardVal('setupStoreId'),
       gasUrl,
       discordWebhookUrl:wizardVal('setupDiscordUrl'),
-      adminPassword:wizardVal('setupAdminPassword'),
+      adminPassword:wizardVal('setupAdminPassword').replace(/[^A-Za-z0-9]/g,''),
       themeCustom
     });
     data.settings.licenseContactEmail=wizardVal('setupContactEmail');
