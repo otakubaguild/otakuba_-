@@ -51,6 +51,26 @@
       </div>
     </section>
 
+    <section class="screen center" id="screenSuspended">
+      <div class="panel window">
+        <div class="title-logo">サービス利用<br>停止中</div>
+        <div class="subtitle">お支払い状況の確認が取れなかったため、現在サービスをご利用いただけません。</div>
+        <div class="subtitle" style="margin-top:6px">店舗の運営者様は、お支払い状況をご確認のうえ、サポートまでご連絡ください。</div>
+      </div>
+    </section>
+
+    <div id="tamperOverlay" class="level-up-overlay">
+      <div class="panel window">
+        <div class="title-logo small">⚠️ システムの変更を検知</div>
+        <div class="subtitle" style="margin-top:6px">配布時の内容と異なる部分が見つかりました。心当たりがない場合はサポートまでご連絡ください。</div>
+        <label class="mt">解除コード<input id="tamperCodeInput" placeholder="サポートから受け取ったコードを入力"></label>
+        <div class="row mt">
+          <button class="btn gold" id="tamperUnlockBtn">解除する</button>
+        </div>
+        <div id="tamperMsg" class="tiny mt"></div>
+      </div>
+    </div>
+
     <section class="screen center" id="screenName">
       <div class="panel window">
         <div class="title-logo small" data-theme-text="messages.registerTitle">冒険者登録</div>
@@ -296,6 +316,7 @@
           <label>店舗ID（QR用）<input id="setupStoreId" placeholder="例：mystore"></label>
           <label>GAS URL<input id="setupGasUrl" placeholder="https://script.google.com/macros/s/.../exec"></label>
           <label>Discord通知URL（任意）<input id="setupDiscordUrl" placeholder="https://discord.com/api/webhooks/..."></label>
+          <label>ご連絡先メールアドレス（お支払い・サポート連絡用）<input id="setupContactEmail" type="email" placeholder="例：owner@example.com"></label>
         </div>
 
         <div class="toolbar">
@@ -318,6 +339,10 @@
 
   <script src="theme.js?v=1.32-cartmode"></script>
   <script src="utils.js?v=1.32-cartmode"></script>
+  <script src="integrity-config.js?v=1.0"></script>
+  <script src="integrity.js?v=1.0"></script>
+  <script src="license-config.js?v=1.0"></script>
+  <script src="license.js?v=1.0"></script>
   <script src="storage.js?v=1.32-cartmode"></script>
   <script src="audio.js?v=1.33-bgmfix"></script>
   <script src="ui.js?v=1.32-cartmode"></script>
@@ -326,6 +351,6 @@
   <script src="discord.js?v=1.32-cartmode"></script>
   <script src="menu.js?v=1.32-cartmode"></script>
   <script src="order.js?v=1.36-receipt"></script>
-  <script src="app.js?v=1.36-receipt"></script>
+  <script src="app.js?v=1.38-integrity"></script>
 </body>
 </html>

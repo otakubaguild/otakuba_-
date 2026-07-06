@@ -1346,6 +1346,25 @@
       '<div class="toolbar"><button class="btn gold" id="sysRecheck">🔄 再チェック</button></div>';
     const rows=$('sysRows');
     function append(html){ rows.innerHTML+=html; }
+    // ライセンス（お支払い状況）
+    if(window.GuildLicense && GuildLicense.serverUrl){
+      append(sysRow('','お支払い状況','確認中…'));
+      try{
+        await GuildLicense.checkLicense(data);
+        const st=GuildLicense.status;
+        if(GuildLicense.offline){
+          rows.lastElementChild.outerHTML=sysRow('warn','お支払い状況','確認サーバーと通信できませんでした（一時的な可能性があります。この間はサービスは止まりません）。');
+        } else if(st==='suspended'){
+          rows.lastElementChild.outerHTML=sysRow('bad','お支払い状況','サービスが停止しています。お支払い状況をご確認のうえ、サポートまでご連絡ください。');
+        } else if(st==='grace'){
+          rows.lastElementChild.outerHTML=sysRow('warn','お支払い状況','お支払いの確認が取れていません。あと'+(GuildLicense.graceDaysLeft!=null?GuildLicense.graceDaysLeft+'日':'数日')+'で利用停止になります。お早めにご確認ください。');
+        } else {
+          rows.lastElementChild.outerHTML=sysRow('ok','お支払い状況','正常です。');
+        }
+      }catch(e){
+        rows.lastElementChild.outerHTML=sysRow('warn','お支払い状況','確認できませんでした。');
+      }
+    }
     // GAS
     if(!gasSet){
       append(sysRow('warn','GAS連携','未設定です。1台だけで使う場合は問題ありませんが、複数端末での同期やDiscord通知を使うには「☁️ 同期」タブでGAS URLを設定してください。'));
@@ -1425,13 +1444,13 @@
         '<div class="guide-note">管理画面の右上には常に🟢営業中／🔴準備中のバッジが表示されるので、今の状態が一目で分かります。</div>'
       )+
       sec('💰 会計・売上タブ',
-        '<p>お客様ごとの会計内容や、期間ごとの売上集計を確認できます。</p>'
+        '<p>お客様ごとの会計内容や、期間ごとの売上集計を確認できます。会計確定後、お客様の画面には明細と合計金額が表示され、「確認完了」を押すまで最初の画面には戻りません。</p>'
       )+
       sec('🔳 QRタブ',
         '<p>お客様がスマホから注文画面を開くためのQRコードを発行できます。テーブルに設置する用途を想定しています。</p>'
       )+
       sec('🩺 システムチェックタブ',
-        '<p>GAS連携・Discord通知・営業状態・バックアップの状態をまとめて確認できます。🟢は正常、🟡は注意、🔴は要対応です。トラブルが起きた時はまずここを開いてください。Discordのテスト通知もここから送れます。</p>'
+        '<p>GAS連携・Discord通知・営業状態・バックアップの状態をまとめて確認できます。🟢は正常、🟡は注意、🔴は要対応です。トラブルが起きた時はまずここを開いてください。Discordのテスト通知もここから送れます。契約プランによっては、お支払い状況もここに表示されます。</p>'
       )+
       sec('🏪 店舗ロゴについて',
         '<p>「🎭 テーマ編集 → 🏪 店舗情報」で店舗ロゴ画像のURLを登録すると、お客様のタイトル画面と「店舗情報」ボタンの両方にロゴが表示されます。未設定の場合は何も表示されません。</p>'

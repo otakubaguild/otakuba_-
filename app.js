@@ -335,6 +335,9 @@ window.GuildApp = {VERSION:'4.0'};
       adminPassword:wizardVal('setupAdminPassword'),
       themeCustom
     });
+    data.settings.licenseContactEmail=wizardVal('setupContactEmail');
+    GuildStorage.save();
+    if(window.GuildLicense && GuildLicense.registerStore) GuildLicense.registerStore(data);
     hideSetupWizard();
     applyStartTheme();
     GuildUI.toast('初回セットアップを保存しました');
@@ -342,6 +345,7 @@ window.GuildApp = {VERSION:'4.0'};
   if($('setupWizardSkip')) $('setupWizardSkip').onclick=()=>{
     data.settings.setupDone=true;
     GuildStorage.save();
+    if(window.GuildLicense && GuildLicense.registerStore) GuildLicense.registerStore(data);
     hideSetupWizard();
     GuildUI.toast('あとで管理画面から設定できます');
   };
@@ -412,8 +416,24 @@ window.GuildApp = {VERSION:'4.0'};
   if($('btnCartConfirm')) $('btnCartConfirm').onclick=()=>GuildOrder.confirmCart();
   if($('btnClosedRefresh')) $('btnClosedRefresh').onclick=()=>location.reload();
   if($('btnClosedAdmin')) $('btnClosedAdmin').onclick=()=>location.href='admin.html';
+  if(window.GuildLicense && GuildLicense.checkLicense) await GuildLicense.checkLicense(data);
+  let tamperResult={tampered:false};
+  if(window.GuildIntegrity && GuildIntegrity.runCheck){ try{ tamperResult=await GuildIntegrity.runCheck(); }catch(e){} }
   const forceSetup = (function(){ try{ return new URLSearchParams(location.search||'').get('setup')==='1'; }catch(e){ return false; } })();
   const needsSetup = forceSetup || (GuildStorage.needsInitialSetup&&GuildStorage.needsInitialSetup());
-  if(!needsSetup && !isBusinessOpen() && !hasActiveSession()){ showClosedScreen(); } else { showWelcomeScreen(); }
+  if(!needsSetup && window.GuildLicense && GuildLicense.status==='suspended'){
+    GuildUI.show('screenSuspended');
+  } else if(!needsSetup && !isBusinessOpen() && !hasActiveSession()){ showClosedScreen(); } else { showWelcomeScreen(); }
   if(needsSetup) showSetupWizard();
+  if(tamperResult.tampered && $('tamperOverlay')){
+    $('tamperOverlay').classList.add('show');
+    $('tamperUnlockBtn').onclick=async()=>{
+      const code=($('tamperCodeInput').value||'').trim();
+      if(!code){ $('tamperMsg').textContent='コードを入力してください'; return; }
+      $('tamperMsg').textContent='確認中…';
+      const ok = window.GuildIntegrity && await GuildIntegrity.verifyUnlockCode(code, tamperResult);
+      if(ok){ $('tamperOverlay').classList.remove('show'); }
+      else { $('tamperMsg').textContent='コードが違います'; }
+    };
+  }
 })();
