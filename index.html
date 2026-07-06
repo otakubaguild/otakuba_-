@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#050505">
   <title data-theme-title>冒険者ギルド</title>
-  <link rel="stylesheet" href="main.css?v=1.32-cartmode">
+  <link rel="stylesheet" href="main.css?v=1.35-logo">
   <link rel="stylesheet" href="battle.css?v=1.33-speech">
   <link rel="stylesheet" href="menu.css?v=1.32-cartmode">
   <link rel="stylesheet" href="effects.css?v=1.32-cartmode">
@@ -28,6 +28,7 @@
 
     <section class="screen active center" id="screenWelcome">
       <div class="panel window">
+        <img id="storeLogoImg" class="store-logo" alt="" style="display:none">
         <div class="title-logo" data-theme-html="messages.titleWelcome">ギルドへ<br>ようこそ</div>
         <div class="subtitle">メニューを開きますか？</div>
         <div class="row choice">
@@ -37,6 +38,16 @@
         <button class="btn mt" id="btnStoreInfo">🏪 店舗情報</button>
         <button class="btn admin-link mt" id="btnAdmin">🔐 管理者用</button>
         <div class="audio-credit" id="audioCreditText">音楽：魔王魂 / パンダの中のパンダ</div>
+      </div>
+    </section>
+
+    <section class="screen center" id="screenClosed">
+      <div class="panel window">
+        <div class="title-logo">本日は<br>準備中です</div>
+        <div class="subtitle" id="closedHoursText">営業時間 --:--〜--:--</div>
+        <div class="subtitle" style="margin-top:6px">しばらくお待ちください</div>
+        <button class="btn gold mt" id="btnClosedRefresh">🔄 更新する</button>
+        <button class="btn admin-link mt" id="btnClosedAdmin">🔐 管理者用</button>
       </div>
     </section>
 
@@ -195,6 +206,20 @@
       </div>
     </div>
 
+    <div class="modal" id="modalReceipt">
+      <div class="modal-head">
+        <h2>🧾 会計明細</h2>
+      </div>
+      <div class="scroll">
+        <div class="panel">
+          <div id="receiptBody" class="confirm-text"></div>
+          <div class="row mt">
+            <button class="btn gold" id="btnReceiptConfirm">確認完了</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="levelUpOverlay" class="level-up-overlay">
       <div class="panel window">
         <div class="level-up-title">LEVEL UP!</div>
@@ -300,7 +325,7 @@
   <script src="battle.js?v=1.33-speech"></script>
   <script src="discord.js?v=1.32-cartmode"></script>
   <script src="menu.js?v=1.32-cartmode"></script>
-  <script src="order.js?v=1.32-cartmode"></script>
-  <script src="app.js?v=1.32-cartmode"></script>
+  <script src="order.js?v=1.36-receipt"></script>
+  <script src="app.js?v=1.36-receipt"></script>
 </body>
 </html>

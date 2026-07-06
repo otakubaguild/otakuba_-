@@ -85,7 +85,41 @@ window.GuildOrder = (() => {
   }
   async function confirmOrder(){ if($('screenMain').classList.contains('combat-lock'))return; if(!pending){GuildUI.toast('注文がありません');return;} const item=Object.assign({},pending); pending=null; $('btnDoOrder').disabled=true; decrementStock(item); const sale=record('order',[item],item.subtotal); addToBill(item); GuildNotify.send(payload('order',sale,[item],item.subtotal,{orderDamage:item.subtotal,directOrder:true})); if(GuildStorage.pushCloud)GuildStorage.pushCloud(); GuildUI.closeModals(); GuildUI.show('screenMain'); await GuildBattle.applyDamage(item.subtotal,(defeated,finalDefeated)=>{GuildStorage.save();GuildBattle.render();$('screenMain').classList.remove('combat-lock');$('damagePop').classList.remove('on');$('btnDoOrder').disabled=false;GuildUI.toast(finalDefeated?(window.GuildTheme?GuildTheme.w('bossDefeatText'):'魔王を討伐した！'):(defeated?((window.GuildTheme?GuildTheme.w('defeat'):'撃破')+'！ 注文完了'):((window.GuildTheme?GuildTheme.w('questClear'):'クエスト達成')+'！')));}); }
   function checkoutAsk(){ const data=GuildStorage.getData(); const base=(data.activeBill||[]).slice(); const all=withCoverCharge(base); const total=all.reduce((s,i)=>s+Number(i.subtotal||0),0); $('checkoutConfirmBody').textContent=all.length?`帰還しますか？\n\n${all.map(i=>`・${i.name} ×${Number(i.qty||1)} = ${yen(i.subtotal,data.settings.currency)}`).join('\n')}\n\n会計合計 ${yen(total,data.settings.currency)}\n売上月 ${currentSalesMonth()} 月分\n\n会計のみ行います。ダメージは注文確定時に入ります。`:'未会計の注文はありません。帰還しますか？'; GuildUI.openModal('modalCheckoutConfirm'); }
-  function checkoutDo(){ const data=GuildStorage.getData(); const all=withCoverCharge((data.activeBill||[]).slice()); const total=all.reduce((s,i)=>s+Number(i.subtotal||0),0); const c=GuildCustomer.current(); const sale=record('checkout',all,total); GuildNotify.send(payload('checkout',sale,all,total,{checkoutOnly:true})); if(GuildStorage.pushCloud)GuildStorage.pushCloud(); if(c){ const cust=(data.customers||[]).find(x=>x.id===c.id||x.name===c.name); if(cust){ cust.checkedOut=true; cust.total=(Number(cust.total)||0)+total; if(GuildCustomer.recheckLevelAfterCheckout){ const lu=GuildCustomer.recheckLevelAfterCheckout(cust); if(lu.leveled){ GuildAudio.playSe('levelup'); if(window.GuildApp&&GuildApp.showLevelUp) GuildApp.showLevelUp(lu.oldLevel,lu.newLevel); } } } } data.activeBill=[]; GuildStorage.save(); GuildBattle.render(); GuildUI.closeModals(); $('screenMain').classList.remove('combat-lock'); GuildUI.toast(window.GuildTheme?GuildTheme.m('checkoutDone'):'おかえりなさい。クエスト達成（会計）を送信しました'); setTimeout(()=>{ if(window.GuildApp&&GuildApp.showWelcomeBack) GuildApp.showWelcomeBack(); else GuildUI.show('screenWelcome'); }, 1400); }
+  function checkoutDo(){
+    const data=GuildStorage.getData();
+    const all=withCoverCharge((data.activeBill||[]).slice());
+    const total=all.reduce((s,i)=>s+Number(i.subtotal||0),0);
+    const c=GuildCustomer.current();
+    const custName=(c&&c.name)||data.currentCustomer||'';
+    const sale=record('checkout',all,total);
+    GuildNotify.send(payload('checkout',sale,all,total,{checkoutOnly:true}));
+    if(GuildStorage.pushCloud)GuildStorage.pushCloud();
+    if(c){
+      const cust=(data.customers||[]).find(x=>x.id===c.id||x.name===c.name);
+      if(cust){
+        cust.checkedOut=true; cust.total=(Number(cust.total)||0)+total;
+        if(GuildCustomer.recheckLevelAfterCheckout){
+          const lu=GuildCustomer.recheckLevelAfterCheckout(cust);
+          if(lu.leveled){ GuildAudio.playSe('levelup'); if(window.GuildApp&&GuildApp.showLevelUp) GuildApp.showLevelUp(lu.oldLevel,lu.newLevel); }
+        }
+      }
+    }
+    data.activeBill=[];
+    GuildStorage.save(); GuildBattle.render();
+    $('screenMain').classList.remove('combat-lock');
+    showReceipt(all,total,custName);
+  }
+  function showReceipt(items,total,custName){
+    const data=GuildStorage.getData();
+    const body=$('receiptBody');
+    if(body){
+      const rows=(items||[]).map(i=>`・${GuildUtils.esc(i.name)} ×${Number(i.qty||1)} = ${yen(i.subtotal,data.settings.currency)}`).join('<br>');
+      body.innerHTML = (custName?`<div>${GuildUtils.esc(custName)} 様</div>`:'') +
+        `<div class="mt">${rows||'（明細なし）'}</div>` +
+        `<div class="mt" style="font-size:1.2em;font-weight:900">合計　${yen(total,data.settings.currency)}</div>`;
+    }
+    GuildUI.openModal('modalReceipt');
+  }
   function cancelPending(){ pending=null; GuildAudio.playSe('cancel'); GuildUI.closeModals(); }
   return {askOrder, confirmOrder, checkoutAsk, checkoutDo, cancelPending, record, isCartMode, addToCart, removeFromCart, openCartReview, confirmCart, cancelCartReview, cartCount, updateCartBadge};
 })();

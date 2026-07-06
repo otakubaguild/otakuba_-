@@ -27,6 +27,12 @@ window.GuildApp = {VERSION:'4.0'};
     const title=document.querySelector('#screenWelcome .title-logo');
     if(title) title.innerHTML=c.startTitle || startTitleDefault();
     welcomeText(c.startSubtitle || startSubtitleDefault());
+    const logoEl=$('storeLogoImg');
+    if(logoEl){
+      const logoUrl=(data.settings.storeInfo&&data.settings.storeInfo.logo)||'';
+      if(logoUrl){ logoEl.src=assetUrl(logoUrl); logoEl.style.display=''; }
+      else { logoEl.style.display='none'; }
+    }
     const bg=assetUrl(c.startBg||'');
     if(bg && window.GuildUI && GuildUI.applyBg) GuildUI.applyBg(bg);
     const sw=document.getElementById('screenWelcome');
@@ -45,6 +51,20 @@ window.GuildApp = {VERSION:'4.0'};
     const c=GuildCustomer.current&&GuildCustomer.current();
     return bill.length>0 && !!(data.currentCustomerId||data.currentCustomer) && !(c&&c.checkedOut===true);
   }
+  function isBusinessOpen(){ return !!((data.settings&&data.settings.business)||{}).open; }
+  let closedPollTimer=null;
+  function stopClosedPoll(){ if(closedPollTimer){ clearInterval(closedPollTimer); closedPollTimer=null; } }
+  function showClosedScreen(){
+    const info=data.settings.storeInfo||{};
+    const hoursEl=$('closedHoursText');
+    if(hoursEl) hoursEl.textContent = info.hours ? ('営業時間　'+info.hours) : '';
+    GuildUI.show('screenClosed');
+    stopClosedPoll();
+    closedPollTimer=setInterval(async()=>{
+      try{ if(GuildStorage.pullCloud) await GuildStorage.pullCloud(); }catch(e){}
+      if(isBusinessOpen()){ stopClosedPoll(); showWelcomeScreen(); }
+    }, 15000);
+  }
   function welcomePrompt(){
     if(hasActiveSession()){
       const c=GuildCustomer.current&&GuildCustomer.current();
@@ -55,6 +75,7 @@ window.GuildApp = {VERSION:'4.0'};
     return (themeCustom().startSubtitle || startSubtitleDefault());
   }
   function showWelcomeScreen(){
+    stopClosedPoll();
     applyStartTheme();
     welcomeText(welcomePrompt());
     GuildUI.show('screenWelcome');
@@ -218,6 +239,7 @@ window.GuildApp = {VERSION:'4.0'};
     const s=(data.settings&&data.settings.storeInfo)||{};
     const name=s.name||data.settings.storeName||data.settings.shopName||'店舗情報';
     const lines=[];
+    if(s.logo) lines.push(`<img src="${GuildUtils.driveImg(s.logo)}" alt="" class="store-logo" onerror="this.style.display='none'">`);
     lines.push(`<div class="store-info-name">${GuildUtils.esc(name)}</div>`);
     if(s.description) lines.push(`<div class="store-info-desc">${GuildUtils.esc(s.description).replace(/\n/g,'<br>')}</div>`);
     if(s.hours) lines.push(`<div><b>営業時間</b>：${GuildUtils.esc(s.hours).replace(/\n/g,'<br>')}</div>`);
@@ -378,11 +400,20 @@ window.GuildApp = {VERSION:'4.0'};
   $('btnDoCharge').onclick=()=>{ GuildAudio.playSe('ok'); applyCoverCharge(); GuildUI.closeModals(); GuildUI.renderNotice(data.settings); GuildUI.show('screenMain'); applyBattleThemeBg(); GuildBattle.render(); };
   $('btnBackTitle').onclick=()=>{ GuildAudio.playSe('cancel'); GuildUI.closeModals(); welcomeText('メニューを開きますか？'); showWelcomeScreen(); };
   $('btnCloseMenu').onclick=()=>GuildUI.closeModals(); $('btnCancelOrder').onclick=GuildOrder.cancelPending; $('btnNoOrder').onclick=GuildOrder.cancelPending; $('btnDoOrder').onclick=GuildOrder.confirmOrder; $('btnCheckout').onclick=GuildOrder.checkoutAsk; $('btnCancelCheckout').onclick=()=>GuildUI.closeModals(); $('btnNoCheckout').onclick=()=>GuildUI.closeModals(); $('btnDoCheckout').onclick=GuildOrder.checkoutDo;
+  if($('btnReceiptConfirm')) $('btnReceiptConfirm').onclick=()=>{
+    GuildAudio.playSe('ok');
+    GuildUI.closeModals();
+    if(GuildBattle.resetAudioFlag) GuildBattle.resetAudioFlag();
+    if(window.GuildApp&&GuildApp.showWelcomeBack) GuildApp.showWelcomeBack(); else showWelcomeScreen();
+  };
   if($('btnCartOpen')) $('btnCartOpen').onclick=()=>GuildOrder.openCartReview();
   if($('btnCartBack')) $('btnCartBack').onclick=()=>{ GuildUI.closeModals(); GuildUI.openModal('modalMenu'); };
   if($('btnCartCancel')) $('btnCartCancel').onclick=()=>GuildOrder.cancelCartReview();
   if($('btnCartConfirm')) $('btnCartConfirm').onclick=()=>GuildOrder.confirmCart();
-  showWelcomeScreen();
+  if($('btnClosedRefresh')) $('btnClosedRefresh').onclick=()=>location.reload();
+  if($('btnClosedAdmin')) $('btnClosedAdmin').onclick=()=>location.href='admin.html';
   const forceSetup = (function(){ try{ return new URLSearchParams(location.search||'').get('setup')==='1'; }catch(e){ return false; } })();
-  if(forceSetup || (GuildStorage.needsInitialSetup&&GuildStorage.needsInitialSetup())) showSetupWizard();
+  const needsSetup = forceSetup || (GuildStorage.needsInitialSetup&&GuildStorage.needsInitialSetup());
+  if(!needsSetup && !isBusinessOpen() && !hasActiveSession()){ showClosedScreen(); } else { showWelcomeScreen(); }
+  if(needsSetup) showSetupWizard();
 })();

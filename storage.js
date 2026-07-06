@@ -185,11 +185,11 @@ window.GuildStorage = (() => {
       notice:{enabled:true,title:'本日のお知らせ',body:'',position:'top'},
       themeCustom:{startTitle:'',startSubtitle:'',startBg:'',startBgm:'title',victoryBg:'',victoryImage:'victory_clear.PNG',victoryTitle:'',victorySubtitle:'',victoryBgm:'ending',masterImage:'master_no.jpeg',masterMessage:'冷やかしか？さっさとメニューを開け',awakenEnabled:true},
       business:{open:false,openedAt:'',closedAt:'',dailyReports:[]},
-      storeInfo:{name:'',address:'',hours:'',phone:'',instagram:'',x:'',website:'',mapUrl:'',description:''}
+      storeInfo:{name:'',address:'',hours:'',phone:'',instagram:'',x:'',website:'',mapUrl:'',description:'',logo:''}
     }, defaults.settings || {});
     data.settings.notice = Object.assign({enabled:true,title:'本日のお知らせ',body:'',position:'top'}, data.settings.notice || {});
     data.settings.business = Object.assign({open:false,openedAt:'',closedAt:'',dailyReports:[]}, data.settings.business || {});
-    data.settings.storeInfo = Object.assign({name:'',address:'',hours:'',phone:'',instagram:'',x:'',website:'',mapUrl:'',description:''}, data.settings.storeInfo || {});
+    data.settings.storeInfo = Object.assign({name:'',address:'',hours:'',phone:'',instagram:'',x:'',website:'',mapUrl:'',description:'',logo:''}, data.settings.storeInfo || {});
     data.settings.themeCustom = Object.assign({startTitle:'',startSubtitle:'',startBg:'',startBgm:'title',victoryBg:'',victoryImage:'victory_clear.PNG',victoryTitle:'',victorySubtitle:'',victoryBgm:'ending',masterImage:'master_no.jpeg',masterMessage:'冷やかしか？さっさとメニューを開け',awakenEnabled:true}, data.settings.themeCustom || {});
     if(!Array.isArray(data.settings.business.dailyReports)) data.settings.business.dailyReports=[];
 

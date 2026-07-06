@@ -22,6 +22,7 @@
   const tabs=[
     ['dash','🏠 ホーム','easy'],
     ['guide','📖 使い方ガイド','easy'],
+    ['syscheck','🩺 システムチェック','easy'],
     ['business','🟢 営業','easy'],
     ['themeEditor','🎭 テーマ編集','easy'],
     ['menu','🍴 メニュー','easy'],
@@ -43,13 +44,13 @@
   let currentMode=loadMode();
   function visibleTabs(){ const maxIdx=MODE_ORDER.indexOf(currentMode); return tabs.filter(t=>MODE_ORDER.indexOf(t[2])<=maxIdx); }
   let current='dash', customerQuery='', salesQuery='';
-  function loginOk(){return sessionStorage.getItem(SESSION)==='ok'} function showLogin(){$('adminLogin').classList.remove('hidden');$('adminApp').classList.add('hidden')} function showApp(){$('adminLogin').classList.add('hidden');$('adminApp').classList.remove('hidden');const hn=data.settings.storeInfo&&data.settings.storeInfo.name||data.settings.storeName||data.settings.shopName||(window.GuildTheme?GuildTheme.b('shopName'):'')||'';if($('adminHeadTitle'))$('adminHeadTitle').textContent=(hn?hn+' ':'')+'管理室';renderModeBar();renderTabs();render();startAutoRefresh()}
+  function loginOk(){return sessionStorage.getItem(SESSION)==='ok'} function showLogin(){$('adminLogin').classList.remove('hidden');$('adminApp').classList.add('hidden')} function showApp(){$('adminLogin').classList.add('hidden');$('adminApp').classList.remove('hidden');const hn=data.settings.storeInfo&&data.settings.storeInfo.name||data.settings.storeName||data.settings.shopName||(window.GuildTheme?GuildTheme.b('shopName'):'')||'';if($('adminHeadTitle'))$('adminHeadTitle').textContent=(hn?hn+' ':'')+'管理室';renderModeBar();renderStatusBadge();renderTabs();render();startAutoRefresh()}
   let autoTimer=null;
   function startAutoRefresh(){ if(autoTimer)clearInterval(autoTimer); autoTimer=setInterval(async()=>{
     // 概要・顧客・履歴を見ている時だけ自動取得。入力中は邪魔しない
     if(!['dash','customers','sales'].includes(current))return;
     const ae=document.activeElement; if(ae&&(ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.tagName==='SELECT'))return;
-    const ok=await GuildStorage.pullCloud(); if(ok)render();
+    const ok=await GuildStorage.pullCloud(); if(ok){renderStatusBadge();render();}
   }, 10000); }
   $('adminLoginBtn').onclick=()=>{if($('adminPass').value===(data.settings.adminPassword||'OTAKU')){sessionStorage.setItem(SESSION,'ok');playAdminAuthFx()}else $('loginError').textContent='パスワードが違います'};
   function playAdminAuthFx(){
@@ -62,6 +63,12 @@
   $('adminBackToIndex').onclick=()=>location.href='index.html';$('adminHeaderToIndex').onclick=()=>location.href='index.html';$('logoutBtn').onclick=()=>{sessionStorage.removeItem(SESSION);showLogin()};
   function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),1500)}
   function save(){GuildStorage.save()}
+  function renderStatusBadge(){
+    const el=document.getElementById('bizStatusBadge'); if(!el) return;
+    const open=!!(data.settings.business&&data.settings.business.open);
+    el.textContent=open?'🟢 営業中':'🔴 準備中';
+    el.classList.toggle('open',open);
+  }
   function renderModeBar(){
     const bar=$('adminModeBar'); if(!bar) return;
     bar.innerHTML=MODE_ORDER.map(m=>`<button class="mode-btn ${currentMode===m?'active':''}" data-mode="${m}">${MODE_LABEL[m]}</button>`).join('');
@@ -1052,12 +1059,14 @@
   function renderStoreInfoAdmin(containerId){
     containerId=containerId||'adminContent';
     const s=data.settings;
-    s.storeInfo=Object.assign({name:'',address:'',hours:'',phone:'',instagram:'',x:'',youtube:'',website:'',mapUrl:'',description:''},s.storeInfo||{});
+    s.storeInfo=Object.assign({name:'',address:'',hours:'',phone:'',instagram:'',x:'',youtube:'',website:'',mapUrl:'',description:'',logo:''},s.storeInfo||{});
     const i=s.storeInfo;
     $(containerId).innerHTML='<h2>🏪 店舗情報</h2>'+
       '<div class="admin-card"><p class="tiny">一般画面の「店舗情報」ボタンに表示されます。営業時間・SNS・地図など、お客様に見せたい情報を登録できます。</p></div>'+
       '<div class="admin-card">'+
       '<label>店舗名<input id="infoName" value="'+esc(i.name||s.storeName||s.shopName||'')+'" placeholder="例：〇〇バー / △△カフェ"></label>'+
+      '<label>店舗ロゴ画像URL（アップロードした画像や外部URLを貼り付け）<input id="infoLogo" value="'+esc(i.logo||'')+'" placeholder="https://drive.google.com/... または https://...png"></label>'+
+      '<div id="infoLogoPreview" style="margin:6px 0 12px">'+(i.logo?('<img src="'+esc(GuildUtils.driveImg(i.logo))+'" alt="ロゴ" style="max-width:120px;max-height:120px;border-radius:10px;border:1px solid rgba(246,200,79,.4)" onerror="this.style.display=\'none\'">'):'<span class="tiny">未設定（タイトル画面・店舗情報にはロゴなしで表示されます）</span>')+'</div>'+
       '<label>紹介文<textarea id="infoDesc" placeholder="例：ゲームを遊びながら注文できるバーです">'+esc(i.description||'')+'</textarea></label>'+
       '<label>営業時間<textarea id="infoHours" placeholder="例：20:00〜LAST / 定休日：月曜">'+esc(i.hours||'')+'</textarea></label>'+
       '<label>住所<textarea id="infoAddress" placeholder="例：青森県むつ市...">'+esc(i.address||'')+'</textarea></label>'+
@@ -1072,6 +1081,7 @@
     $('saveStoreInfo').onclick=function(){
       s.storeInfo={
         name:$('infoName').value.trim(),
+        logo:$('infoLogo').value.trim(),
         description:$('infoDesc').value,
         hours:$('infoHours').value,
         address:$('infoAddress').value,
@@ -1086,7 +1096,12 @@
       save();
       if(GuildStorage.pushCloud)GuildStorage.pushCloud();
       toast('店舗情報を保存しました');
+      renderStoreInfoAdmin(containerId);
     };
+    if($('infoLogo')) $('infoLogo').addEventListener('input',function(){
+      const box=$('infoLogoPreview'); const v=this.value.trim();
+      box.innerHTML=v?('<img src="'+esc(GuildUtils.driveImg(v))+'" alt="ロゴ" style="max-width:120px;max-height:120px;border-radius:10px;border:1px solid rgba(246,200,79,.4)" onerror="this.style.display=\'none\'">'):'<span class="tiny">未設定（タイトル画面・店舗情報にはロゴなしで表示されます）</span>';
+    });
   }
 
   function renderQR(){
@@ -1203,8 +1218,17 @@
   function makeDailyReport(day){const list=daySales(day);const total=sumSales(list);const cover=chargeTotal(list);const guests=guestCount(list);const groups=saleGroups(list);const items=rankItems(list,false).slice(0,5);const cats=rankItems(list,true);return {id:GuildUtils.uid('report'),day,createdAt:new Date().toISOString(),createdAtText:GuildUtils.todayText(),total,cover,itemTotal:total-cover,guests,groups,orderCount:list.length,items,categories:cats};}
   function reportHtml(r){return `<div class="admin-card"><div class="admin-card-title">📅 ${esc(r.day)} 日報</div><div class="grid sales-summary"><div>売上<br><b>${yen(r.total||0,data.settings.currency)}</b></div><div>席料<br><b>${yen(r.cover||0,data.settings.currency)}</b></div><div>組数<br><b>${r.groups||0}</b></div><div>人数<br><b>${r.guests||0}</b></div></div><div class="tiny">人気TOP5：${(r.items||[]).map((x,i)=>`${i+1}.${esc(x.name)}×${x.qty}`).join(' / ')||'なし'}</div></div>`;}
   function renderBusiness(){const b=business();const today=todayKey();const r=makeDailyReport(today);const reports=(b.dailyReports||[]).slice().reverse().slice(0,10);$('adminContent').innerHTML=`<h2>🟢 営業管理</h2><div class="grid"><div class="admin-card"><div class="admin-card-title">営業状態</div><div class="big-num">${b.open?'営業中':'営業終了中'}</div><div class="tiny">開始：${esc(b.openedAt||'-')}</div><div class="toolbar"><button class="btn green" id="openBusiness">営業開始</button><button class="btn red" id="closeBusiness">営業終了・日報作成</button></div></div>${reportHtml(r)}</div><h3>保存済み日報</h3>${reports.length?reports.map(reportHtml).join(''):'<div class="empty">まだ日報はありません</div>'}`;
-    $('openBusiness').onclick=()=>{b.open=true;b.openedAt=GuildUtils.todayText();save();toast('営業開始');renderBusiness();};
-    $('closeBusiness').onclick=()=>{if(!confirm('営業終了して本日の日報を保存しますか？'))return;const rep=makeDailyReport(todayKey());b.open=false;b.closedAt=GuildUtils.todayText();b.dailyReports=(b.dailyReports||[]).filter(x=>x.day!==rep.day);b.dailyReports.push(rep);save();if(GuildStorage.pushCloud)GuildStorage.pushCloud();toast('日報を保存しました');renderBusiness();};
+    $('openBusiness').onclick=()=>{
+      b.open=true;b.openedAt=GuildUtils.todayText();
+      if(GuildStorage.resetProgress) GuildStorage.resetProgress({sync:true});
+      save();if(GuildStorage.pushCloud)GuildStorage.pushCloud();toast('営業開始');renderBusiness();renderStatusBadge();
+    };
+    $('closeBusiness').onclick=()=>{
+      const rep=makeDailyReport(todayKey());
+      const msg='営業を終了しますか？\n\n本日の売上\n'+yen(rep.total,data.settings.currency)+'\n注文数\n'+rep.orderCount+'件\n\n新規のご注文はできなくなります（会計待ちのお客様は会計可能です）。';
+      if(!confirm(msg))return;
+      b.open=false;b.closedAt=GuildUtils.todayText();b.dailyReports=(b.dailyReports||[]).filter(x=>x.day!==rep.day);b.dailyReports.push(rep);save();if(GuildStorage.pushCloud)GuildStorage.pushCloud();toast('日報を保存しました');renderBusiness();renderStatusBadge();
+    };
   }
   function inventoryRowsFor(items){return items.map(({p,i})=>`<tr data-inv-index="${i}"><td>${esc(p.emoji||'')} ${esc(p.name)}</td><td><input data-field="stock" type="number" min="0" placeholder="無制限" value="${p.stock===''?'':p.stock}"></td><td><label><input data-field="recommended" type="checkbox" ${p.recommended?'checked':''}>⭐</label></td><td><label><input data-field="limited" type="checkbox" ${p.limited?'checked':''}>👑</label></td><td><label><input data-field="soldOut" type="checkbox" ${p.soldOut?'checked':''}>❌</label></td></tr>`).join('');}
   function renderInventory(){data.menu=(data.menu||[]).map(normalizeProduct);const cs=cats();$('adminContent').innerHTML=`<h2>📦 在庫・状態管理</h2><div class="toolbar"><button class="btn green" id="saveInventory">保存</button><button class="btn" id="invOpenAll">全部開く</button><button class="btn" id="invCloseAll">全部閉じる</button><button class="btn" id="clearSoldOut">売切れ解除</button><button class="btn" id="clearStock">在庫を全て無制限</button></div><div class="category-list">${cs.map((c,ci)=>{const items=data.menu.map((p,i)=>({p,i})).filter(x=>x.p.cat===c.id);return `<section class="category-block ${ci===0?'open':''}"><button type="button" class="category-head inv-head"><span>${esc((c.icon?c.icon+' ':'')+c.name)} <b>(${items.length})</b></span><span class="category-toggle">${ci===0?'閉じる':'開く'}</span></button><div class="category-body">${items.length?`<table class="sales-table"><thead><tr><th>商品</th><th>在庫</th><th>⭐</th><th>👑</th><th>❌</th></tr></thead><tbody>${inventoryRowsFor(items)}</tbody></table>`:'<div class="empty">なし</div>'}</div></section>`;}).join('')}</div>`;
@@ -1280,6 +1304,7 @@
       const d=new Date(); const stamp=d.getFullYear()+('0'+(d.getMonth()+1)).slice(-2)+('0'+d.getDate()).slice(-2)+'_'+('0'+d.getHours()).slice(-2)+('0'+d.getMinutes()).slice(-2);
       a.href=url; a.download='otakuba_backup_'+stamp+'.json'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
       setTimeout(()=>URL.revokeObjectURL(url),1000);
+      data.settings.lastBackupAt=new Date().toISOString(); save();
       const m=$('backupMsg'); if(m) m.textContent='✅ バックアップを保存しました（ダウンロード先を確認してください）';
       toast('バックアップを保存しました');
     }catch(e){ const m=$('backupMsg'); if(m) m.textContent='❌ 保存に失敗しました: '+e; }
@@ -1303,6 +1328,70 @@
       ev.target.value='';
     };
     r.readAsText(f);
+  }
+  function sysRow(status,label,detail){
+    const icon=status==='ok'?'🟢':status==='warn'?'🟡':status==='bad'?'🔴':'⚪';
+    return '<div class="admin-card" style="display:flex;align-items:flex-start;gap:10px;margin:8px 0">'+
+      '<div style="font-size:22px;line-height:1">'+icon+'</div>'+
+      '<div style="flex:1"><div style="font-weight:800">'+esc(label)+'</div>'+(detail?('<div class="tiny" style="margin-top:2px">'+detail+'</div>'):'')+'</div>'+
+    '</div>';
+  }
+  async function renderSysCheck(){
+    const s=data.settings||{};
+    const gasSet=!!(s.gasUrl&&s.gasUrl.trim());
+    const box=$('adminContent');
+    box.innerHTML='<h2>🩺 システムチェック</h2>'+
+      '<p class="tiny">お店のシステムがちゃんと動いているか、まとめて確認できます。困ったときはまずここを見てください。</p>'+
+      '<div id="sysRows">'+sysRow('ok','GitHub Pages（このページ自体）','この画面が表示できている時点で正常に公開されています。')+'</div>'+
+      '<div class="toolbar"><button class="btn gold" id="sysRecheck">🔄 再チェック</button></div>';
+    const rows=$('sysRows');
+    function append(html){ rows.innerHTML+=html; }
+    // GAS
+    if(!gasSet){
+      append(sysRow('warn','GAS連携','未設定です。1台だけで使う場合は問題ありませんが、複数端末での同期やDiscord通知を使うには「☁️ 同期」タブでGAS URLを設定してください。'));
+    } else {
+      append(sysRow('','GAS連携','接続確認中…'));
+      try{
+        const res=await fetch(s.gasUrl+(s.gasUrl.includes('?')?'&':'?')+'action=ping&v='+Date.now(),{cache:'no-store'});
+        const j=await res.json();
+        const ok=j&&j.ok;
+        rows.lastElementChild.outerHTML=sysRow(ok?'ok':'bad', 'GAS連携', ok?'正常に接続できています。':'応答はありましたが内容が想定外です。「☁️ 同期」タブのURLを確認してください。');
+      }catch(e){
+        rows.lastElementChild.outerHTML=sysRow('bad','GAS連携','接続できませんでした。URLが正しいか、GASのデプロイが「全員がアクセス可」になっているか確認してください。');
+      }
+    }
+    // Discord
+    if(!gasSet){
+      append(sysRow('warn','Discord通知','GAS連携が未設定のため通知は送信されません。'));
+    } else if((s.notifyOn===false)){
+      append(sysRow('warn','Discord通知','「⚙️ 設定」タブで通知がOFFになっています。'));
+    } else if(s.discordWebhookUrl&&s.discordWebhookUrl.trim()){
+      append(sysRow('ok','Discord通知','この店専用のWebhook URLが設定されています。下のボタンでテスト送信できます。'));
+    } else {
+      append(sysRow('','Discord通知','この店専用のURLは未設定です（GAS側の既定の通知先が使われます）。下のボタンでテスト送信できます。'));
+    }
+    // 営業状態
+    const bizOpen=!!(s.business&&s.business.open);
+    append(sysRow(bizOpen?'ok':'warn','営業状態',bizOpen?'現在「営業中」です。お客様は注文できます。':'現在「準備中」です。お客様の画面には準備中の案内が表示され、新規注文はできません。'));
+    // バックアップ
+    if(!s.lastBackupAt){
+      append(sysRow('warn','バックアップ','まだ一度もバックアップを取っていません。「🧹 reset」タブから保存できます。'));
+    } else {
+      const days=Math.floor((Date.now()-new Date(s.lastBackupAt).getTime())/86400000);
+      const st=days>=14?'bad':days>=7?'warn':'ok';
+      append(sysRow(st,'バックアップ','最終バックアップ：'+new Date(s.lastBackupAt).toLocaleString('ja-JP')+'（'+days+'日前）'+(st!=='ok'?'　そろそろ新しいバックアップを取ることをおすすめします。':'')));
+    }
+    box.insertAdjacentHTML('beforeend','<div class="toolbar"><button class="btn" id="sysDiscordTest">🔔 Discordへテスト通知を送る</button></div><div id="sysDiscordMsg" class="tiny"></div>');
+    $('sysRecheck').onclick=renderSysCheck;
+    $('sysDiscordTest').onclick=async function(){
+      const m=$('sysDiscordMsg'); m.textContent='送信中…';
+      try{
+        if(window.GuildNotify&&GuildNotify.send){
+          await GuildNotify.send({action:'test', message:'🩺 システムチェックからのテスト通知です', time:new Date().toLocaleString('ja-JP')});
+          m.textContent='送信しました。Discordの通知チャンネルを確認してください（GAS側が未対応のactionの場合、届かないことがあります）。';
+        } else { m.textContent='通知機能が読み込まれていません。'; }
+      }catch(e){ m.textContent='送信に失敗しました：'+e; }
+    };
   }
   function renderGuide(){
     const sec=(title,body)=>`<details class="guide-section"><summary>${title}</summary><div class="guide-body">${body}</div></details>`;
@@ -1330,14 +1419,22 @@
       sec('🍴 メニュータブ（商品登録）',
         '<p>ビール・サワー／焼酎・カクテル／ショット・ボトル／ソフトドリンク／フードなどのカテゴリごとに商品を登録・編集・削除できます。商品名・価格・ダメージ量（1杯で敵にどれだけダメージが入るか）を設定してください。</p>'
       )+
-      sec('🟢 営業タブ',
-        '<p>「営業開始」を押すと当日の記録が始まり、「営業終了・日報作成」を押すとその日の売上サマリー（日報）が自動作成されます。過去の日報も一覧で確認できます。</p>'
+      sec('🟢 営業タブ（営業中/準備中の切り替え）',
+        '<p>「営業開始」を押すと注文受付が始まり、お客様のQR画面も通常のタイトル画面に切り替わります。全ての敵のHPもこのタイミングで全回復し、新しい1日として始まります。</p>'+
+        '<p>「営業終了」を押すと、売上・注文数を確認するダイアログが出ます。確定すると当日の日報が保存され、それ以降お客様のQR画面は「本日は準備中です」の案内表示になり、新規注文はできなくなります（すでに会計待ちのお客様は会計だけ可能です）。</p>'+
+        '<div class="guide-note">管理画面の右上には常に🟢営業中／🔴準備中のバッジが表示されるので、今の状態が一目で分かります。</div>'
       )+
       sec('💰 会計・売上タブ',
         '<p>お客様ごとの会計内容や、期間ごとの売上集計を確認できます。</p>'
       )+
       sec('🔳 QRタブ',
         '<p>お客様がスマホから注文画面を開くためのQRコードを発行できます。テーブルに設置する用途を想定しています。</p>'
+      )+
+      sec('🩺 システムチェックタブ',
+        '<p>GAS連携・Discord通知・営業状態・バックアップの状態をまとめて確認できます。🟢は正常、🟡は注意、🔴は要対応です。トラブルが起きた時はまずここを開いてください。Discordのテスト通知もここから送れます。</p>'
+      )+
+      sec('🏪 店舗ロゴについて',
+        '<p>「🎭 テーマ編集 → 🏪 店舗情報」で店舗ロゴ画像のURLを登録すると、お客様のタイトル画面と「店舗情報」ボタンの両方にロゴが表示されます。未設定の場合は何も表示されません。</p>'
       )+
       sec('👤 顧客タブ',
         '<p>来店したお客様の一覧・レベル・来店回数を確認できます。名前で検索も可能です。</p>'
@@ -1439,6 +1536,6 @@
       </div>`;
     document.querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>goto(b.dataset.goto,b.dataset.sub));
   }
-  function render(){if(current==='dash')renderDash(); if(current==='guide')renderGuide(); if(current==='business')renderBusiness(); if(current==='menu')renderMenu(); if(current==='inventory')renderInventory(); if(current==='settings')renderSettings(); if(current==='themeEditor')renderThemeEditor(); if(current==='qr')renderQR(); if(current==='customers')renderCustomers(); if(current==='sales')renderSales(); if(current==='sync')renderSync(); if(current==='reset')renderReset();}
+  function render(){if(current==='dash')renderDash(); if(current==='guide')renderGuide(); if(current==='syscheck')renderSysCheck(); if(current==='business')renderBusiness(); if(current==='menu')renderMenu(); if(current==='inventory')renderInventory(); if(current==='settings')renderSettings(); if(current==='themeEditor')renderThemeEditor(); if(current==='qr')renderQR(); if(current==='customers')renderCustomers(); if(current==='sales')renderSales(); if(current==='sync')renderSync(); if(current==='reset')renderReset();}
   loginOk()?showApp():showLogin();
 })();

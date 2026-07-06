@@ -13,6 +13,7 @@ input,textarea,select{color:var(--white);background:rgba(0,0,0,.62);border:2px s
 .panel{background:linear-gradient(180deg,rgba(7,12,20,.66),rgba(0,3,8,.78));backdrop-filter:blur(2.5px);-webkit-backdrop-filter:blur(2.5px);border:3px solid rgba(255,246,223,.88);border-radius:12px;box-shadow:var(--shadow);padding:12px;position:relative}
 .window{width:100%;max-width:430px}
 .title-logo{font-size:30px;letter-spacing:1px;color:var(--gold);text-shadow:3px 3px 0 #000,0 0 18px rgba(246,200,79,.7);line-height:1.45;font-weight:900;font-family:var(--font-brand,var(--font-base,inherit))}
+.store-logo{display:block;max-width:120px;max-height:120px;margin:0 auto 12px;border-radius:14px;object-fit:contain}
 .title-logo.small{font-size:24px}
 .subtitle{margin-top:20px;font-size:18px;text-shadow:2px 2px 0 #000}
 .row{display:flex;gap:10px}.row>*{flex:1}
