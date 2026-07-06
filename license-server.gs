@@ -158,6 +158,18 @@ function handleRegisterStore_(body){
  */
 const WEBHOOK_SHARED_SECRET = 'ここに自分だけの合言葉を決めて入れる（他人に教えない）';
 
+/**
+ * ここから下は「使い方ガイド」に表示される、お問い合わせ先とよくある質問です。
+ * ここを書き換えて再デプロイするだけで、既に配布済みの全店舗の管理画面に
+ * 反映されます（店舗側は何もアップロードし直す必要がありません）。
+ */
+const SUPPORT_DISCORD_URL = 'https://discord.gg/ここに颯さんのDiscord招待リンク';
+const FAQ_ITEMS = [
+  { q: 'お客様の画面と管理画面は同じURLですか？', a: 'いいえ。お客様は index.html（トップ画面）、店舗側は admin.html（管理画面）を使います。' },
+  { q: '画像やBGMを変えても反映されません', a: 'ブラウザのキャッシュが原因のことがあります。ページを再読み込みしてみてください。' },
+  { q: '複数端末で内容がズレます', a: '「☁️ 同期」タブでGAS URLを設定し、こまめに送信/取得を行ってください。' },
+];
+
 // 改ざん警告が出た店舗が「解除コード」を入力してきた時に照合する値。
 // 颯さんが決めた1つの文字列。定期的に変えたい場合はここを書き換えてデプロイし直すだけでOK。
 const TAMPER_UNLOCK_CODE = 'ここに颯さんが決めた解除コードを入れる';
@@ -257,6 +269,9 @@ function doGet(e){
     if(status==='grace'){ fields.graceStartAt = new Date().toISOString(); }
     upsertStore_(fields);
     return HtmlService.createHtmlOutput('<p>更新しました。</p><a href="?action=dashboard&key='+encodeURIComponent(DASHBOARD_KEY)+'">一覧に戻る</a>');
+  }
+  if(action === 'guideContent'){
+    return ContentService.createTextOutput(JSON.stringify({ok:true, supportDiscordUrl:SUPPORT_DISCORD_URL, faq:FAQ_ITEMS})).setMimeType(ContentService.MimeType.JSON);
   }
   let result = {ok:false, error:'unknown action'};
   if(action === 'licenseCheck'){

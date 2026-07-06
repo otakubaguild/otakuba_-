@@ -1473,13 +1473,44 @@
       sec('🧹 resetタブ（取り扱い注意）',
         '<div class="guide-note">⚠️ ここでのリセット操作は元に戻せません。テスト運用のデータを消して本番運用を始めたいときなど、内容をよく確認してから使ってください。</div>'
       )+
-      sec('よくある質問',
+      sec('⚠️ 著作権について（画像・BGMを差し替える前に）',
+        '<div class="guide-note">背景・キャラクター画像・BGMは自由に差し替えできますが、差し替える素材の権利関係はご自身でご確認ください。</div>'+
         '<ul>'+
+        '<li>アニメ・ゲーム・漫画などの<b>公式の画像やキャラクターをそのまま使用する</b>ことは著作権侵害にあたる可能性があります。SNS投稿などで公開する場合は特に注意してください。</li>'+
+        '<li><b>フリー音源・フリー画像素材を使う場合も、それぞれのサイトの利用規約を必ず確認してください。</b>「商用利用可」でも「クレジット表記が必須」「加工禁止」「一定数以上の同時使用禁止」など、サイトごとにルールが異なります。</li>'+
+        '<li>例：本テンプレートに標準搭載しているBGM・SEは「魔王魂」様の素材で、規約上クレジット表記（作曲者名の記載）で利用可能です。ただし<b>差し替え用に別サイトの音源を使う場合、そのサイトのルールは魔王魂とは別物</b>です。無料だからといって同じ条件とは限りません。</li>'+
+        '<li>心配な場合は、その素材サイトの「利用規約」「よくある質問」ページを一度読んでからのご利用をおすすめします。</li>'+
+        '</ul>'
+      )+
+      sec('よくある質問',
+        '<div id="guideFaqBody"><ul>'+
         '<li><b>Q. お客様の画面と管理画面は同じURLですか？</b><br>A. いいえ。お客様は index.html（トップ画面）、店舗側は admin.html（管理画面）を使います。</li>'+
         '<li><b>Q. 画像やBGMを変えても反映されません</b><br>A. ブラウザのキャッシュが原因のことがあります。ページを再読み込みしてみてください。</li>'+
         '<li><b>Q. 複数端末で内容がズレます</b><br>A. 「☁️ 同期」タブでGAS URLを設定し、こまめに送信/取得を行ってください。</li>'+
-        '</ul>'
+        '</ul></div>'
+      )+
+      sec('📩 お問い合わせ',
+        '<div id="guideSupportBody"><p class="tiny">ガイドを見ても解決しない場合は、販売元にお問い合わせください。</p></div>'
       );
+    // ここから先は中央サーバーから最新のFAQ/お問い合わせ先を取得し、上の内容を上書きする。
+    // 取得できない場合（未設定・オフライン等）は、上で表示した内容のまま変わらない。
+    if(window.GuildLicense && GuildLicense.serverUrl){
+      fetch(GuildLicense.serverUrl+(GuildLicense.serverUrl.includes('?')?'&':'?')+'action=guideContent&v='+Date.now(),{cache:'no-store'})
+        .then(r=>r.json())
+        .then(j=>{
+          if(!j || !j.ok) return;
+          if(Array.isArray(j.faq) && j.faq.length && $('guideFaqBody')){
+            $('guideFaqBody').innerHTML='<ul>'+j.faq.map(function(item){
+              return '<li><b>Q. '+esc(item.q||'')+'</b><br>A. '+esc(item.a||'')+'</li>';
+            }).join('')+'</ul>';
+          }
+          if(j.supportDiscordUrl && $('guideSupportBody')){
+            $('guideSupportBody').innerHTML='<p class="tiny">ガイドを見ても解決しない場合は、こちらのDiscordからお問い合わせください。</p>'+
+              '<div class="toolbar"><a class="btn gold" href="'+esc(j.supportDiscordUrl)+'" target="_blank" rel="noopener">💬 サポートDiscordを開く</a></div>';
+          }
+        })
+        .catch(function(){ /* 取得失敗時は元の表示のまま。何もしない */ });
+    }
   }
   function renderReset(){
     const ss=salesSettings();
