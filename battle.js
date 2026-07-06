@@ -37,7 +37,7 @@ window.GuildBattle = (() => {
     $('enemyHpFill').style.width = `${Math.max(0,Math.min(100,(Number(e.hp||0)/Number(e.maxHp||1))*100))}%`;
     GuildUI.applyBg(e.bg);
     const sprite=$('enemySprite'); sprite.classList.remove('hit','defeated'); sprite.dataset.enemyId = e.id || '';
-    const sc=(Number(e.scale)||100)/100, ox=Number(e.offsetX)||0, oy=Number(e.offsetY)||0;
+    const sc=(Number(e.scale)||80)/100, ox=Number(e.offsetX)||0, oy=Number(e.offsetY)||0;
     sprite.style.setProperty('--enemy-scale', sc); sprite.style.setProperty('--enemy-ox', ox+'%'); sprite.style.setProperty('--enemy-oy', oy+'%');
     sprite.innerHTML = e.image ? `<img src="${esc(GuildUtils.driveImg(e.image))}" alt="${esc(e.name)}" onload="this.parentNode && this.parentNode.classList.add('loaded')" onerror="this.replaceWith(document.createTextNode('👾'))">` : '👾';
     if((e.id||e.name)!==lastShownEnemyId){ lastShownEnemyId=e.id||e.name; const t=pickText(e,'appear'); if(t) showSpeech(t); }

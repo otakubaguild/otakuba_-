@@ -430,7 +430,8 @@
     '<label>背景<select data-field="bg">'+optList(themeScopedBgList().concat(themeScopedBgList().includes(m.bg)||!m.bg?[]:[m.bg]),m.bg)+'</select></label>'+
     '<label>敵画像（一覧から選択）<select data-field="image">'+optList(themeScopedImgList().concat(themeScopedImgList().includes(m.image)||!m.image||/^https?:/i.test(m.image)?[]:[m.image]),m.image)+'</select></label>'+
     '<label>敵画像 URL（アップした画像を使う場合はここに貼る）<input data-field="imageUrl" value="'+esc(/^https?:/i.test(m.image)?m.image:'')+'" placeholder="https://drive.google.com/..."></label>'+
-    '<div class="enemy-preview" data-preview="'+i+'" style="position:relative;width:100%;height:180px;border:2px solid rgba(255,246,223,.5);border-radius:12px;overflow:hidden;margin:8px 0;background:#000 center/cover no-repeat;background-image:url('+esc(GuildUtils.driveImg(m.bg))+')"><img data-preview-img src="'+esc(GuildUtils.driveImg(m.image))+'" style="position:absolute;left:50%;top:50%;max-width:60%;max-height:80%;object-fit:contain;transform:translate(calc(-50% + '+(Number(m.offsetX)||0)+'%),calc(-50% + '+(Number(m.offsetY)||0)+'%)) scale('+((Number(m.scale)||100)/100)+')" onerror="this.style.display=\'none\'"></div>'+
+    '<div class="enemy-preview" data-preview="'+i+'" style="position:relative;width:min(72vw,230px);height:min(40dvh,230px);margin:8px auto;border:2px solid rgba(255,246,223,.5);border-radius:12px;overflow:hidden;background:#000 center/cover no-repeat;background-image:url('+esc(GuildUtils.driveImg(m.bg))+')"><img data-preview-img src="'+esc(GuildUtils.driveImg(m.image))+'" style="position:absolute;left:50%;top:50%;max-width:100%;max-height:100%;object-fit:contain;transform:translate(calc(-50% + '+(Number(m.offsetX)||0)+'%),calc(-50% + '+(Number(m.offsetY)||0)+'%)) scale('+((Number(m.scale)||100)/100)+')" onerror="this.style.display=\'none\'"></div>'+
+    '<p class="tiny" style="margin-top:-4px">※実際のお客様画面と同じ縦横比のプレビューです（画面サイズにより多少前後します）</p>'+
     '<label>大きさ <span data-scale-val>'+(Number(m.scale)||100)+'</span>%<input data-field="scale" type="range" min="30" max="250" value="'+(Number(m.scale)||100)+'"></label>'+
     '<label>左右 <span data-ox-val>'+(Number(m.offsetX)||0)+'</span>%<input data-field="offsetX" type="range" min="-60" max="60" value="'+(Number(m.offsetX)||0)+'"></label>'+
     '<label>上下 <span data-oy-val>'+(Number(m.offsetY)||0)+'</span>%<input data-field="offsetY" type="range" min="-60" max="60" value="'+(Number(m.offsetY)||0)+'"></label>'+
@@ -1070,8 +1071,8 @@
       '<div id="infoLogoPreview" style="margin:6px 0 12px">'+(i.logo?('<img src="'+esc(GuildUtils.driveImg(i.logo))+'" alt="ロゴ" style="max-width:120px;max-height:120px;border-radius:10px;border:1px solid rgba(246,200,79,.4)" onerror="this.style.display=\'none\'">'):'<span class="tiny">未設定（タイトル画面・店舗情報にはロゴなしで表示されます）</span>')+'</div>'+
       '<label>紹介文<textarea id="infoDesc" placeholder="例：ゲームを遊びながら注文できるバーです">'+esc(i.description||'')+'</textarea></label>'+
       '<label>営業時間<textarea id="infoHours" placeholder="例：20:00〜LAST / 定休日：月曜">'+esc(i.hours||'')+'</textarea></label>'+
-      '<label>住所<textarea id="infoAddress" placeholder="例：青森県むつ市...">'+esc(i.address||'')+'</textarea></label>'+
-      '<label>電話番号<input id="infoPhone" value="'+esc(i.phone||'')+'" placeholder="例：0175-..."></label>'+
+      '<label>住所<textarea id="infoAddress" placeholder="例：〇〇県〇〇市〇〇1-2-3 △△ビル2F">'+esc(i.address||'')+'</textarea></label>'+
+      '<label>電話番号<input id="infoPhone" value="'+esc(i.phone||'')+'" placeholder="例：00-0000-0000"></label>'+
       '<label>Instagram URL<input id="infoInstagram" value="'+esc(i.instagram||'')+'" placeholder="https://instagram.com/..."></label>'+
       '<label>X URL<input id="infoX" value="'+esc(i.x||'')+'" placeholder="https://x.com/..."></label>'+
       '<label>YouTube URL<input id="infoYoutube" value="'+esc(i.youtube||'')+'" placeholder="https://youtube.com/@..."></label>'+

@@ -230,7 +230,7 @@ window.GuildApp = {VERSION:'4.0'};
       if(Array.isArray(p.enemies)){
         data.monsters=p.enemies.map(function(e,idx){ return {
           id:GuildUtils.uid('enemy'), name:e.name, stage:e.stage, maxHp:e.maxHp, hp:e.maxHp,
-          bg:e.bg, background:e.bg, image:e.image, bgm:e.bgm, scale:e.scale||100, offsetX:e.offsetX||0, offsetY:e.offsetY||0, sort:idx
+          bg:e.bg, background:e.bg, image:e.image, bgm:e.bgm, scale:e.scale||80, offsetX:e.offsetX||0, offsetY:e.offsetY||0, sort:idx
         }; });
         data.currentEnemyIndex=0;
       }
