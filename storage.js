@@ -19,11 +19,14 @@ window.GuildStorage = (() => {
   function fixAssetPath(v){ return (v && RPG_BARE_FILES.indexOf(v)!==-1) ? ('presets/rpg/'+v) : v; }
   function normalizeMonster(m, i){
     m = m || {}; const hpMax = Number(m.maxHp || m.hp || 500) || 500;
+    const texts = (m.texts && typeof m.texts === 'object') ? m.texts : {};
+    ['appear','damage','defeat'].forEach(function(c){ if(!Array.isArray(texts[c])) texts[c] = []; });
     return {id:m.id || GuildUtils.uid('enemy'), name:m.name || `敵${i+1}`, stage:m.stage || '草原',
       hp:Number.isFinite(Number(m.hp)) ? Math.max(0,Number(m.hp)) : hpMax, maxHp:hpMax,
       bg:fixAssetPath(m.bg || m.background) || 'presets/rpg/grass.png', background:fixAssetPath(m.bg || m.background) || 'presets/rpg/grass.png',
       image:fixAssetPath(m.image) || 'presets/rpg/slime.png', bgm:m.bgm || 'slime', sort:Number(m.sort || i),
-      scale:Number.isFinite(Number(m.scale))?Number(m.scale):100, offsetX:Number.isFinite(Number(m.offsetX))?Number(m.offsetX):0, offsetY:Number.isFinite(Number(m.offsetY))?Number(m.offsetY):0};
+      scale:Number.isFinite(Number(m.scale))?Number(m.scale):100, offsetX:Number.isFinite(Number(m.offsetX))?Number(m.offsetX):0, offsetY:Number.isFinite(Number(m.offsetY))?Number(m.offsetY):0,
+      texts:texts};
   }
 
   function normalizeMenu(p,i){
