@@ -124,6 +124,12 @@ window.GuildApp = {VERSION:'4.0'};
       vs.innerHTML=(c.victorySubtitle||'').replace(/\n/g,'<br>');
       vs.style.display=c.victorySubtitle?'block':'none';
     }
+    const vw=$('victoryClearTextWrap');
+    if(vw){
+      const pos=(c.victoryTextPosition==='top'||c.victoryTextPosition==='bottom')?c.victoryTextPosition:'middle';
+      vw.classList.remove('pos-top','pos-middle','pos-bottom');
+      vw.classList.add('pos-'+pos);
+    }
   }
 
   function showMasterMessage(text){

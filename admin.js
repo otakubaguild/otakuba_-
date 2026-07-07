@@ -592,6 +592,7 @@
       victoryImage: asset('victoryImage', asset('clearImage', '')),
       victoryTitle: val(messages.victoryTitle, messages.clearTitle, ''),
       victorySubtitle: val(messages.victorySubtitle, messages.peace, ''),
+      victoryTextPosition: val(messages.victoryTextPosition, 'middle'),
       victoryBgm: val(assets.victoryBgm, assets.clearBgm, 'ending'),
 
       masterName: val(brand.masterName, 'ギルドマスター'),
@@ -615,7 +616,7 @@
     const s=data.settings;
     s.themeCustom=Object.assign({
       startTitle:'', startSubtitle:'', startBg:'', startBgm:'title',
-      victoryBg:'', victoryImage:'victory_clear.PNG', victoryTitle:'', victorySubtitle:'', victoryBgm:'ending',
+      victoryBg:'', victoryImage:'victory_clear.PNG', victoryTitle:'', victorySubtitle:'', victoryTextPosition:'middle', victoryBgm:'ending',
       masterName:'ギルドマスター', masterImage:'master_no.jpeg', masterMessage:'冷やかしか？さっさとメニューを開け'
     },s.themeCustom||{});
     return s.themeCustom;
@@ -885,6 +886,11 @@
       '<div class="admin-card"><div class="admin-card-title">🏆 討伐完了画面</div>'+
       '<label>追加タイトル<input id="tcVictoryTitle" value="'+esc(c.victoryTitle||'')+'" placeholder="例：MISSION COMPLETE"></label>'+
       '<label>追加メッセージ<textarea id="tcVictorySubtitle" placeholder="例：ご来店ありがとうございました">'+esc(c.victorySubtitle||'')+'</textarea></label>'+
+      '<label>メッセージの表示位置<select id="tcVictoryTextPos">'+
+        '<option value="top"'+(c.victoryTextPosition==='top'?' selected':'')+'>上</option>'+
+        '<option value="middle"'+(c.victoryTextPosition!=='top'&&c.victoryTextPosition!=='bottom'?' selected':'')+'>中央</option>'+
+        '<option value="bottom"'+(c.victoryTextPosition==='bottom'?' selected':'')+'>下（戻るボタンのすぐ上）</option>'+
+      '</select></label>'+
       '</div>'+
       '<div class="admin-card"><div class="admin-card-title">🌀 覚醒演出（ラスボス直前）</div>'+
       '<p class="tiny">敵が2体以上いる場合、ラスボスの1つ前を倒すと画面が揺れてセリフが出る演出です。テーマによって合わない場合はオフにできます（呼び名の「覚醒演出のセリフ」で文言も変更可）。</p>'+
@@ -910,6 +916,7 @@
         startSubtitle:$('tcStartSubtitle').value.trim(),
         victoryTitle:$('tcVictoryTitle').value.trim(),
         victorySubtitle:$('tcVictorySubtitle').value,
+        victoryTextPosition:$('tcVictoryTextPos').value,
         awakenEnabled:$('tcAwakenEnabled').checked,
         masterName:$('tcMasterName').value.trim()||'ギルドマスター',
         masterMessage:$('tcMasterMessage').value.trim()||'冷やかしか？さっさとメニューを開け'
