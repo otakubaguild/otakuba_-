@@ -385,8 +385,17 @@ window.GuildStorage = (() => {
 
   function save(){ set(keys.state,data); schedulePush(); }
   function resetProgress(opts){
-    // 未会計のまま残っている注文があれば、消してしまう前に「自動精算」として売上に記録しておく
+    data.currentEnemyIndex=0;
+    data.monsters.forEach(m=>m.hp=m.maxHp);
+    data.activeBill=[];
+    data.progressResetAt=new Date().toISOString();
+    save();
+    if(opts && opts.sync && typeof pushCloud==='function') pushCloud();
+  }
+  function settleAbandonedBill(){
+    // 未会計の注文があれば、消してしまう前に「自動精算」として売上に記録しておく
     // （会計ボタンを押さずに退店された場合に、売上がまるごと消えてしまう事故を防ぐための保険）
+    // ※営業開始のタイミングでのみ呼ぶ想定（討伐後の通常進行では呼ばない）
     if(Array.isArray(data.activeBill) && data.activeBill.length){
       const total = data.activeBill.reduce((s,i)=>s+(Number(i.subtotal)||0),0);
       if(total>0){
@@ -402,16 +411,11 @@ window.GuildStorage = (() => {
           time: new Date().toISOString(),
           timeText: GuildUtils.todayText(),
           accountingMonth: (data.salesSettings&&data.salesSettings.currentMonth) || new Date().toISOString().slice(0,7),
-          reason: '自動精算（未会計のまま終了）'
+          reason: '自動精算（未会計のまま営業終了）'
         });
+        save();
       }
     }
-    data.currentEnemyIndex=0;
-    data.monsters.forEach(m=>m.hp=m.maxHp);
-    data.activeBill=[];
-    data.progressResetAt=new Date().toISOString();
-    save();
-    if(opts && opts.sync && typeof pushCloud==='function') pushCloud();
   }
   function getData(){ return data; }
   function replace(part, value){ data[part]=value; save(); }
@@ -457,5 +461,5 @@ window.GuildStorage = (() => {
     return data;
   }
 
-return {keys, init, save, getData, replace, resetProgress, pullCloud, pushCloud, markSaleDeleted, markCustomerDeleted, qrUrlForStore, qrUrlForGas, needsInitialSetup, completeInitialSetup};
+return {keys, init, save, getData, replace, resetProgress, settleAbandonedBill, pullCloud, pushCloud, markSaleDeleted, markCustomerDeleted, qrUrlForStore, qrUrlForGas, needsInitialSetup, completeInitialSetup};
 })();
