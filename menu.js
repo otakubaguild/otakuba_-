@@ -2,7 +2,7 @@ window.GuildMenu = (() => {
   const {$, esc, yen} = GuildUtils;
   let data;
   const qtyMap = {};
-  function init(d){ data=d; renderCategoryButtons(); }
+  function init(d){ data=d; renderCategoryButtons(); const lb=$('imageLightbox'); if(lb && !lb.dataset.bound){ lb.dataset.bound='1'; lb.onclick=()=>lb.classList.remove('show'); } }
   function categoryInfo(cat){ return (data.settings.categories||[]).find(c=>c.id===cat) || {id:cat,name:cat,icon:'🍽️'}; }
   function renderCategoryButtons(){
     const box=$('categoryButtons'); box.innerHTML='';
@@ -23,8 +23,10 @@ window.GuildMenu = (() => {
       const badges = `${p.recommended?'<span class="menu-badge">⭐おすすめ</span>':''}${p.limited?'<span class="menu-badge">👑限定</span>':''}${isSoldOut?'<span class="menu-badge sold">❌売切れ</span>':''}${stockNum!==null && !isSoldOut?`<span class="menu-badge">残${stockNum}</span>`:''}`;
       el.className = 'panel product' + (isSoldOut ? ' sold-out' : '');
       const cartMode=(window.GuildOrder&&GuildOrder.isCartMode&&GuildOrder.isCartMode());
-      el.innerHTML=`<div class="product-info"><div class="product-name">${p.image?`<img src="${esc(GuildUtils.driveImg(p.image))}" alt="" class="menu-thumb">`:esc(p.emoji||p.icon||'🍽️')} ${esc(p.name)}</div><div class="menu-badges">${badges}</div><div class="product-desc">${esc(p.desc||'')}</div><div class="product-price">${yen(p.price,data.settings.currency)}</div></div>
+      el.innerHTML=`<div class="product-info"><div class="product-name">${p.image?`<img src="${esc(GuildUtils.driveImg(p.image))}" alt="" class="menu-thumb" data-lightbox-img="${esc(GuildUtils.driveImg(p.image))}">`:esc(p.emoji||p.icon||'🍽️')} ${esc(p.name)}</div><div class="menu-badges">${badges}</div><div class="product-desc">${esc(p.desc||'')}</div><div class="product-price">${yen(p.price,data.settings.currency)}</div></div>
       <div class="product-controls"><div class="qty-row"><button class="btn small" type="button" data-minus ${isSoldOut?'disabled':''}>−</button><span class="qty-num">${qtyMap[id]}</span><button class="btn small" type="button" data-plus ${isSoldOut?'disabled':''}>＋</button></div><button type="button" class="btn gold small" data-order ${isSoldOut?'disabled':''}>${isSoldOut?'売切れ':(cartMode?'🛒 追加':'注文')}</button></div>`;
+      const thumb=el.querySelector('[data-lightbox-img]');
+      if(thumb) thumb.onclick=(e)=>{ e.stopPropagation(); const box=$('imageLightbox'); const img=$('imageLightboxImg'); if(box&&img){ img.src=thumb.getAttribute('data-lightbox-img'); box.classList.add('show'); } };
       const num=el.querySelector('.qty-num');
       el.querySelector('[data-minus]').onclick=()=>{ qtyMap[id]=Math.max(1,(qtyMap[id]||1)-1); num.textContent=qtyMap[id]; };
       el.querySelector('[data-plus]').onclick=()=>{ const max=p.stock===''||typeof p.stock==='undefined'?99:Math.max(1,Number(p.stock)||1); qtyMap[id]=Math.min(max,(qtyMap[id]||1)+1); num.textContent=qtyMap[id]; };

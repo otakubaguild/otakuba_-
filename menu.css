@@ -9,5 +9,8 @@
 .billbox{margin-top:8px;padding:10px;border:1px solid rgba(246,200,79,.45);border-radius:10px;background:rgba(0,0,0,.35)}
 .bill-total{color:var(--green);font-size:18px;font-weight:900;text-align:right;margin-top:10px}
 .empty{padding:20px;text-align:center;opacity:.75;line-height:1.7}
-.menu-thumb{width:48px;height:48px;object-fit:cover;border-radius:8px;vertical-align:middle;margin-right:8px}
+.menu-thumb{width:48px;height:48px;object-fit:cover;border-radius:8px;vertical-align:middle;margin-right:8px;cursor:zoom-in}
+.image-lightbox{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.88);padding:24px}
+.image-lightbox.show{display:flex;animation:fadeIn .15s ease both}
+.image-lightbox img{max-width:100%;max-height:100%;object-fit:contain;border-radius:10px}
 .menu-badges{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.menu-badge{display:inline-block;border:1px solid rgba(246,200,79,.55);border-radius:999px;padding:2px 7px;font-size:11px;background:rgba(0,0,0,.35);color:var(--gold);font-weight:900}.menu-badge.sold{border-color:rgba(255,93,93,.65);color:var(--red)}.product.sold-out{opacity:.58;filter:grayscale(.45)}.product button:disabled{opacity:.5;filter:grayscale(1)}

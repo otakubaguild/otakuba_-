@@ -382,6 +382,27 @@ window.GuildStorage = (() => {
 
   function save(){ set(keys.state,data); schedulePush(); }
   function resetProgress(opts){
+    // 未会計のまま残っている注文があれば、消してしまう前に「自動精算」として売上に記録しておく
+    // （会計ボタンを押さずに退店された場合に、売上がまるごと消えてしまう事故を防ぐための保険）
+    if(Array.isArray(data.activeBill) && data.activeBill.length){
+      const total = data.activeBill.reduce((s,i)=>s+(Number(i.subtotal)||0),0);
+      if(total>0){
+        data.sales = data.sales||[];
+        data.sales.push({
+          id: GuildUtils.uid('sale'),
+          type:'checkout',
+          customer: data.currentCustomer||'未登録（自動精算）',
+          customerId: data.currentCustomerId||'',
+          items: data.activeBill,
+          total,
+          partyCount: data.partyCount||1,
+          time: new Date().toISOString(),
+          timeText: GuildUtils.todayText(),
+          accountingMonth: (data.salesSettings&&data.salesSettings.currentMonth) || new Date().toISOString().slice(0,7),
+          reason: '自動精算（未会計のまま終了）'
+        });
+      }
+    }
     data.currentEnemyIndex=0;
     data.monsters.forEach(m=>m.hp=m.maxHp);
     data.activeBill=[];
