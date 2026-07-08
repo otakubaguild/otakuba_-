@@ -13,6 +13,7 @@ window.GuildApp = {VERSION:'4.0'};
     try{ if(data.settings.themeWords) GuildTheme.saveWordsOverride(data.settings.themeWords); }catch(e){}
     try{ if(data.settings.themeFonts) GuildTheme.saveFontsOverride(data.settings.themeFonts); }catch(e){}
     try{ if(data.settings.themeColors) GuildTheme.saveColorsOverride(data.settings.themeColors); }catch(e){}
+    try{ if(data.settings.uiTheme) GuildTheme.saveUiThemeOverride(data.settings.uiTheme); }catch(e){}
   }
   GuildAudio.init(data.settings); GuildBattle.init(data); GuildMenu.init(data); GuildUI.renderNotice(data.settings);
   GuildApp.onSynced=function(){ try{ GuildMenu.init(data); GuildUI.renderNotice(data.settings); GuildBattle.render(); if(typeof renderParty==='function') renderParty(); }catch(e){} };

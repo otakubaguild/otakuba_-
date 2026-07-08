@@ -196,12 +196,14 @@ window.GuildStorage = (() => {
       notice:{enabled:true,title:'本日のお知らせ',body:'',position:'top'},
       themeCustom:{startTitle:'',startSubtitle:'',startBg:'',startBgm:'title',victoryBg:'',victoryImage:'victory_clear.PNG',victoryTitle:'',victorySubtitle:'',victoryBgm:'ending',masterImage:'master_no.jpeg',masterMessage:'冷やかしか？さっさとメニューを開け',awakenEnabled:true},
       business:{open:false,openedAt:'',closedAt:'',dailyReports:[]},
-      storeInfo:{name:'',address:'',hours:'',phone:'',instagram:'',x:'',website:'',mapUrl:'',description:'',logo:''}
+      storeInfo:{name:'',address:'',hours:'',phone:'',instagram:'',x:'',website:'',mapUrl:'',description:'',logo:''},
+      uiTheme:{borderColor:'gold',borderColorCustom:'',panelBg:'black',panelBgCustom:'',btnStyle:'rpg',btnRadius:9,borderWidth:3,borderRadius:12,btnShadow:true,blur:true}
     }, defaults.settings || {});
     data.settings.notice = Object.assign({enabled:true,title:'本日のお知らせ',body:'',position:'top'}, data.settings.notice || {});
     data.settings.business = Object.assign({open:false,openedAt:'',closedAt:'',dailyReports:[]}, data.settings.business || {});
     data.settings.storeInfo = Object.assign({name:'',address:'',hours:'',phone:'',instagram:'',x:'',website:'',mapUrl:'',description:'',logo:''}, data.settings.storeInfo || {});
     data.settings.themeCustom = Object.assign({startTitle:'',startSubtitle:'',startBg:'',startBgm:'title',victoryBg:'',victoryImage:'victory_clear.PNG',victoryTitle:'',victorySubtitle:'',victoryBgm:'ending',masterImage:'master_no.jpeg',masterMessage:'冷やかしか？さっさとメニューを開け',awakenEnabled:true}, data.settings.themeCustom || {});
+    data.settings.uiTheme = Object.assign({borderColor:'gold',borderColorCustom:'',panelBg:'black',panelBgCustom:'',btnStyle:'rpg',btnRadius:9,borderWidth:3,borderRadius:12,btnShadow:true,blur:true}, data.settings.uiTheme || {});
     if(!Array.isArray(data.settings.business.dailyReports)) data.settings.business.dailyReports=[];
 
     const routeCfg = await resolveStoreRoute_();
@@ -233,6 +235,7 @@ window.GuildStorage = (() => {
     data.activeBill = Array.isArray(data.activeBill)?data.activeBill:[];
     data.settings.business = Object.assign({open:false,openedAt:'',closedAt:'',dailyReports:[]}, data.settings.business || {});
     data.settings.themeCustom = Object.assign({startTitle:'',startSubtitle:'',startBg:'',startBgm:'title',victoryBg:'',victoryImage:'victory_clear.PNG',victoryTitle:'',victorySubtitle:'',victoryBgm:'ending',masterImage:'master_no.jpeg',masterMessage:'冷やかしか？さっさとメニューを開け',awakenEnabled:true}, data.settings.themeCustom || {});
+    data.settings.uiTheme = Object.assign({borderColor:'gold',borderColorCustom:'',panelBg:'black',panelBgCustom:'',btnStyle:'rpg',btnRadius:9,borderWidth:3,borderRadius:12,btnShadow:true,blur:true}, data.settings.uiTheme || {});
     if(!Array.isArray(data.settings.business.dailyReports)) data.settings.business.dailyReports=[];
     data.currentEnemyIndex = GuildUtils.clamp(data.currentEnemyIndex,0,Math.max(0,data.monsters.length-1));
     data.partyCount = Math.max(1, Math.min(20, Number(data.partyCount || 1) || 1));
@@ -306,7 +309,7 @@ window.GuildStorage = (() => {
         // 浅いマージだと themeCustom / notice / audioFiles などのネストしたオブジェクトが
         // 丸ごと置き換わってしまい、片方の端末にしかない項目が消えることがあるため、
         // ネストが深いキーだけは1階層だけ深くマージする
-        const NESTED_KEYS=['themeCustom','notice','audioFiles','storeInfo'];
+        const NESTED_KEYS=['themeCustom','notice','audioFiles','storeInfo','uiTheme'];
         const merged=Object.assign({},data.settings,remote.settings);
         NESTED_KEYS.forEach(function(k){
           if(remote.settings[k] && typeof remote.settings[k]==='object' && !Array.isArray(remote.settings[k])){

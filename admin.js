@@ -14,6 +14,7 @@
     try{ if(data.settings.themeWords) GuildTheme.saveWordsOverride(data.settings.themeWords); }catch(e){}
     try{ if(data.settings.themeFonts) GuildTheme.saveFontsOverride(data.settings.themeFonts); }catch(e){}
     try{ if(data.settings.themeColors) GuildTheme.saveColorsOverride(data.settings.themeColors); }catch(e){}
+    try{ if(data.settings.uiTheme) GuildTheme.saveUiThemeOverride(data.settings.uiTheme); }catch(e){}
   }
   const SESSION='otakuba.v3.final.admin.session';
   // モード（Easy/Normal/Hard）: 各タブがどのモード以上で表示されるかを持つ。上位モードは下位モードのタブも全て含む（累積表示）
@@ -35,7 +36,7 @@
     ['reset','🧹 reset','hard'],
   ];
   // テーマ編集タブ内のサブナビ（Phase4-3: 店舗情報/テキスト/画像/BGM/キャラクター/ステージ/プレビューを1画面にまとめる）
-  const THEME_SUBTABS=[['store','🏪 店舗情報'],['text','✏️ テキスト'],['color','🎨 カラー'],['image','🖼️ 画像'],['bgm','🎵 BGM'],['character','⚔️ キャラクター'],['stage','🗺️ ステージ'],['preview','👁️ プレビュー']];
+  const THEME_SUBTABS=[['store','🏪 店舗情報'],['text','✏️ テキスト'],['color','🎨 カラー'],['ui','🖼️ UIテーマ'],['image','🖼️ 画像'],['bgm','🎵 BGM'],['character','⚔️ キャラクター'],['stage','🗺️ ステージ'],['preview','👁️ プレビュー']];
   let themeSubTab='store';
   const MODE_KEY='otakuba.admin.mode';
   // 既存ユーザーの操作感を壊さないよう、初回デフォルトは「くわしい」＝これまで通り全タブ表示。新規は店側の判断でモード変更可能。
@@ -714,6 +715,7 @@
       themeWords:s.themeWords?JSON.parse(JSON.stringify(s.themeWords)):{},
       themeFonts:s.themeFonts?JSON.parse(JSON.stringify(s.themeFonts)):{},
       themeCustom:s.themeCustom?JSON.parse(JSON.stringify(s.themeCustom)):{},
+      uiTheme:s.uiTheme?JSON.parse(JSON.stringify(s.uiTheme)):{},
       audioFiles:s.audioFiles?JSON.parse(JSON.stringify(s.audioFiles)):{},
       monsters:JSON.parse(JSON.stringify(data.monsters||[])),
       savedAt:new Date().toISOString()
@@ -727,6 +729,7 @@
     if(snap.themeWords){ s.themeWords=snap.themeWords; if(window.GuildTheme) GuildTheme.saveWordsOverride(snap.themeWords); }
     if(snap.themeFonts){ s.themeFonts=snap.themeFonts; if(window.GuildTheme) GuildTheme.saveFontsOverride(snap.themeFonts); }
     if(snap.themeCustom) s.themeCustom=snap.themeCustom;
+    if(snap.uiTheme){ s.uiTheme=snap.uiTheme; if(window.GuildTheme) GuildTheme.saveUiThemeOverride(snap.uiTheme); }
     if(snap.audioFiles) s.audioFiles=snap.audioFiles;
     if(Array.isArray(snap.monsters)) data.monsters=snap.monsters.map(normalizeMonster);
     save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
@@ -784,10 +787,72 @@
       toast('色をリセットしました。ページを再読み込みすると反映されます');
     };
   }
+  const UI_BORDER_COLOR_OPTS=[['gold','金'],['silver','銀'],['blue','青'],['red','赤'],['green','緑'],['custom','カスタムカラー']];
+  const UI_PANEL_BG_OPTS=[['black','黒'],['blackTrans','半透明黒'],['blueTrans','半透明青'],['parchment','羊皮紙'],['wood','木目'],['glass','ガラス風'],['custom','カスタム画像']];
+  const UI_BTN_STYLE_OPTS=[['rpg','RPG'],['sf','SF'],['magic','魔法学校'],['wa','和風']];
+  function renderThemeUi(){
+    const ui=Object.assign({borderColor:'gold',borderColorCustom:'',panelBg:'black',panelBgCustom:'',btnStyle:'rpg',btnRadius:9,borderWidth:3,borderRadius:12,btnShadow:true,blur:true}, data.settings.uiTheme||{});
+    $('themeSubContent').innerHTML=
+      '<div class="admin-card"><div class="admin-card-title">🖼️ UIテーマエディター</div>'+
+      '<p class="tiny">枠・パネル背景・ボタンの見た目をまとめて変えられます。色そのものを変える「🎨 カラー」タブとは別に、質感・形の部分を調整します。</p>'+
+
+      '<label>枠線の色<select id="uiBorderColor">'+UI_BORDER_COLOR_OPTS.map(([k,l])=>'<option value="'+k+'" '+(ui.borderColor===k?'selected':'')+'>'+l+'</option>').join('')+'</select></label>'+
+      '<label id="uiBorderColorCustomWrap" style="'+(ui.borderColor==='custom'?'':'display:none')+'">カスタム枠色<input type="color" id="uiBorderColorCustom" value="'+esc(ui.borderColorCustom||'#f6c84f')+'" style="height:44px;padding:2px"></label>'+
+
+      '<label>枠内背景<select id="uiPanelBg">'+UI_PANEL_BG_OPTS.map(([k,l])=>'<option value="'+k+'" '+(ui.panelBg===k?'selected':'')+'>'+l+'</option>').join('')+'</select></label>'+
+      '<label id="uiPanelBgCustomWrap" style="'+(ui.panelBg==='custom'?'':'display:none')+'">カスタム背景画像URL<input id="uiPanelBgCustom" value="'+esc(ui.panelBgCustom||'')+'" placeholder="https://... または画像ファイル名"></label>'+
+
+      '<label>ボタンスタイル<select id="uiBtnStyle">'+UI_BTN_STYLE_OPTS.map(([k,l])=>'<option value="'+k+'" '+(ui.btnStyle===k?'selected':'')+'>'+l+'</option>').join('')+'</select></label>'+
+
+      '<label>ボタン角丸（<span id="uiBtnRadiusVal">'+esc(String(ui.btnRadius))+'</span>px）<input type="range" id="uiBtnRadius" min="0" max="30" value="'+esc(String(ui.btnRadius))+'"></label>'+
+      '<label class="check-row"><input type="checkbox" id="uiBtnShadow" '+(ui.btnShadow?'checked':'')+'> ボタンに影を付ける</label>'+
+
+      '<label>枠の太さ（<span id="uiBorderWidthVal">'+esc(String(ui.borderWidth))+'</span>px）<input type="range" id="uiBorderWidth" min="1" max="6" value="'+esc(String(ui.borderWidth))+'"></label>'+
+      '<label>枠の角丸（<span id="uiBorderRadiusVal">'+esc(String(ui.borderRadius))+'</span>px）<input type="range" id="uiBorderRadius" min="0" max="30" value="'+esc(String(ui.borderRadius))+'"></label>'+
+      '<label class="check-row"><input type="checkbox" id="uiBlur" '+(ui.blur?'checked':'')+'> 背景ぼかし（半透明＋blur、高級感が出ます）</label>'+
+
+      '<div class="toolbar"><button class="btn gold" id="saveUiTheme">UIテーマを保存</button><button class="btn" id="resetUiTheme">既定に戻す</button></div>'+
+      '</div>';
+
+    $('uiBorderColor').onchange=function(){ $('uiBorderColorCustomWrap').style.display=this.value==='custom'?'':'none'; };
+    $('uiPanelBg').onchange=function(){ $('uiPanelBgCustomWrap').style.display=this.value==='custom'?'':'none'; };
+    $('uiBtnRadius').oninput=function(){ $('uiBtnRadiusVal').textContent=this.value; };
+    $('uiBorderWidth').oninput=function(){ $('uiBorderWidthVal').textContent=this.value; };
+    $('uiBorderRadius').oninput=function(){ $('uiBorderRadiusVal').textContent=this.value; };
+
+    $('saveUiTheme').onclick=function(){
+      const partial={
+        borderColor:$('uiBorderColor').value,
+        borderColorCustom:$('uiBorderColorCustom')?$('uiBorderColorCustom').value:'',
+        panelBg:$('uiPanelBg').value,
+        panelBgCustom:$('uiPanelBgCustom')?$('uiPanelBgCustom').value.trim():'',
+        btnStyle:$('uiBtnStyle').value,
+        btnRadius:Number($('uiBtnRadius').value)||0,
+        btnShadow:$('uiBtnShadow').checked,
+        borderWidth:Number($('uiBorderWidth').value)||3,
+        borderRadius:Number($('uiBorderRadius').value)||0,
+        blur:$('uiBlur').checked
+      };
+      if(window.GuildTheme) GuildTheme.saveUiThemeOverride(partial);
+      data.settings.uiTheme=Object.assign({}, data.settings.uiTheme||{}, partial);
+      save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
+      toast('UIテーマを保存しました（全端末に反映されます）');
+      renderThemeUi();
+    };
+    $('resetUiTheme').onclick=function(){
+      if(!confirm('UIテーマを既定（RPG標準の見た目）に戻しますか？'))return;
+      delete data.settings.uiTheme;
+      if(window.GuildTheme) GuildTheme.clearUiOverride();
+      save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
+      toast('UIテーマを既定に戻しました');
+      renderThemeUi();
+    };
+  }
   function renderThemeSub(){
     if(themeSubTab==='store') renderStoreInfoAdmin('themeSubContent');
     if(themeSubTab==='text') renderThemeText();
     if(themeSubTab==='color') renderThemeColors();
+    if(themeSubTab==='ui') renderThemeUi();
     if(themeSubTab==='image') renderThemeImage();
     if(themeSubTab==='bgm') renderThemeBgm();
     if(themeSubTab==='character') renderMonsters('themeSubContent');

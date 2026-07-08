@@ -11,6 +11,25 @@ window.GuildTheme = (() => {
   };
   let theme = JSON.parse(JSON.stringify(FALLBACK));
 
+  // ===== UIテーマ（Phase5：枠・パネル背景・ボタンスタイル・角丸・影・ぼかし）=====
+  const UI_FALLBACK = {
+    borderColor:'gold', borderColorCustom:'',
+    panelBg:'black', panelBgCustom:'',
+    btnStyle:'rpg',
+    btnRadius:9, borderWidth:3, borderRadius:12,
+    btnShadow:true, blur:true
+  };
+  let uiTheme = Object.assign({}, UI_FALLBACK);
+  const BORDER_COLORS = { gold:'#f6c84f', silver:'#c9d3dc', blue:'#6cc7ff', red:'#ff6767', green:'#7bd88f' };
+  const PANEL_BGS = {
+    black:'linear-gradient(180deg,rgba(7,12,20,.66),rgba(0,3,8,.78))',
+    blackTrans:'linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,.55))',
+    blueTrans:'linear-gradient(180deg,rgba(4,16,32,.52),rgba(0,8,20,.62))',
+    parchment:'linear-gradient(180deg,rgba(70,52,28,.55),rgba(40,28,14,.68))',
+    wood:'linear-gradient(180deg,rgba(46,30,16,.6),rgba(24,14,6,.72))',
+    glass:'linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.03))'
+  };
+
   async function init(){
     try{
       const res = await fetch('theme.json?v=' + Date.now(), {cache:'no-store'});
@@ -28,9 +47,11 @@ window.GuildTheme = (() => {
     }catch(e){ /* 失敗してもフォールバックで動く */ }
     // プリセットで選んで保存したテーマがあれば、それを最優先で使う
     loadOverride();
+    loadUiOverride();
     applyColors();
     applyFonts();
     applyDomText();
+    applyUiTheme(uiTheme);
     return theme;
   }
 
@@ -45,6 +66,38 @@ window.GuildTheme = (() => {
       if(c.bgDark) r.setProperty('--bg-dark', c.bgDark);
     }catch(e){}
   }
+
+  // ===== UIテーマの適用 =====
+  function applyUiTheme(partial){
+    uiTheme = Object.assign({}, UI_FALLBACK, uiTheme, partial||{});
+    try{
+      const r = document.documentElement.style;
+      const bc = uiTheme.borderColor==='custom' ? (uiTheme.borderColorCustom||BORDER_COLORS.gold) : (BORDER_COLORS[uiTheme.borderColor]||BORDER_COLORS.gold);
+      r.setProperty('--panel-border-color', bc);
+      const bg = (uiTheme.panelBg==='custom' && uiTheme.panelBgCustom)
+        ? `linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.55)), url("${uiTheme.panelBgCustom}") center/cover`
+        : (PANEL_BGS[uiTheme.panelBg]||PANEL_BGS.black);
+      r.setProperty('--panel-bg', bg);
+      r.setProperty('--panel-blur', uiTheme.blur ? '8px' : '0px');
+      r.setProperty('--btn-radius', (Number(uiTheme.btnRadius)||0)+'px');
+      r.setProperty('--panel-radius', (Number(uiTheme.borderRadius)||0)+'px');
+      r.setProperty('--panel-border-width', (Number(uiTheme.borderWidth)||0)+'px');
+      r.setProperty('--btn-border-width', Math.max(2,Math.min(4,Number(uiTheme.borderWidth)||3))+'px');
+      r.setProperty('--btn-shadow', uiTheme.btnShadow ? 'inset 0 -4px 0 rgba(255,255,255,.08), 0 4px 0 rgba(0,0,0,.45)' : 'none');
+      document.body.dataset.btnStyle = uiTheme.btnStyle || 'rpg';
+    }catch(e){}
+  }
+  function saveUiThemeOverride(partial){
+    uiTheme = Object.assign({}, UI_FALLBACK, uiTheme, partial||{});
+    applyUiTheme(uiTheme);
+    try{ localStorage.setItem('otakuba.uitheme.override', JSON.stringify(uiTheme)); }catch(e){}
+  }
+  function loadUiOverride(){
+    try{ const s=localStorage.getItem('otakuba.uitheme.override'); if(s){ const o=JSON.parse(s); if(o&&typeof o==='object'){ uiTheme=Object.assign({},UI_FALLBACK,o); return true; } } }catch(e){}
+    return false;
+  }
+  function clearUiOverride(){ try{ localStorage.removeItem('otakuba.uitheme.override'); }catch(e){} uiTheme=Object.assign({},UI_FALLBACK); applyUiTheme(uiTheme); }
+  function getUiTheme(){ return Object.assign({}, uiTheme); }
 
   // フォントをCSS変数に反映。空欄の項目は var() のフォールバック連鎖でbase→既定フォントに自動で落ちる
   const loadedFonts={};
@@ -127,6 +180,8 @@ window.GuildTheme = (() => {
     applyDomText();
     // 選んだテーマを端末に保存し、次回起動時も維持
     try{ localStorage.setItem('otakuba.theme.override', JSON.stringify(theme)); }catch(e){}
+    // プリセットがUIテーマも指定していれば、それも一緒に切り替える
+    if(preset.uiTheme) saveUiThemeOverride(preset.uiTheme);
   }
   // 管理画面から「呼称・固定文字」だけを部分保存する（Phase4-4）。他の項目(色/画像等)は保持したまま words だけ上書き。
   function saveWordsOverride(partialWords){
@@ -153,5 +208,5 @@ window.GuildTheme = (() => {
   }
   function clearOverride(){ try{ localStorage.removeItem('otakuba.theme.override'); }catch(e){} }
 
-  return { init, w, m, b, all, applyColors, applyFonts, applyDomText, lookup, loadPresets, applyPresetTheme, saveWordsOverride, saveFontsOverride, saveColorsOverride, loadOverride, clearOverride };
+  return { init, w, m, b, all, applyColors, applyFonts, applyDomText, lookup, loadPresets, applyPresetTheme, saveWordsOverride, saveFontsOverride, saveColorsOverride, loadOverride, clearOverride, applyUiTheme, saveUiThemeOverride, loadUiOverride, clearUiOverride, getUiTheme };
 })();
