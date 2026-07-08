@@ -15,3 +15,34 @@
 @keyframes battleHit{0%,100%{transform:translate(-50%,-50%)}20%{transform:translate(calc(-50% - 12px),calc(-50% - 4px))}40%{transform:translate(calc(-50% + 12px),calc(-50% + 2px))}60%{transform:translate(calc(-50% - 7px),-50%)}80%{transform:translate(calc(-50% + 5px),-50%)}}
 @keyframes battleDefeat{0%{opacity:1;transform:translate(-50%,-50%) scale(1)}45%{opacity:.85;transform:translate(-50%,-50%) scale(1.08)}100%{opacity:0;transform:translate(-50%,calc(-50% + 20px)) scale(.7)}}
 @keyframes damage{0%{opacity:0;transform:translate(-50%,20px) scale(.8)}20%{opacity:1;transform:translate(-50%,0) scale(1.2)}100%{opacity:0;transform:translate(-50%,-55px) scale(.95)}}
+
+/* ===== 撃破演出：スタイル切替（管理画面「💥 撃破演出」で選択） ===== */
+/* スタイル1: pop（既定）は上の .defeat.on だけで完結、追加要素なし */
+
+/* スタイル2: フラッシュ（画面全体が白→赤で明滅） */
+#defeatFxOverlay{position:absolute;inset:0;z-index:6;pointer-events:none;opacity:0}
+#defeatFxOverlay.style-flash.on{animation:defeatFlash .55s ease}
+@keyframes defeatFlash{
+  0%{background:rgba(255,255,255,0)}
+  18%{background:rgba(255,255,255,.9)}
+  45%{background:rgba(255,70,70,.4)}
+  100%{background:rgba(255,255,255,0)}
+}
+
+/* スタイル3: リング（衝撃波が敵の位置から広がる） */
+#defeatRing{position:absolute;left:50%;top:50%;width:10px;height:10px;border:4px solid var(--gold);border-radius:50%;transform:translate(-50%,-50%);opacity:0;z-index:6;pointer-events:none}
+#defeatRing.on{animation:defeatRingPop .7s ease-out}
+@keyframes defeatRingPop{
+  0%{width:10px;height:10px;opacity:.9;border-width:6px}
+  100%{width:300px;height:300px;opacity:0;border-width:1px}
+}
+
+/* 撃破画像ポップ（倒した敵の画像・撃破スタンプ画像などを表示） */
+.defeat-image-pop{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.6);max-width:62%;max-height:62%;object-fit:contain;z-index:7;opacity:0;pointer-events:none;filter:drop-shadow(0 8px 16px rgba(0,0,0,.6))}
+.defeat-image-pop.on{animation:defeatImagePop 1.15s ease}
+@keyframes defeatImagePop{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.55)}
+  22%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}
+  78%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(1.12)}
+}

@@ -15,6 +15,29 @@ window.GuildBattle = (() => {
     if(ov) ov.classList.remove('on');
     if(field) field.classList.remove('awaken-shake');
   }
+  // ===== 撃破演出（管理画面「💥 撃破演出」で選んだスタイル・画像を反映）=====
+  function defeatEffectSettings(){
+    const s=(data&&data.settings)||{};
+    return Object.assign({style:'pop', image:'', imageEnabled:false}, s.defeatEffect||{});
+  }
+  function triggerDefeatEffect(e){
+    const cfg=defeatEffectSettings();
+    if(cfg.style==='flash'){
+      const ov=$('defeatFxOverlay');
+      if(ov){ ov.className='style-flash'; void ov.offsetWidth; ov.classList.add('on'); setTimeout(()=>ov.classList.remove('on'),600); }
+    } else if(cfg.style==='ring'){
+      const ring=$('defeatRing');
+      if(ring){ ring.classList.remove('on'); void ring.offsetWidth; ring.classList.add('on'); setTimeout(()=>ring.classList.remove('on'),720); }
+    }
+    if(cfg.imageEnabled && cfg.image){
+      const img=$('defeatImagePop');
+      if(img){
+        img.src=GuildUtils.driveImg(cfg.image);
+        img.classList.remove('on'); void img.offsetWidth; img.classList.add('on');
+        setTimeout(()=>img.classList.remove('on'),1200);
+      }
+    }
+  }
   function bgmKey(e){ return (e&&e.bgm) || 'slime'; }
   function pickText(e,cat){ const arr=(e&&e.texts&&Array.isArray(e.texts[cat]))?e.texts[cat].filter(t=>t&&t.trim()):[]; return arr.length? arr[Math.floor(Math.random()*arr.length)] : ''; }
   function showSpeech(text){
@@ -37,7 +60,7 @@ window.GuildBattle = (() => {
     $('enemyHpFill').style.width = `${Math.max(0,Math.min(100,(Number(e.hp||0)/Number(e.maxHp||1))*100))}%`;
     GuildUI.applyBg(e.bg);
     const sprite=$('enemySprite'); sprite.classList.remove('hit','defeated'); sprite.dataset.enemyId = e.id || '';
-    const sc=(Number(e.scale)||80)/100, ox=Number(e.offsetX)||0, oy=Number(e.offsetY)||0;
+    const sc=(Number(e.scale)||70)/100, ox=Number(e.offsetX)||0, oy=Number(e.offsetY)||0;
     sprite.style.setProperty('--enemy-scale', sc); sprite.style.setProperty('--enemy-ox', ox+'%'); sprite.style.setProperty('--enemy-oy', oy+'%');
     sprite.innerHTML = e.image ? `<img src="${esc(GuildUtils.driveImg(e.image))}" alt="${esc(e.name)}" onload="this.parentNode && this.parentNode.classList.add('loaded')" onerror="this.replaceWith(document.createTextNode('👾'))">` : '👾';
     if((e.id||e.name)!==lastShownEnemyId){ lastShownEnemyId=e.id||e.name; const t=pickText(e,'appear'); if(t) showSpeech(t); }
@@ -70,6 +93,7 @@ window.GuildBattle = (() => {
       if(e.hp<=0){
         defeatedAny=true; const finalBoss=isFinalEnemy(e); if(finalBoss) finalDefeated=true; sprite.classList.add('defeated');
         { const ft=pickText(e,'defeat'); if(ft) showSpeech(ft); }
+        triggerDefeatEffect(e);
         const defeatPop=$('defeatPop'); defeatPop.textContent=finalBoss?(window.GuildTheme?GuildTheme.w('bossDefeatText'):'魔王討伐！'):((window.GuildTheme?GuildTheme.w('defeat'):'撃破')+'！'); defeatPop.classList.add('on');
         if(finalBoss){ suppressBgm=true; GuildAudio.stopBgm(); GuildAudio.playSe('victory');
           setTimeout(()=>{ defeatPop.classList.remove('on'); if(window.GuildApp && GuildApp.showVictoryClear) GuildApp.showVictoryClear(); }, 1600);

@@ -25,7 +25,7 @@ window.GuildStorage = (() => {
       hp:Number.isFinite(Number(m.hp)) ? Math.max(0,Number(m.hp)) : hpMax, maxHp:hpMax,
       bg:fixAssetPath(m.bg || m.background) || 'presets/rpg/grass.png', background:fixAssetPath(m.bg || m.background) || 'presets/rpg/grass.png',
       image:fixAssetPath(m.image) || 'presets/rpg/slime.png', bgm:m.bgm || 'slime', sort:Number(m.sort || i),
-      scale:Number.isFinite(Number(m.scale))?Number(m.scale):100, offsetX:Number.isFinite(Number(m.offsetX))?Number(m.offsetX):0, offsetY:Number.isFinite(Number(m.offsetY))?Number(m.offsetY):0,
+      scale:Number.isFinite(Number(m.scale))?Number(m.scale):70, offsetX:Number.isFinite(Number(m.offsetX))?Number(m.offsetX):0, offsetY:Number.isFinite(Number(m.offsetY))?Number(m.offsetY):0,
       texts:texts};
   }
 
@@ -197,13 +197,15 @@ window.GuildStorage = (() => {
       themeCustom:{startTitle:'',startSubtitle:'',startBg:'',startBgm:'title',victoryBg:'',victoryImage:'victory_clear.PNG',victoryTitle:'',victorySubtitle:'',victoryBgm:'ending',masterImage:'master_no.jpeg',masterMessage:'冷やかしか？さっさとメニューを開け',awakenEnabled:true},
       business:{open:false,openedAt:'',closedAt:'',dailyReports:[]},
       storeInfo:{name:'',address:'',hours:'',phone:'',instagram:'',x:'',website:'',mapUrl:'',description:'',logo:''},
-      uiTheme:{borderColor:'gold',borderColorCustom:'',panelBg:'black',panelBgCustom:'',btnStyle:'rpg',btnRadius:9,borderWidth:3,borderRadius:12,btnShadow:true,blur:true}
+      uiTheme:{borderColor:'gold',borderColorCustom:'',panelBg:'black',panelBgCustom:'',btnStyle:'rpg',btnRadius:9,borderWidth:3,borderRadius:12,btnShadow:true,blur:true},
+      defeatEffect:{style:'pop',image:'',imageEnabled:false}
     }, defaults.settings || {});
     data.settings.notice = Object.assign({enabled:true,title:'本日のお知らせ',body:'',position:'top'}, data.settings.notice || {});
     data.settings.business = Object.assign({open:false,openedAt:'',closedAt:'',dailyReports:[]}, data.settings.business || {});
     data.settings.storeInfo = Object.assign({name:'',address:'',hours:'',phone:'',instagram:'',x:'',website:'',mapUrl:'',description:'',logo:''}, data.settings.storeInfo || {});
     data.settings.themeCustom = Object.assign({startTitle:'',startSubtitle:'',startBg:'',startBgm:'title',victoryBg:'',victoryImage:'victory_clear.PNG',victoryTitle:'',victorySubtitle:'',victoryBgm:'ending',masterImage:'master_no.jpeg',masterMessage:'冷やかしか？さっさとメニューを開け',awakenEnabled:true}, data.settings.themeCustom || {});
     data.settings.uiTheme = Object.assign({borderColor:'gold',borderColorCustom:'',panelBg:'black',panelBgCustom:'',btnStyle:'rpg',btnRadius:9,borderWidth:3,borderRadius:12,btnShadow:true,blur:true}, data.settings.uiTheme || {});
+    data.settings.defeatEffect = Object.assign({style:'pop',image:'',imageEnabled:false}, data.settings.defeatEffect || {});
     if(!Array.isArray(data.settings.business.dailyReports)) data.settings.business.dailyReports=[];
 
     const routeCfg = await resolveStoreRoute_();
@@ -236,6 +238,7 @@ window.GuildStorage = (() => {
     data.settings.business = Object.assign({open:false,openedAt:'',closedAt:'',dailyReports:[]}, data.settings.business || {});
     data.settings.themeCustom = Object.assign({startTitle:'',startSubtitle:'',startBg:'',startBgm:'title',victoryBg:'',victoryImage:'victory_clear.PNG',victoryTitle:'',victorySubtitle:'',victoryBgm:'ending',masterImage:'master_no.jpeg',masterMessage:'冷やかしか？さっさとメニューを開け',awakenEnabled:true}, data.settings.themeCustom || {});
     data.settings.uiTheme = Object.assign({borderColor:'gold',borderColorCustom:'',panelBg:'black',panelBgCustom:'',btnStyle:'rpg',btnRadius:9,borderWidth:3,borderRadius:12,btnShadow:true,blur:true}, data.settings.uiTheme || {});
+    data.settings.defeatEffect = Object.assign({style:'pop',image:'',imageEnabled:false}, data.settings.defeatEffect || {});
     if(!Array.isArray(data.settings.business.dailyReports)) data.settings.business.dailyReports=[];
     data.currentEnemyIndex = GuildUtils.clamp(data.currentEnemyIndex,0,Math.max(0,data.monsters.length-1));
     data.partyCount = Math.max(1, Math.min(20, Number(data.partyCount || 1) || 1));
@@ -309,7 +312,7 @@ window.GuildStorage = (() => {
         // 浅いマージだと themeCustom / notice / audioFiles などのネストしたオブジェクトが
         // 丸ごと置き換わってしまい、片方の端末にしかない項目が消えることがあるため、
         // ネストが深いキーだけは1階層だけ深くマージする
-        const NESTED_KEYS=['themeCustom','notice','audioFiles','storeInfo','uiTheme'];
+        const NESTED_KEYS=['themeCustom','notice','audioFiles','storeInfo','uiTheme','defeatEffect'];
         const merged=Object.assign({},data.settings,remote.settings);
         NESTED_KEYS.forEach(function(k){
           if(remote.settings[k] && typeof remote.settings[k]==='object' && !Array.isArray(remote.settings[k])){

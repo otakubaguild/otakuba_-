@@ -36,7 +36,7 @@
     ['reset','🧹 reset','hard'],
   ];
   // テーマ編集タブ内のサブナビ（Phase4-3: 店舗情報/テキスト/画像/BGM/キャラクター/ステージ/プレビューを1画面にまとめる）
-  const THEME_SUBTABS=[['store','🏪 店舗情報'],['text','✏️ テキスト'],['color','🎨 カラー'],['ui','🖼️ UIテーマ'],['image','🖼️ 画像'],['bgm','🎵 BGM'],['character','⚔️ キャラクター'],['stage','🗺️ ステージ'],['preview','👁️ プレビュー']];
+  const THEME_SUBTABS=[['store','🏪 店舗情報'],['text','✏️ テキスト'],['color','🎨 カラー'],['ui','🖼️ UIテーマ'],['effect','💥 撃破演出'],['image','🖼️ 画像'],['bgm','🎵 BGM'],['character','⚔️ キャラクター'],['stage','🗺️ ステージ'],['preview','👁️ プレビュー']];
   let themeSubTab='store';
   const MODE_KEY='otakuba.admin.mode';
   // 既存ユーザーの操作感を壊さないよう、初回デフォルトは「くわしい」＝これまで通り全タブ表示。新規は店側の判断でモード変更可能。
@@ -473,9 +473,9 @@
     '<label>背景<select data-field="bg">'+optList(themeScopedBgList().concat(themeScopedBgList().includes(m.bg)||!m.bg?[]:[m.bg]),m.bg)+'</select></label>'+
     '<label>敵画像（一覧から選択）<select data-field="image">'+optList(themeScopedImgList().concat(themeScopedImgList().includes(m.image)||!m.image||/^https?:/i.test(m.image)?[]:[m.image]),m.image)+'</select></label>'+
     '<label>敵画像 URL（アップした画像を使う場合はここに貼る）<input data-field="imageUrl" value="'+esc(/^https?:/i.test(m.image)?m.image:'')+'" placeholder="https://drive.google.com/..."></label>'+
-    '<div class="enemy-preview" data-preview="'+i+'" style="position:relative;width:min(72vw,230px);height:min(40dvh,230px);margin:8px auto;border:2px solid rgba(255,246,223,.5);border-radius:12px;overflow:hidden;background:#000 center/cover no-repeat;background-image:url('+esc(GuildUtils.driveImg(m.bg))+')"><img data-preview-img src="'+esc(GuildUtils.driveImg(m.image))+'" style="position:absolute;left:50%;top:50%;max-width:100%;max-height:100%;object-fit:contain;transform:translate(calc(-50% + '+(Number(m.offsetX)||0)+'%),calc(-50% + '+(Number(m.offsetY)||0)+'%)) scale('+((Number(m.scale)||80)/100)+')" onerror="this.style.display=\'none\'"></div>'+
+    '<div class="enemy-preview" data-preview="'+i+'" style="position:relative;width:min(72vw,230px);height:min(40dvh,230px);margin:8px auto;border:2px solid rgba(255,246,223,.5);border-radius:12px;overflow:hidden;background:#000 center/cover no-repeat;background-image:url('+esc(GuildUtils.driveImg(m.bg))+')"><img data-preview-img src="'+esc(GuildUtils.driveImg(m.image))+'" style="position:absolute;left:50%;top:50%;max-width:100%;max-height:100%;object-fit:contain;transform:translate(calc(-50% + '+(Number(m.offsetX)||0)+'%),calc(-50% + '+(Number(m.offsetY)||0)+'%)) scale('+((Number(m.scale)||70)/100)+')" onerror="this.style.display=\'none\'"></div>'+
     '<p class="tiny" style="margin-top:-4px">※実際のお客様画面と同じ縦横比のプレビューです（画面サイズにより多少前後します）</p>'+
-    '<label>大きさ <span data-scale-val>'+(Number(m.scale)||80)+'</span>%<input data-field="scale" type="range" min="30" max="250" value="'+(Number(m.scale)||80)+'"></label>'+
+    '<label>大きさ <span data-scale-val>'+(Number(m.scale)||70)+'</span>%<input data-field="scale" type="range" min="30" max="250" value="'+(Number(m.scale)||70)+'"></label>'+
     '<label>左右 <span data-ox-val>'+(Number(m.offsetX)||0)+'</span>%<input data-field="offsetX" type="range" min="-60" max="60" value="'+(Number(m.offsetX)||0)+'"></label>'+
     '<label>上下 <span data-oy-val>'+(Number(m.offsetY)||0)+'</span>%<input data-field="offsetY" type="range" min="-60" max="60" value="'+(Number(m.offsetY)||0)+'"></label>'+
     '<div class="admin-card" style="margin:10px 0"><div class="admin-card-title">🗨️ 専用セリフ（未入力なら何も表示されません）</div>'+
@@ -485,7 +485,7 @@
     '<p class="tiny">複数追加した場合は、その中からランダムで1つ表示されます。</p></div>'+
     '<div class="toolbar"><button class="btn gold small" data-save-monster="'+i+'">この敵を保存</button><button class="btn small" data-current-monster="'+i+'">現在の敵にする</button><button class="btn small" data-dup-monster="'+i+'">複製</button><button class="btn red small" data-del-monster="'+i+'">削除</button></div></div></section>';}
   function monstersListHtml(){data.monsters=(data.monsters||[]).map(normalizeMonster);return data.monsters.length?data.monsters.map(function(m,i){return monsterCard(m,i);}).join(''):'<div class="empty">なし</div>';}
-  function readMonsterCard(card){var m=data.monsters[+card.dataset.monsterIndex];m.name=card.querySelector('[data-field=name]').value;m.stage=card.querySelector('[data-field=stage]').value;var bgmUrl=(card.querySelector('[data-field=bgmUrl]')||{}).value||'';m.bgm=bgmUrl.trim()?bgmUrl.trim():card.querySelector('[data-field=bgm]').value;m.hp=+card.querySelector('[data-field=hp]').value||0;m.maxHp=+card.querySelector('[data-field=maxHp]').value||500;m.bg=card.querySelector('[data-field=bg]').value;m.background=m.bg;var imgUrl=(card.querySelector('[data-field=imageUrl]')||{}).value||'';m.image=imgUrl.trim()?imgUrl.trim():card.querySelector('[data-field=image]').value;m.scale=+card.querySelector('[data-field=scale]').value||80;m.offsetX=+card.querySelector('[data-field=offsetX]').value||0;m.offsetY=+card.querySelector('[data-field=offsetY]').value||0;m.texts=m.texts&&typeof m.texts==='object'?m.texts:{};['appear','damage','defeat'].forEach(function(cat){var list=card.querySelector('[data-text-cat="'+cat+'"]');m.texts[cat]=list?Array.from(list.querySelectorAll('[data-text-input]')).map(function(inp){return inp.value.trim();}).filter(function(v){return !!v;}):[];});return m;}
+  function readMonsterCard(card){var m=data.monsters[+card.dataset.monsterIndex];m.name=card.querySelector('[data-field=name]').value;m.stage=card.querySelector('[data-field=stage]').value;var bgmUrl=(card.querySelector('[data-field=bgmUrl]')||{}).value||'';m.bgm=bgmUrl.trim()?bgmUrl.trim():card.querySelector('[data-field=bgm]').value;m.hp=+card.querySelector('[data-field=hp]').value||0;m.maxHp=+card.querySelector('[data-field=maxHp]').value||500;m.bg=card.querySelector('[data-field=bg]').value;m.background=m.bg;var imgUrl=(card.querySelector('[data-field=imageUrl]')||{}).value||'';m.image=imgUrl.trim()?imgUrl.trim():card.querySelector('[data-field=image]').value;m.scale=+card.querySelector('[data-field=scale]').value||70;m.offsetX=+card.querySelector('[data-field=offsetX]').value||0;m.offsetY=+card.querySelector('[data-field=offsetY]').value||0;m.texts=m.texts&&typeof m.texts==='object'?m.texts:{};['appear','damage','defeat'].forEach(function(cat){var list=card.querySelector('[data-text-cat="'+cat+'"]');m.texts[cat]=list?Array.from(list.querySelectorAll('[data-text-input]')).map(function(inp){return inp.value.trim();}).filter(function(v){return !!v;}):[];});return m;}
   function saveMonsterForm(){document.querySelectorAll('[data-monster-index]').forEach(readMonsterCard);save();}
   let monsterContainerId='adminContent';
   function renderMonsters(containerId){monsterContainerId=containerId||monsterContainerId;$(monsterContainerId).innerHTML='<h2>⚔️ 討伐モンスター管理</h2><div class="admin-card"><div class="admin-card-title">現在のテーマ：'+esc(PRESET_LABELS[activePresetId()]||activePresetId())+'</div><p class="tiny">背景・敵画像の選択肢は、このテーマの素材だけに絞り込んで表示されます。テーマを変えたい場合は「テーマ編集」の上部から選び直してください。</p></div><div class="toolbar"><button class="btn gold" id="addMonster">追加</button><button class="btn green" id="saveMonsters">全体保存</button><button class="btn" id="monOpenAll">全部開く</button><button class="btn" id="monCloseAll">全部閉じる</button><button class="btn" id="jsonMonsters">JSON</button></div><div class="category-list" id="monsterListBox">'+monstersListHtml()+'</div>';bindMonsterEvents();
@@ -494,7 +494,7 @@
     $('monOpenAll').onclick=function(){document.querySelectorAll('#monsterListBox .category-block').forEach(function(b){b.classList.add('open');var t=b.querySelector('.category-toggle');if(t)t.textContent='閉じる';});};
     $('monCloseAll').onclick=function(){document.querySelectorAll('#monsterListBox .category-block').forEach(function(b){b.classList.remove('open');var t=b.querySelector('.category-toggle');if(t)t.textContent='開く';});};
     $('jsonMonsters').onclick=function(){textareaEditor('monsters','monsters.json');};}
-  function updatePreview(card){var img=card.querySelector('[data-preview-img]');var box=card.querySelector('[data-preview]');if(!img||!box)return;var sc=(+card.querySelector('[data-field=scale]').value||100)/100;var ox=+card.querySelector('[data-field=offsetX]').value||0;var oy=+card.querySelector('[data-field=offsetY]').value||0;var imgSrc=card.querySelector('[data-field=image]').value;var imgUrlField=(card.querySelector('[data-field=imageUrl]')||{}).value||'';var finalImg=imgUrlField.trim()?imgUrlField.trim():imgSrc;var bgSrc=card.querySelector('[data-field=bg]').value;img.src=GuildUtils.driveImg(finalImg);img.style.display='';box.style.backgroundImage='url('+GuildUtils.driveImg(bgSrc)+')';img.style.transform='translate(calc(-50% + '+ox+'%),calc(-50% + '+oy+'%)) scale('+sc+')';var sv=card.querySelector('[data-scale-val]');if(sv)sv.textContent=+card.querySelector('[data-field=scale]').value||100;var oxv=card.querySelector('[data-ox-val]');if(oxv)oxv.textContent=ox;var oyv=card.querySelector('[data-oy-val]');if(oyv)oyv.textContent=oy;}
+  function updatePreview(card){var img=card.querySelector('[data-preview-img]');var box=card.querySelector('[data-preview]');if(!img||!box)return;var sc=(+card.querySelector('[data-field=scale]').value||70)/100;var ox=+card.querySelector('[data-field=offsetX]').value||0;var oy=+card.querySelector('[data-field=offsetY]').value||0;var imgSrc=card.querySelector('[data-field=image]').value;var imgUrlField=(card.querySelector('[data-field=imageUrl]')||{}).value||'';var finalImg=imgUrlField.trim()?imgUrlField.trim():imgSrc;var bgSrc=card.querySelector('[data-field=bg]').value;img.src=GuildUtils.driveImg(finalImg);img.style.display='';box.style.backgroundImage='url('+GuildUtils.driveImg(bgSrc)+')';img.style.transform='translate(calc(-50% + '+ox+'%),calc(-50% + '+oy+'%)) scale('+sc+')';var sv=card.querySelector('[data-scale-val]');if(sv)sv.textContent=+card.querySelector('[data-field=scale]').value||70;var oxv=card.querySelector('[data-ox-val]');if(oxv)oxv.textContent=ox;var oyv=card.querySelector('[data-oy-val]');if(oyv)oyv.textContent=oy;}
   function bindMonsterEvents(){
     document.querySelectorAll('[data-bgm-play]').forEach(function(b){b.onclick=function(){
       var card=b.closest('[data-monster-index]');
@@ -716,6 +716,7 @@
       themeFonts:s.themeFonts?JSON.parse(JSON.stringify(s.themeFonts)):{},
       themeCustom:s.themeCustom?JSON.parse(JSON.stringify(s.themeCustom)):{},
       uiTheme:s.uiTheme?JSON.parse(JSON.stringify(s.uiTheme)):{},
+      defeatEffect:s.defeatEffect?JSON.parse(JSON.stringify(s.defeatEffect)):{},
       audioFiles:s.audioFiles?JSON.parse(JSON.stringify(s.audioFiles)):{},
       monsters:JSON.parse(JSON.stringify(data.monsters||[])),
       savedAt:new Date().toISOString()
@@ -730,6 +731,7 @@
     if(snap.themeFonts){ s.themeFonts=snap.themeFonts; if(window.GuildTheme) GuildTheme.saveFontsOverride(snap.themeFonts); }
     if(snap.themeCustom) s.themeCustom=snap.themeCustom;
     if(snap.uiTheme){ s.uiTheme=snap.uiTheme; if(window.GuildTheme) GuildTheme.saveUiThemeOverride(snap.uiTheme); }
+    if(snap.defeatEffect) s.defeatEffect=snap.defeatEffect;
     if(snap.audioFiles) s.audioFiles=snap.audioFiles;
     if(Array.isArray(snap.monsters)) data.monsters=snap.monsters.map(normalizeMonster);
     save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
@@ -848,11 +850,48 @@
       renderThemeUi();
     };
   }
+  const DEFEAT_STYLE_OPTS=[['pop','通常（ポップ）'],['flash','フラッシュ（画面明滅）'],['ring','リング（衝撃波）']];
+  function renderThemeEffect(){
+    const fx=Object.assign({style:'pop',image:'',imageEnabled:false}, data.settings.defeatEffect||{});
+    $('themeSubContent').innerHTML=
+      '<div class="admin-card"><div class="admin-card-title">💥 撃破演出</div>'+
+      '<p class="tiny">敵を倒した瞬間の演出です。ここで選んだ内容は、すべての敵の撃破時に共通で使われます（敵ごとの個別設定はありません）。</p>'+
+
+      '<label>演出スタイル<select id="fxStyle">'+DEFEAT_STYLE_OPTS.map(([k,l])=>'<option value="'+k+'" '+(fx.style===k?'selected':'')+'>'+l+'</option>').join('')+'</select></label>'+
+
+      '<label class="check-row"><input type="checkbox" id="fxImageEnabled" '+(fx.imageEnabled?'checked':'')+'> 撃破時に画像を表示する</label>'+
+      '<label>撃破画像URL / ファイル名<input id="fxImage" value="'+esc(fx.image||'')+'" placeholder="例：defeat_stamp.png / https://..."></label>'+
+      '<p class="tiny">「倒した敵の画像」でも「撃破スタンプ風の1枚絵」でも構いません。画像ファイルはGitHubに置いて、ファイル名かURLをここに入力してください。</p>'+
+      (fx.image?'<div class="fx-preview" style="text-align:center;margin:8px 0"><img src="'+esc(GuildUtils.driveImg(fx.image))+'" style="max-width:140px;max-height:140px;border:2px solid rgba(246,200,79,.45);border-radius:10px;background:#000" onerror="this.style.display=\'none\'"></div>':'')+
+
+      '<div class="toolbar"><button class="btn gold" id="saveFxTheme">撃破演出を保存</button><button class="btn" id="resetFxTheme">既定に戻す</button></div>'+
+      '</div>';
+
+    $('saveFxTheme').onclick=function(){
+      const partial={
+        style:$('fxStyle').value,
+        imageEnabled:$('fxImageEnabled').checked,
+        image:$('fxImage').value.trim()
+      };
+      data.settings.defeatEffect=Object.assign({}, data.settings.defeatEffect||{}, partial);
+      save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
+      toast('撃破演出を保存しました（全端末に反映されます）');
+      renderThemeEffect();
+    };
+    $('resetFxTheme').onclick=function(){
+      if(!confirm('撃破演出を既定（通常のポップのみ）に戻しますか？'))return;
+      data.settings.defeatEffect={style:'pop',image:'',imageEnabled:false};
+      save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
+      toast('撃破演出を既定に戻しました');
+      renderThemeEffect();
+    };
+  }
   function renderThemeSub(){
     if(themeSubTab==='store') renderStoreInfoAdmin('themeSubContent');
     if(themeSubTab==='text') renderThemeText();
     if(themeSubTab==='color') renderThemeColors();
     if(themeSubTab==='ui') renderThemeUi();
+    if(themeSubTab==='effect') renderThemeEffect();
     if(themeSubTab==='image') renderThemeImage();
     if(themeSubTab==='bgm') renderThemeBgm();
     if(themeSubTab==='character') renderMonsters('themeSubContent');
@@ -880,7 +919,7 @@
           applyConceptTemplateToSettings(p);
           data.settings.currentPresetId=p.id;
           if(Array.isArray(p.enemies)){
-            data.monsters=p.enemies.map(function(e,idx){ return normalizeMonster({ id:GuildUtils.uid('enemy'), name:e.name, stage:e.stage, maxHp:e.maxHp, hp:e.maxHp, bg:e.bg, image:e.image, bgm:e.bgm, scale:e.scale||80, offsetX:e.offsetX||0, offsetY:e.offsetY||0 }, idx); });
+            data.monsters=p.enemies.map(function(e,idx){ return normalizeMonster({ id:GuildUtils.uid('enemy'), name:e.name, stage:e.stage, maxHp:e.maxHp, hp:e.maxHp, bg:e.bg, image:e.image, bgm:e.bgm, scale:e.scale||70, offsetX:e.offsetX||0, offsetY:e.offsetY||0 }, idx); });
             data.currentEnemyIndex=0;
           }
           if(p.theme&&p.theme.brand&&p.theme.brand.shopName){ data.settings.shopName=p.theme.brand.shopName; }
