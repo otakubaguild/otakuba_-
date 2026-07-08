@@ -2,15 +2,39 @@ window.GuildOrder = (() => {
   const {$, yen, todayText} = GuildUtils;
   let pending=null;
   let cart=[]; // カートモード用（今までの単一注文フローとは別に、複数商品をためておく）
-  function itemFromProduct(p, qty=1){ const price=Number(p.price)||0; return {id:p.id,name:p.name,cat:p.cat||p.category||'food',price,qty:Number(qty)||1,subtotal:price*(Number(qty)||1)}; }
+  function isEventActiveNow(p){
+    if(!p || !p.eventOnly) return true;
+    const now=Date.now();
+    if(p.startAt){ const s=new Date(p.startAt).getTime(); if(Number.isFinite(s) && now<s) return false; }
+    if(p.endAt){ const e=new Date(p.endAt).getTime(); if(Number.isFinite(e) && now>e) return false; }
+    return true;
+  }
+  function itemFromProduct(p, qty=1){
+    const price=Number(p.price)||0; const q=Number(qty)||1;
+    const item={id:p.id,name:p.name,cat:p.cat||p.category||'food',price,qty:q,subtotal:price*q};
+    // ===== 依頼(クエスト)拡張メタデータ（既存の注文/会計フローには影響しない付加情報） =====
+    if(p.questName||p.questRank||p.questExp||p.questGold||p.targetMonster){
+      item.questId=p.id;
+      item.questRank=p.questRank||'';
+      item.orderedAt=new Date().toISOString();
+      item.completedAt=item.orderedAt; // このテンプレートの注文は即時反映のため、受注と同時に達成扱い
+      item.completionStatus='completed';
+      item.gainedExp=(Number(p.questExp)||0)*q;
+      item.gainedGold=(Number(p.questGold)||0)*q;
+      item.killedMonster=p.targetMonster||'';
+      item.killedCount=(Number(p.targetCount)||0)*q;
+    }
+    return item;
+  }
   function isCartMode(){ const data=GuildStorage.getData(); return !!(data.settings&&data.settings.cartMode); }
-  function askOrder(product, qty=1){ const data=GuildStorage.getData(); if(!(data.settings.business && data.settings.business.open)){ GuildUI.toast('只今準備中のため、新規のご注文はできません'); return; } const fresh=(data.menu||[]).find(x=>x.id===product.id)||product; const stock=fresh.stock===''||typeof fresh.stock==='undefined'?null:Number(fresh.stock); if(fresh.soldOut || (stock!==null && stock<=0)){GuildUI.toast('売切れです');return;} if(stock!==null && qty>stock){GuildUI.toast('在庫は残り'+stock+'です'); qty=stock;} pending=itemFromProduct(fresh, qty); GuildAudio.playSe('add'); $('orderConfirmBody').textContent=`このクエストを受注しますか？\n\n・${pending.name} ×${pending.qty} = ${yen(pending.subtotal,data.settings.currency)}\n\n注文確定で敵にダメージが入ります。`; GuildUI.openModal('modalOrderConfirm'); }
+  function askOrder(product, qty=1){ const data=GuildStorage.getData(); if(!(data.settings.business && data.settings.business.open)){ GuildUI.toast('只今準備中のため、新規のご注文はできません'); return; } const fresh=(data.menu||[]).find(x=>x.id===product.id)||product; if(!isEventActiveNow(fresh)){ GuildUI.toast('この依頼は現在受付期間外です'); return; } const stock=fresh.stock===''||typeof fresh.stock==='undefined'?null:Number(fresh.stock); if(fresh.soldOut || (stock!==null && stock<=0)){GuildUI.toast('売切れです');return;} if(stock!==null && qty>stock){GuildUI.toast('在庫は残り'+stock+'です'); qty=stock;} pending=itemFromProduct(fresh, qty); GuildAudio.playSe('add'); const questStyle=!!fresh.isQuest; $('orderConfirmBody').textContent=`この${questStyle?'依頼':'クエスト'}を受注しますか？\n\n・${pending.name} ×${pending.qty} = ${yen(pending.subtotal,data.settings.currency)}\n\n注文確定で敵にダメージが入ります。`; GuildUI.openModal('modalOrderConfirm'); }
   // ===== カートモード =====
   function cartCount(){ return cart.reduce((s,i)=>s+i.qty,0); }
   function cartTotal(){ return cart.reduce((s,i)=>s+i.subtotal,0); }
   function updateCartBadge(){ const b=$('cartBadge'); const btn=$('btnCartOpen'); if(!btn) return; const n=cartCount(); if(b) b.textContent=n; btn.style.display=n>0?'':'none'; }
   function addToCart(product, qty=1){
     const data=GuildStorage.getData(); const fresh=(data.menu||[]).find(x=>x.id===product.id)||product;
+    if(!isEventActiveNow(fresh)){ GuildUI.toast('この依頼は現在受付期間外です'); return; }
     const stock=fresh.stock===''||typeof fresh.stock==='undefined'?null:Number(fresh.stock);
     if(fresh.soldOut || (stock!==null && stock<=0)){GuildUI.toast('売切れです');return;}
     const alreadyInCart=(cart.find(i=>i.id===fresh.id)||{qty:0}).qty;

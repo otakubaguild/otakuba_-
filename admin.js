@@ -95,7 +95,16 @@
     }
     return data.settings.categories;
   }
-  function normalizeProduct(p,i){p=p||{};p.id=p.id||GuildUtils.uid('menu');p.cat=p.cat||p.category||'food';p.category=p.cat;p.name=p.name||'商品';p.price=Number(p.price)||0;p.emoji=p.emoji||p.icon||'🍽️';p.icon=p.emoji;p.desc=p.desc||'';p.image=p.image||'';p.hidden=!!p.hidden;p.soldOut=!!p.soldOut;p.recommended=!!p.recommended;p.limited=!!p.limited;if(p.stock===null||typeof p.stock==='undefined')p.stock='';else if(p.stock!=='')p.stock=Math.max(0,Number(p.stock)||0);p.sort=Number(p.sort||i);return p}
+  function normalizeProduct(p,i){p=p||{};p.id=p.id||GuildUtils.uid('menu');p.cat=p.cat||p.category||'food';p.category=p.cat;p.name=p.name||'商品';p.price=Number(p.price)||0;p.emoji=p.emoji||p.icon||'🍽️';p.icon=p.emoji;p.desc=p.desc||'';p.image=p.image||'';p.hidden=!!p.hidden;p.soldOut=!!p.soldOut;p.recommended=!!p.recommended;p.limited=!!p.limited;if(p.stock===null||typeof p.stock==='undefined')p.stock='';else if(p.stock!=='')p.stock=Math.max(0,Number(p.stock)||0);p.sort=Number(p.sort||i);
+    p.questName=p.questName||'';p.questRank=p.questRank||'';p.questDesc=p.questDesc||'';p.questClient=p.questClient||'';
+    p.recommendedLevel=(p.recommendedLevel===''||typeof p.recommendedLevel==='undefined')?'':Number(p.recommendedLevel)||0;
+    p.questExp=Number(p.questExp)||0;p.questGold=Number(p.questGold)||0;
+    p.targetMonster=p.targetMonster||'';p.targetCount=Number(p.targetCount)||0;
+    p.clearTitle=p.clearTitle||'';p.clearBody=p.clearBody||'';
+    p.eventOnly=!!p.eventOnly;p.startAt=p.startAt||'';p.endAt=p.endAt||'';p.repeatable=p.repeatable!==false;
+    p.clearSe=p.clearSe||'';p.clearImage=p.clearImage||'';
+    p.isQuest=!!p.isQuest;
+    return p}
   function categoryManagerHtml(cs){
     return '<div class="admin-card"><div class="admin-card-title">🗂️ カテゴリ管理</div>'+
       '<p class="tiny">お店の業態に合わせてカテゴリを自由に編集できます（アイコンは絵文字1文字）。</p>'+
@@ -226,8 +235,41 @@
     };
   }
   function toggleCats(o){document.querySelectorAll('.category-block').forEach(b=>{b.classList.toggle('open',o);b.querySelector('.category-toggle').textContent=o?'閉じる':'開く'})}
-  function productCard(p,i,opts){return `<div class="admin-card product-edit-card" data-menu-index="${i}"><div class="admin-card-title">#${i+1} ${esc(p.name)}</div><label>商品名<input data-field="name" value="${esc(p.name)}"></label><label>ジャンル<select data-field="cat">${opts}</select></label><label>価格<input data-field="price" type="number" value="${p.price}"></label><label>絵文字<input data-field="emoji" value="${esc(p.emoji)}"></label><label>画像<input data-field="image" value="${esc(p.image)}"></label><label>在庫<input data-field="stock" type="number" min="0" placeholder="空欄=無制限" value="${p.stock===''?'':p.stock}"></label><label>説明<textarea data-field="desc">${esc(p.desc)}</textarea></label><label class="check-row"><input data-field="recommended" type="checkbox" ${p.recommended?'checked':''}>⭐おすすめ</label><label class="check-row"><input data-field="limited" type="checkbox" ${p.limited?'checked':''}>👑限定</label><label class="check-row"><input data-field="soldOut" type="checkbox" ${p.soldOut?'checked':''}>❌売切れ</label><label class="check-row"><input data-field="hidden" type="checkbox" ${p.hidden?'checked':''}>非表示</label><button class="btn red small" data-del-product="${i}">削除</button></div>`}
-  function saveMenuForm(){document.querySelectorAll('[data-menu-index]').forEach(card=>{const p=data.menu[+card.dataset.menuIndex];p.name=card.querySelector('[data-field="name"]').value;p.cat=card.querySelector('[data-field="cat"]').value;p.category=p.cat;p.price=+card.querySelector('[data-field="price"]').value||0;p.emoji=card.querySelector('[data-field="emoji"]').value||'🍽️';p.icon=p.emoji;p.image=card.querySelector('[data-field="image"]').value;p.desc=card.querySelector('[data-field="desc"]').value;p.stock=card.querySelector('[data-field="stock"]').value===''?'':Math.max(0,+card.querySelector('[data-field="stock"]').value||0);p.recommended=card.querySelector('[data-field="recommended"]').checked;p.limited=card.querySelector('[data-field="limited"]').checked;p.soldOut=card.querySelector('[data-field="soldOut"]').checked;p.hidden=card.querySelector('[data-field="hidden"]').checked});data.settings.menuPushedAt=new Date().toISOString();save();if(GuildStorage.pushCloud)GuildStorage.pushCloud();}
+  function productCard(p,i,opts){return `<div class="admin-card product-edit-card" data-menu-index="${i}"><div class="admin-card-title">#${i+1} ${esc(p.name)}</div><label>商品名<input data-field="name" value="${esc(p.name)}"></label><label>ジャンル<select data-field="cat">${opts}</select></label><label>価格<input data-field="price" type="number" value="${p.price}"></label><label>絵文字<input data-field="emoji" value="${esc(p.emoji)}"></label><label>画像<input data-field="image" value="${esc(p.image)}"></label><label>在庫<input data-field="stock" type="number" min="0" placeholder="空欄=無制限" value="${p.stock===''?'':p.stock}"></label><label>説明<textarea data-field="desc">${esc(p.desc)}</textarea></label><label class="check-row"><input data-field="recommended" type="checkbox" ${p.recommended?'checked':''}>⭐おすすめ</label><label class="check-row"><input data-field="limited" type="checkbox" ${p.limited?'checked':''}>👑限定</label><label class="check-row"><input data-field="soldOut" type="checkbox" ${p.soldOut?'checked':''}>❌売切れ</label><label class="check-row"><input data-field="hidden" type="checkbox" ${p.hidden?'checked':''}>非表示</label>
+    <details class="quest-fields" ${p.isQuest?'open':''}><summary>🗡️ 依頼設定（任意・ギルド連携用）</summary>
+      <label class="check-row" style="margin-top:0"><input data-field="isQuest" type="checkbox" ${p.isQuest?'checked':''}> 📜 依頼として別枠に表示する（オン＝通常メニューから消え「依頼」タブ専用になります）</label>
+      <label>依頼名<input data-field="questName" value="${esc(p.questName||'')}" placeholder="未入力なら商品名を使用"></label>
+      <label>依頼ランク<select data-field="questRank"><option value="">未設定</option>${['F','E','D','C','B','A','S','SS','SSS'].map(r=>`<option value="${r}" ${p.questRank===r?'selected':''}>${r}</option>`).join('')}</select></label>
+      <label>依頼説明<textarea data-field="questDesc" placeholder="未入力なら通常の説明を使用">${esc(p.questDesc||'')}</textarea></label>
+      <label>依頼主<input data-field="questClient" value="${esc(p.questClient||'')}" placeholder="例：ギルド受付嬢"></label>
+      <label>推奨レベル<input data-field="recommendedLevel" type="number" min="0" value="${p.recommendedLevel===''?'':p.recommendedLevel}"></label>
+      <label>経験値<input data-field="questExp" type="number" min="0" value="${p.questExp||0}"></label>
+      <label>ゴールド<input data-field="questGold" type="number" min="0" value="${p.questGold||0}"></label>
+      <label>討伐対象モンスター<input data-field="targetMonster" value="${esc(p.targetMonster||'')}" placeholder="モンスター名"></label>
+      <label>討伐対象数<input data-field="targetCount" type="number" min="0" value="${p.targetCount||0}"></label>
+      <label>達成証タイトル<input data-field="clearTitle" value="${esc(p.clearTitle||'')}"></label>
+      <label>達成証本文<textarea data-field="clearBody">${esc(p.clearBody||'')}</textarea></label>
+      <label class="check-row"><input data-field="eventOnly" type="checkbox" ${p.eventOnly?'checked':''}>イベント限定</label>
+      <label>開始日時<input data-field="startAt" type="datetime-local" value="${esc(p.startAt||'')}"></label>
+      <label>終了日時<input data-field="endAt" type="datetime-local" value="${esc(p.endAt||'')}"></label>
+      <label class="check-row"><input data-field="repeatable" type="checkbox" ${p.repeatable!==false?'checked':''}>リピート可</label>
+      <label>達成時SE<input data-field="clearSe" value="${esc(p.clearSe||'')}" placeholder="例：victory / ファイル名"></label>
+      <label>達成時演出画像<input data-field="clearImage" value="${esc(p.clearImage||'')}" placeholder="画像ファイル名またはURL"></label>
+    </details>
+    <button class="btn red small" data-del-product="${i}">削除</button></div>`}
+  function saveMenuForm(){document.querySelectorAll('[data-menu-index]').forEach(card=>{const p=data.menu[+card.dataset.menuIndex];p.name=card.querySelector('[data-field="name"]').value;p.cat=card.querySelector('[data-field="cat"]').value;p.category=p.cat;p.price=+card.querySelector('[data-field="price"]').value||0;p.emoji=card.querySelector('[data-field="emoji"]').value||'🍽️';p.icon=p.emoji;p.image=card.querySelector('[data-field="image"]').value;p.desc=card.querySelector('[data-field="desc"]').value;p.stock=card.querySelector('[data-field="stock"]').value===''?'':Math.max(0,+card.querySelector('[data-field="stock"]').value||0);p.recommended=card.querySelector('[data-field="recommended"]').checked;p.limited=card.querySelector('[data-field="limited"]').checked;p.soldOut=card.querySelector('[data-field="soldOut"]').checked;p.hidden=card.querySelector('[data-field="hidden"]').checked;
+    const qf=function(field){const el=card.querySelector('[data-field="'+field+'"]');return el?el.value:'';};
+    const isQuestEl=card.querySelector('[data-field="isQuest"]');p.isQuest=isQuestEl?isQuestEl.checked:false;
+    p.questName=qf('questName').trim();p.questRank=qf('questRank');p.questDesc=qf('questDesc');p.questClient=qf('questClient').trim();
+    p.recommendedLevel=qf('recommendedLevel')===''?'':Math.max(0,+qf('recommendedLevel')||0);
+    p.questExp=Math.max(0,+qf('questExp')||0);p.questGold=Math.max(0,+qf('questGold')||0);
+    p.targetMonster=qf('targetMonster').trim();p.targetCount=Math.max(0,+qf('targetCount')||0);
+    p.clearTitle=qf('clearTitle').trim();p.clearBody=qf('clearBody');
+    const eventOnlyEl=card.querySelector('[data-field="eventOnly"]');p.eventOnly=eventOnlyEl?eventOnlyEl.checked:false;
+    p.startAt=qf('startAt');p.endAt=qf('endAt');
+    const repeatableEl=card.querySelector('[data-field="repeatable"]');p.repeatable=repeatableEl?repeatableEl.checked:true;
+    p.clearSe=qf('clearSe').trim();p.clearImage=qf('clearImage').trim();
+  });data.settings.menuPushedAt=new Date().toISOString();save();if(GuildStorage.pushCloud)GuildStorage.pushCloud();}
   function customerListHtml(){const q=customerQuery.toLowerCase();const list=(data.customers||[]).map((c,i)=>({c,i})).filter(({c})=>!q||[c.name,c.title,c.memo,c.id].some(v=>String(v||'').toLowerCase().includes(q)));return list.length?list.map(({c,i})=>customerCard(c,i)).join(''):'<div class="empty">なし</div>';}
   function refreshCustomerList(){const box=$('customerListBox');if(box)box.innerHTML=customerListHtml();bindCustomerListEvents();}
   function bindCustomerListEvents(){document.querySelectorAll('[data-del-customer]').forEach(b=>b.onclick=()=>{if(confirm('削除しますか？')){const idx=+b.dataset.delCustomer;const c=data.customers[idx];if(c&&c.id){data.deletedCustomerIds=Array.from(new Set([...(data.deletedCustomerIds||[]),c.id]));if(GuildStorage.markCustomerDeleted)GuildStorage.markCustomerDeleted(c);}data.customers.splice(idx,1);save();if(GuildStorage.pushCloud)GuildStorage.pushCloud();refreshCustomerList();toast('削除しました')}});document.querySelectorAll('[data-sales-of]').forEach(b=>b.onclick=()=>{salesQuery=data.customers[+b.dataset.salesOf].name;current='sales';renderTabs();renderSales()});bindOpenBillEvents()}
@@ -506,6 +548,8 @@
     '<label>管理パスワード（半角英数字のみ）<input id="setPass" value="'+esc(s.adminPassword||'OTAKU')+'" pattern="[A-Za-z0-9]*" inputmode="latin" autocapitalize="off" autocorrect="off" spellcheck="false"></label>'+
     '<label class="check-row"><input id="setCartMode" type="checkbox" '+(s.cartMode?'checked':'')+'>カートモード（複数商品をまとめて注文できるようにする）</label>'+
     '<p class="tiny">オフ＝今まで通り、商品ごとに即注文（バー向け）。オン＝カートに追加してからまとめて注文（複数人・フード店など向け）。</p>'+
+    '<label class="check-row"><input id="setQuestMode" type="checkbox" '+(s.questMode?'checked':'')+'>依頼タブ（メニューとは別枠で「📜 依頼」を表示する）</label>'+
+    '<p class="tiny">オン＝「📜 依頼として別枠に表示する」をつけた商品だけが、通常メニューから消えて専用の「依頼」タブにまとまります。それ以外の商品は今まで通りです。</p>'+
     '<div class="toolbar"><button class="btn gold" id="saveBasic">この項目だけ保存</button></div>'+
     '<button class="btn" id="resetSetupWizard">初回セットアップを確認する</button>'+
     '</div><div class="admin-card"><div class="admin-card-title">🔔 通知・連携</div>'+
@@ -531,7 +575,7 @@
     '</div><div class="toolbar"><button class="btn" id="jsonSettings">詳細JSON</button></div>';
     function pushToast(msg){ save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud(); toast(msg+'（クラウドにも送信）'); }
     if($('setPass')) $('setPass').addEventListener('input',function(){ const c=this.value.replace(/[^A-Za-z0-9]/g,''); if(c!==this.value) this.value=c; });
-    $('saveBasic').onclick=function(){ s.currency=$('setCurrency').value||'G'; s.coverCharge=+$('setCover').value||0; s.adminPassword=($('setPass').value||'OTAKU').replace(/[^A-Za-z0-9]/g,'')||'OTAKU'; s.cartMode=$('setCartMode').checked; pushToast('基本設定を保存しました'); };
+    $('saveBasic').onclick=function(){ s.currency=$('setCurrency').value||'G'; s.coverCharge=+$('setCover').value||0; s.adminPassword=($('setPass').value||'OTAKU').replace(/[^A-Za-z0-9]/g,'')||'OTAKU'; s.cartMode=$('setCartMode').checked; s.questMode=$('setQuestMode').checked; pushToast('基本設定を保存しました'); };
     $('saveNotify').onclick=function(){ s.notifyOn=$('setNotify').checked; s.gasUrl=$('setGas').value.trim(); s.discordWebhookUrl=$('setHook').value.trim(); pushToast('通知・連携設定を保存しました'); };
     $('saveNotice').onclick=function(){ s.notice={enabled:$('noticeEnabled').checked,title:$('noticeTitle').value||'本日のお知らせ',body:$('noticeBody').value||'',position:$('noticePosition').value||'top'}; pushToast('お知らせを保存しました'); };
     $('setLevelMode').onchange=function(){s.levelMode=$('setLevelMode').value; $('levelThresholdBox').style.display=s.levelMode==='total'?'':'none'; pushToast('レベル計算方式を保存しました');};

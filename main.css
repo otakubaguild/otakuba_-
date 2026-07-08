@@ -85,3 +85,9 @@ input,textarea,select{color:var(--white);background:rgba(0,0,0,.62);border:2px s
 .store-info-body a{color:var(--gold);text-decoration:underline}
 
 .app-brand-label{position:absolute;right:8px;bottom:calc(6px + env(safe-area-inset-bottom));z-index:6;font-size:9px;letter-spacing:1px;color:rgba(255,246,223,.35);pointer-events:none;font-family:var(--font-base,monospace);text-shadow:1px 1px 0 rgba(0,0,0,.6)}
+
+.quest-meta{color:var(--gold);opacity:.85;font-size:11px;margin-top:2px}
+.menu-badge.quest-rank{border-color:var(--gold);color:#1d1300;background:linear-gradient(#ffe58a,#c89225);font-weight:900}
+details.quest-fields{margin-top:10px;border:1px dashed rgba(246,200,79,.5);border-radius:8px;padding:8px}
+details.quest-fields summary{cursor:pointer;color:var(--gold);font-weight:800;font-size:13px}
+details.quest-fields label{display:block;margin-top:6px}

@@ -36,7 +36,15 @@ window.GuildStorage = (() => {
     return {id:p.id||GuildUtils.uid('menu'), cat:p.cat||p.category||'food', category:p.cat||p.category||'food',
       name:p.name||'商品', price:Number(p.price)||0, emoji:p.emoji||p.icon||'🍽️', icon:p.emoji||p.icon||'🍽️',
       image:p.image||'', desc:p.desc||'', hidden:!!p.hidden, sort:Number(p.sort||i),
-      soldOut:!!p.soldOut, recommended:!!p.recommended, limited:!!p.limited, stock:stock};
+      soldOut:!!p.soldOut, recommended:!!p.recommended, limited:!!p.limited, stock:stock,
+      // ===== 依頼(クエスト)拡張フィールド（未入力でも既存動作に影響しない） =====
+      questName:p.questName||'', questRank:p.questRank||'', questDesc:p.questDesc||'',
+      questClient:p.questClient||'', recommendedLevel:p.recommendedLevel===''||typeof p.recommendedLevel==='undefined'?'':Number(p.recommendedLevel)||0,
+      questExp:Number(p.questExp)||0, questGold:Number(p.questGold)||0,
+      targetMonster:p.targetMonster||'', targetCount:Number(p.targetCount)||0,
+      clearTitle:p.clearTitle||'', clearBody:p.clearBody||'',
+      eventOnly:!!p.eventOnly, startAt:p.startAt||'', endAt:p.endAt||'', repeatable:p.repeatable!==false,
+      clearSe:p.clearSe||'', clearImage:p.clearImage||'', isQuest:!!p.isQuest};
   }
 
   function migrateLegacy(legacy){

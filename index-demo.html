@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#050505">
+  <title data-theme-title>冒険者ギルド</title>
+  <link rel="stylesheet" href="main.css?v=1.37-btnwrapfix">
+  <link rel="stylesheet" href="battle.css?v=1.33-speech">
+  <link rel="stylesheet" href="menu.css?v=1.33-lightbox">
+  <link rel="stylesheet" href="effects.css?v=1.32-cartmode">
+
+  <style>
+    .setup-wizard-overlay{z-index:10050}
+    .setup-wizard-card{max-width:94vw;width:460px;max-height:90dvh;overflow:auto;text-align:left}
+    .setup-step{border:1px solid rgba(255,246,223,.25);border-radius:10px;padding:10px;margin:10px 0;background:rgba(0,0,0,.22)}
+    .setup-step label{display:grid;gap:4px;margin:8px 0;font-size:12px;color:var(--gold)}
+    .setup-step input,.setup-step textarea,.setup-step select{width:100%}
+    .setup-step textarea{min-height:62px}
+  </style>
+
+</head>
+<body>
+  <div class="app">
+    <div class="bg" id="pageBg"></div>
+    <div class="scan"></div>
+    <div class="app-brand-label">PLAY_ORDER</div>
+    <div id="toast" class="toast"></div>
+    <div id="imageLightbox" class="image-lightbox"><img id="imageLightboxImg" src="" alt=""></div>
+
+    <section class="screen active center" id="screenWelcome">
+      <div class="panel window">
+        <img id="storeLogoImg" class="store-logo" alt="" style="display:none">
+        <div class="title-logo" data-theme-html="messages.titleWelcome">ギルドへ<br>ようこそ</div>
+        <div class="subtitle">メニューを開きますか？</div>
+        <div class="row choice">
+          <button class="btn gold" id="btnStartYes">はい</button>
+          <button class="btn" id="btnStartNo">いいえ</button>
+        </div>
+        <button class="btn mt" id="btnStoreInfo">🏪 店舗情報</button>
+        <div class="audio-credit" id="audioCreditText">音楽：魔王魂 / パンダの中のパンダ</div>
+      </div>
+    </section>
+
+    <section class="screen center" id="screenClosed">
+      <div class="panel window">
+        <div class="title-logo">本日は<br>準備中です</div>
+        <div class="subtitle" id="closedHoursText">営業時間 --:--〜--:--</div>
+        <div class="subtitle" style="margin-top:6px">しばらくお待ちください</div>
+        <button class="btn gold mt" id="btnClosedRefresh">🔄 更新する</button>
+      </div>
+    </section>
+
+    <section class="screen center" id="screenSuspended">
+      <div class="panel window">
+        <div class="title-logo">サービス利用<br>停止中</div>
+        <div class="subtitle">お支払い状況の確認が取れなかったため、現在サービスをご利用いただけません。</div>
+        <div class="subtitle" style="margin-top:6px">店舗の運営者様は、お支払い状況をご確認のうえ、サポートまでご連絡ください。</div>
+      </div>
+    </section>
+
+    <div id="tamperOverlay" class="level-up-overlay">
+      <div class="panel window">
+        <div class="title-logo small">⚠️ システムの変更を検知</div>
+        <div class="subtitle" style="margin-top:6px">配布時の内容と異なる部分が見つかりました。心当たりがない場合はサポートまでご連絡ください。</div>
+        <label class="mt">解除コード<input id="tamperCodeInput" placeholder="サポートから受け取ったコードを入力"></label>
+        <div class="row mt">
+          <button class="btn gold" id="tamperUnlockBtn">解除する</button>
+        </div>
+        <div id="tamperMsg" class="tiny mt"></div>
+      </div>
+    </div>
+
+    <section class="screen center" id="screenName">
+      <div class="panel window">
+        <div class="title-logo small" data-theme-text="messages.registerTitle">冒険者登録</div>
+        <p><span data-theme-text="words.customer">冒険者</span>名を入力してください</p>
+        <input id="nameInput" placeholder="例：タロウ" autocomplete="name">
+        <p class="tiny mt">アイコンを選んでください（同じ名前の人と区別するために使います）</p>
+        <div class="avatar-picker" id="avatarPicker"></div>
+        <div class="row mt" style="align-items:center;gap:8px">
+          <div id="avatarImgPreview" class="avatar-img-preview"></div>
+          <label class="btn small" style="flex:1;text-align:center;cursor:pointer">📷 画像を選ぶ（任意）<input id="avatarImgFile" type="file" accept="image/*" style="display:none"></label>
+          <button class="btn small" id="avatarImgClear" style="display:none;flex:0 0 auto">絵文字に戻す</button>
+        </div>
+        <p class="tiny">※画像はこの端末だけに保存されます（他の端末には表示されません）</p>
+        <div class="row mt">
+          <button class="btn gold" id="btnNameOk">新規登録</button>
+          <button class="btn" id="btnBackWelcome">戻る</button>
+        </div>
+        <div class="row mt">
+          <button class="btn" id="btnSelectExisting">📋 登録済みの<span data-theme-text="words.customer">冒険者</span>から選ぶ</button>
+        </div>
+      </div>
+    </section>
+
+    <div id="existingOverlay" class="level-up-overlay">
+      <div class="panel window" style="max-width:92vw;width:420px;max-height:80dvh;display:flex;flex-direction:column">
+        <div class="title-logo small" data-theme-text="messages.selectTitle">冒険者を選択</div>
+        <input id="existingSearch" placeholder="名前で検索" style="margin:6px 0">
+        <div id="existingList" style="flex:1;overflow-y:auto;text-align:left;margin:8px 0"></div>
+        <button class="btn" id="existingClose">閉じる</button>
+      </div>
+    </div>
+
+    <section class="screen center" id="screenParty">
+      <div class="panel window">
+        <div class="title-logo small" data-theme-text="messages.partyTitle">パーティ人数</div>
+        <p>ご来店人数を選択してください</p>
+        <div class="party-control">
+          <button class="btn" id="btnPartyMinus" type="button">−</button>
+          <div class="panel party-count-panel">
+            <div id="partyCountView" class="party-count-view">1名</div>
+          </div>
+          <button class="btn" id="btnPartyPlus" type="button">＋</button>
+        </div>
+        <div class="tiny" id="chargePreview"></div>
+        <div class="row mt">
+          <button class="btn gold" id="btnPartyOk">次へ</button>
+          <button class="btn" id="btnPartyBack">戻る</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="screenMain">
+      <div class="rpg">
+        <div id="noticeBox"></div>
+        <header class="hud">
+          <div class="panel hud-card">
+            <div class="hud-title" data-theme-text="words.adventurerInfo">冒険者情報</div>
+            <div class="hud-main" id="adventurerName">---</div>
+            <div class="tiny" id="adventurerSub">Lv.1 / 二つ名なし</div>
+          </div>
+          <div class="panel hud-card">
+            <div class="hud-title" id="stageName">現在ステージ</div>
+            <div class="hud-main" id="enemyName">---</div>
+            <div class="tiny" id="enemyHpText">HP 0 / 0</div>
+            <div class="hpbar"><div class="hpfill" id="enemyHpFill"></div></div>
+          </div>
+        </header>
+
+        <main class="battlefield" id="battleField">
+          <div class="enemy" id="enemySprite">👾</div>
+          <div class="enemy-speech" id="enemySpeech"></div>
+          <div class="damage" id="damagePop"></div>
+          <div class="defeat" id="defeatPop" data-theme-text="words.defeat">撃破！</div>
+    <div id="awakenOverlay"><div class="awaken-text" data-theme-text="words.awakenText">魔王が覚醒する——！</div></div>
+        </main>
+
+        <nav class="categories" id="categoryButtons"></nav>
+        <button class="btn gold checkout-main" id="btnCheckout">🏆 <span data-theme-text="words.checkoutButton">クエスト達成（会計）</span></button>
+        <button class="btn checkout-main" id="btnBackTitle">🏠 最初の画面へ</button>
+      </div>
+    </section>
+
+    <div class="modal" id="modalMenu">
+      <div class="modal-head">
+        <h2 id="menuTitle" data-theme-text="words.menuTitleDefault">メニュー</h2>
+        <button class="btn small" id="btnCloseMenu">閉じる</button>
+      </div>
+      <div class="scroll" id="productList"></div>
+      <button class="btn gold cart-float-btn" id="btnCartOpen" style="display:none">🛒 カートを見る（<span id="cartBadge">0</span>）</button>
+    </div>
+
+    <div class="modal" id="modalCartReview">
+      <div class="modal-head">
+        <h2>🛒 カートの確認</h2>
+        <button class="btn small" id="btnCartBack">戻る</button>
+      </div>
+      <div class="scroll">
+        <div class="panel">
+          <div id="cartReviewBody" class="confirm-text"></div>
+          <div class="row mt">
+            <button class="btn gold" id="btnCartConfirm">この内容で注文する</button>
+            <button class="btn" id="btnCartCancel">やめる</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="modalOrderConfirm">
+      <div class="modal-head">
+        <h2><span data-theme-text="words.quest">クエスト</span>受注確認</h2>
+        <button class="btn small" id="btnCancelOrder">戻る</button>
+      </div>
+      <div class="scroll">
+        <div class="panel">
+          <div id="orderConfirmBody" class="confirm-text"></div>
+          <div class="row mt">
+            <button class="btn gold" id="btnDoOrder">はい、注文する</button>
+            <button class="btn" id="btnNoOrder">いいえ</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="modalChargeConfirm">
+      <div class="modal-head">
+        <h2><span data-theme-text="words.guild">ギルド</span>登録料</h2>
+        <button class="btn small" id="btnCancelCharge">戻る</button>
+      </div>
+      <div class="scroll">
+        <div class="panel">
+          <div id="chargeConfirmBody" class="confirm-text"></div>
+          <div class="row mt">
+            <button class="btn gold" id="btnDoCharge">登録する</button>
+            <button class="btn" id="btnNoCharge">いいえ</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="modalCheckoutConfirm">
+      <div class="modal-head">
+        <h2 data-theme-text="words.checkoutButton">クエスト達成（会計）</h2>
+        <button class="btn small" id="btnCancelCheckout">戻る</button>
+      </div>
+      <div class="scroll">
+        <div class="panel">
+          <div id="checkoutConfirmBody" class="confirm-text"></div>
+          <div class="row mt">
+            <button class="btn gold" id="btnDoCheckout">帰還して会計する</button>
+            <button class="btn" id="btnNoCheckout">いいえ</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="modalReceipt">
+      <div class="modal-head">
+        <h2>🧾 会計明細</h2>
+      </div>
+      <div class="scroll">
+        <div class="panel">
+          <div id="receiptBody" class="confirm-text"></div>
+          <div class="row mt">
+            <button class="btn gold" id="btnReceiptConfirm">確認完了</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="levelUpOverlay" class="level-up-overlay">
+      <div class="panel window">
+        <div class="level-up-title">LEVEL UP!</div>
+        <div id="levelUpText" class="level-up-text"></div>
+        <button class="btn gold mt" id="levelUpClose">OK</button>
+      </div>
+    </div>
+
+    <div id="guildReturnOverlay" class="victory-clear-overlay">
+      <div class="panel window center">
+        <div class="level-up-title">🏆 <span data-theme-text="words.bossDefeatText">魔王討伐！</span></div>
+        <div class="mt" data-theme-text="messages.peace">魔王を倒し、平和が訪れた。</div>
+        <button class="btn gold mt" id="guildReturnBtn">🏰 <span data-theme-text="words.guild">ギルド</span>に帰還</button>
+      </div>
+    </div>
+
+    <div id="victoryClearOverlay" class="victory-clear-overlay">
+      <div id="victoryClearContent" class="victory-clear-content" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;width:100%;height:100%;padding:18px;text-align:center">
+        <img id="victoryClearImg" src="victory_clear.PNG" alt="魔王討伐完了" class="victory-clear-img" onerror="this.style.display='none'">
+        <div id="victoryClearTitle" class="level-up-title" style="display:none"></div>
+        <div id="victoryClearSubtitle" class="panel" style="display:none;max-width:420px"></div>
+      </div>
+      <button class="btn" id="victoryClearClose">⚔️ 最初の<span data-theme-text="words.battle">戦闘</span>に戻る</button>
+    </div>
+    <div id="setupWizardOverlay" class="level-up-overlay setup-wizard-overlay">
+      <div class="panel window setup-wizard-card">
+        <div class="title-logo small">初回セットアップ</div>
+        <p class="tiny">店舗用の基本設定です。あとから管理画面 → Game設定で変更できます。</p>
+
+        <div class="setup-step">
+          <div class="admin-card-title">① 店舗</div>
+          <label>店舗名<input id="setupStoreName" placeholder="例：〇〇バー / △△カフェ"></label>
+          <label>テーマ<select id="setupTheme">
+            <option value="">現在のまま</option>
+            <option value="rpg">⚔️ RPG</option>
+            <option value="sf">🚀 SF</option>
+            <option value="magic_school">🪄 魔法学校</option>
+          </select></label>
+        </div>
+
+        <div class="setup-step">
+          <div class="admin-card-title">🔐 管理画面のパスワード</div>
+          <p class="tiny">このテンプレートの初期パスワードは共通です。他の人に管理画面を開かれないよう、必ずここで変更してください。</p>
+          <label>新しい管理パスワード（半角英数字のみ）<input id="setupAdminPassword" placeholder="例：好きな文字列に変更してください" pattern="[A-Za-z0-9]*" inputmode="latin" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
+        </div>
+
+        <div class="setup-step">
+          <div class="admin-card-title">② スタート画面</div>
+          <label>タイトルHTML<textarea id="setupStartTitle" placeholder="例：ようこそ&lt;br&gt;いらっしゃいませ"></textarea></label>
+          <label>メッセージ<input id="setupStartSubtitle" placeholder="例：メニューを開きますか？"></label>
+          <label>背景画像URL / ファイル名<input id="setupStartBg" placeholder="例：start_bg.png / https://..."></label>
+          <label>BGMキー / URL<input id="setupStartBgm" placeholder="例：title"></label>
+        </div>
+
+        <div class="setup-step">
+          <div class="admin-card-title">③ 「いいえ」を押した時</div>
+          <label>表示名<input id="setupMasterName" placeholder="例：ギルドマスター / 店長 / 校長"></label>
+          <label>画像URL / ファイル名<input id="setupMasterImage" placeholder="例：master_no.jpeg / https://..."></label>
+          <label>セリフ<input id="setupMasterMessage" placeholder="例：冷やかしか？さっさとメニューを開け"></label>
+        </div>
+
+        <div class="setup-step">
+          <div class="admin-card-title">④ 討伐完了画面</div>
+          <label>背景画像URL / ファイル名<input id="setupVictoryBg" placeholder="例：victory_bg.png / https://..."></label>
+          <label>中央画像URL / ファイル名<input id="setupVictoryImage" placeholder="例：victory_clear.PNG"></label>
+          <label>タイトル<input id="setupVictoryTitle" placeholder="例：討伐完了"></label>
+          <label>メッセージ<textarea id="setupVictorySubtitle" placeholder="例：ご来店ありがとうございました"></textarea></label>
+          <label>BGMキー / URL<input id="setupVictoryBgm" placeholder="例：ending"></label>
+        </div>
+
+        <div class="setup-step">
+          <div class="admin-card-title">⑤ 同期・通知</div>
+          <label>店舗ID（QR用）<input id="setupStoreId" placeholder="例：mystore"></label>
+          <label>GAS URL<input id="setupGasUrl" placeholder="https://script.google.com/macros/s/.../exec"></label>
+          <label>Discord通知URL（任意）<input id="setupDiscordUrl" placeholder="https://discord.com/api/webhooks/..."></label>
+          <label>ご連絡先メールアドレス（お支払い・サポート連絡用）<input id="setupContactEmail" type="email" placeholder="例：owner@example.com"></label>
+        </div>
+
+        <div class="toolbar">
+          <button class="btn gold" id="setupWizardSave">保存して開始</button>
+          <button class="btn" id="setupWizardSkip">あとで設定</button>
+        </div>
+      </div>
+    </div>
+
+
+    <div id="storeInfoOverlay" class="level-up-overlay">
+      <div class="panel window store-info-card">
+        <div class="title-logo small">店舗情報</div>
+        <div id="storeInfoBody" class="store-info-body"></div>
+        <button class="btn mt" id="storeInfoClose">閉じる</button>
+      </div>
+    </div>
+
+</div>
+
+  <script src="theme.js?v=1.32-cartmode"></script>
+  <script src="utils.js?v=1.32-cartmode"></script>
+  <script src="integrity-config.js?v=1.0"></script>
+  <script src="integrity.js?v=1.0"></script>
+  <script src="license-config.js?v=1.0"></script>
+  <script src="license.js?v=1.0"></script>
+  <script src="storage.js?v=1.32-cartmode"></script>
+  <script src="audio.js?v=1.33-bgmfix"></script>
+  <script src="ui.js?v=1.32-cartmode"></script>
+  <script src="customer.js?v=1.32-cartmode"></script>
+  <script src="battle.js?v=1.34-scale80"></script>
+  <script src="discord.js?v=1.32-cartmode"></script>
+  <script src="menu.js?v=1.33-lightbox"></script>
+  <script src="order.js?v=1.37-closedguard"></script>
+  <script src="app.js?v=1.41-adminguard"></script>
+</body>
+</html>
