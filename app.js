@@ -8,6 +8,11 @@ window.GuildApp = {VERSION:'4.0'};
         const presets=await GuildTheme.loadPresets();
         const p=(presets||[]).find(x=>x.id===data.settings.currentPresetId);
         if(p) GuildTheme.applyPresetTheme(p);
+        else GuildTheme.clearOverride(); // 保存されているプリセットIDが見つからない場合も既定へ
+      } else {
+        // プリセット未使用（既定/最初のRPGテーマなど）の場合、この端末にだけ古いプリセットの色が
+        // 残っていることがあるため、ここで必ず既定にリセットしてから下の個別カスタムを乗せる
+        GuildTheme.clearOverride();
       }
     }catch(e){}
     try{ if(data.settings.themeWords) GuildTheme.saveWordsOverride(data.settings.themeWords); }catch(e){}
@@ -268,7 +273,34 @@ window.GuildApp = {VERSION:'4.0'};
     const body=$('storeInfoBody'); if(body) body.innerHTML=lines.filter(Boolean).join('');
   }
 
-  function renderParty(){ const count=Math.max(1,Math.min(20,Number(data.partyCount||1)||1)); data.partyCount=count; const charge=Number(data.settings.coverCharge??500)||0; const label=(window.GuildTheme?GuildTheme.w('customerRegister'):'ギルド登録料（チャージ）'); $('partyCountView').textContent=`${count}名`; $('chargePreview').textContent=`${label}：${GuildUtils.yen(charge,data.settings.currency)} × ${count}名 = ${GuildUtils.yen(charge*count,data.settings.currency)}`; }
+  function renderParty(){ const count=Math.max(1,Math.min(20,Number(data.partyCount||1)||1)); data.partyCount=count; const charge=Number(data.settings.coverCharge??500)||0; const label=(window.GuildTheme?GuildTheme.w('customerRegister'):'ギルド登録料（チャージ）'); $('partyCountView').textContent=`${count}名`; $('chargePreview').textContent=`${label}：${GuildUtils.yen(charge,data.settings.currency)} × ${count}名 = ${GuildUtils.yen(charge*count,data.settings.currency)}`; renderPartyMembers(); }
+  // ===== 同行者の名前・アイコン入力（Phase6）=====
+  // 代表者以外のパーティメンバー分の入力欄を、人数に合わせて動的に描画する。
+  // 人数を+/-しても、すでに入力済みの内容は保持したまま再描画する。
+  let partyMemberDraft=[];
+  function readPartyMemberDraft(){
+    const rows=document.querySelectorAll('#partyMembersBox [data-member-row]');
+    partyMemberDraft=Array.from(rows).map(r=>({
+      name:(r.querySelector('[data-member-name]')||{}).value||'',
+      avatar:(r.querySelector('[data-member-avatar]')||{}).value||AVATAR_LIST[0]
+    }));
+  }
+  function renderPartyMembers(){
+    const box=$('partyMembersBox'); if(!box) return;
+    readPartyMemberDraft();
+    const count=Math.max(1,Math.min(20,Number(data.partyCount||1)||1));
+    const extra=count-1;
+    if(extra<=0){ box.innerHTML=''; return; }
+    let html='<p class="tiny mt">同行者の名前・アイコン（任意。入力しておくと、次回その人が一人で来店した時も「登録済みの'+(window.GuildTheme?GuildTheme.w('customer'):'冒険者')+'から選ぶ」で選べます）</p>';
+    for(let i=0;i<extra;i++){
+      const d=partyMemberDraft[i]||{name:'',avatar:AVATAR_LIST[0]};
+      html+='<div class="row mt" data-member-row style="align-items:center;gap:6px">'+
+        '<input data-member-name placeholder="同行者'+(i+1)+'の名前（任意）" value="'+GuildUtils.esc(d.name)+'" style="flex:2">'+
+        '<select data-member-avatar style="flex:0 0 60px">'+AVATAR_LIST.map(a=>'<option value="'+a+'" '+(a===d.avatar?'selected':'')+'>'+a+'</option>').join('')+'</select>'+
+        '</div>';
+    }
+    box.innerHTML=html;
+  }
   // 同じ名前の人がいても見た目で区別できるように、登録時にアイコン(絵文字)を選んでもらう
   const AVATAR_LIST=['🙂','😎','🐱','🐶','🦊','🐻','🐼','🐰','🦁','🐯','🐸','🐧','🦄','🐲','👻','🎃','⭐','🔥','🍀','💎'];
   let selectedAvatar=AVATAR_LIST[0];
@@ -416,7 +448,17 @@ window.GuildApp = {VERSION:'4.0'};
   $('btnPartyOk').onclick=()=>{ GuildAudio.playSe('ok'); showChargeConfirm(); };
   $('btnCancelCharge').onclick=()=>GuildUI.closeModals();
   $('btnNoCharge').onclick=()=>{ GuildAudio.playSe('cancel'); GuildUI.closeModals(); showWelcomeScreen(); };
-  $('btnDoCharge').onclick=()=>{ GuildAudio.playSe('ok'); applyCoverCharge(); GuildUI.closeModals(); GuildUI.renderNotice(data.settings); GuildUI.show('screenMain'); applyBattleThemeBg(); GuildBattle.render(); };
+  $('btnDoCharge').onclick=()=>{
+    GuildAudio.playSe('ok');
+    readPartyMemberDraft();
+    const repName=String(data.currentCustomer||'').trim();
+    partyMemberDraft.forEach(function(m){
+      const nm=String(m.name||'').trim();
+      if(!nm || nm===repName) return; // 空欄・代表者と同じ名前はスキップ
+      if(GuildCustomer.registerOrReuse) GuildCustomer.registerOrReuse(nm, m.avatar||AVATAR_LIST[0]);
+    });
+    applyCoverCharge(); GuildUI.closeModals(); GuildUI.renderNotice(data.settings); GuildUI.show('screenMain'); applyBattleThemeBg(); GuildBattle.render();
+  };
   $('btnBackTitle').onclick=()=>{ GuildAudio.playSe('cancel'); GuildUI.closeModals(); welcomeText('メニューを開きますか？'); showWelcomeScreen(); };
   $('btnCloseMenu').onclick=()=>GuildUI.closeModals(); $('btnCancelOrder').onclick=GuildOrder.cancelPending; $('btnNoOrder').onclick=GuildOrder.cancelPending; $('btnDoOrder').onclick=GuildOrder.confirmOrder; $('btnCheckout').onclick=GuildOrder.checkoutAsk; $('btnCancelCheckout').onclick=()=>GuildUI.closeModals(); $('btnNoCheckout').onclick=()=>GuildUI.closeModals(); $('btnDoCheckout').onclick=GuildOrder.checkoutDo;
   if($('btnReceiptConfirm')) $('btnReceiptConfirm').onclick=()=>{

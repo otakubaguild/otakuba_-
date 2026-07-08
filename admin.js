@@ -9,6 +9,11 @@
         const presets=await GuildTheme.loadPresets();
         const p=(presets||[]).find(x=>x.id===data.settings.currentPresetId);
         if(p) GuildTheme.applyPresetTheme(p);
+        else GuildTheme.clearOverride(); // 保存されているプリセットIDが見つからない場合も既定へ
+      } else {
+        // プリセット未使用（既定/最初のRPGテーマなど）の場合、この端末にだけ古いプリセットの色が
+        // 残っていることがあるため、ここで必ず既定にリセットしてから下の個別カスタムを乗せる
+        GuildTheme.clearOverride();
       }
     }catch(e){}
     try{ if(data.settings.themeWords) GuildTheme.saveWordsOverride(data.settings.themeWords); }catch(e){}
@@ -727,13 +732,27 @@
       savedAt:new Date().toISOString()
     };
   }
-  function applyThemeSnapshot(snap){
+  async function applyThemeSnapshot(snap){
     if(!snap) return;
     const s=data.settings;
-    if(snap.currentPresetId) s.currentPresetId=snap.currentPresetId;
-    if(snap.themeColors){ s.themeColors=snap.themeColors; if(window.GuildTheme) GuildTheme.saveColorsOverride(snap.themeColors); }
-    if(snap.themeWords){ s.themeWords=snap.themeWords; if(window.GuildTheme) GuildTheme.saveWordsOverride(snap.themeWords); }
-    if(snap.themeFonts){ s.themeFonts=snap.themeFonts; if(window.GuildTheme) GuildTheme.saveFontsOverride(snap.themeFonts); }
+    // まず土台をリセットする：スナップショットが特定のプリセットを指していればそのプリセットの素の値へ、
+    // 指していなければ既定(theme.json)へ。これをやらないと、直前まで使っていた別コンセプトの
+    // 店名・呼び名・色などが一部残ったまま重なってしまい、「切り替えても反映されない」ことになる。
+    if(window.GuildTheme){
+      let resetDone=false;
+      if(snap.currentPresetId && GuildTheme.loadPresets){
+        try{
+          const presets=await GuildTheme.loadPresets();
+          const preset=(presets||[]).find(x=>x.id===snap.currentPresetId);
+          if(preset){ GuildTheme.applyPresetTheme(preset); resetDone=true; }
+        }catch(e){}
+      }
+      if(!resetDone) GuildTheme.clearOverride();
+    }
+    s.currentPresetId=snap.currentPresetId||'';
+    if(snap.themeColors && Object.keys(snap.themeColors).length){ s.themeColors=snap.themeColors; if(window.GuildTheme) GuildTheme.saveColorsOverride(snap.themeColors); } else { delete s.themeColors; }
+    if(snap.themeWords && Object.keys(snap.themeWords).length){ s.themeWords=snap.themeWords; if(window.GuildTheme) GuildTheme.saveWordsOverride(snap.themeWords); } else { delete s.themeWords; }
+    if(snap.themeFonts && Object.keys(snap.themeFonts).length){ s.themeFonts=snap.themeFonts; if(window.GuildTheme) GuildTheme.saveFontsOverride(snap.themeFonts); } else { delete s.themeFonts; }
     if(snap.themeCustom) s.themeCustom=snap.themeCustom;
     if(snap.uiTheme){ s.uiTheme=snap.uiTheme; if(window.GuildTheme) GuildTheme.saveUiThemeOverride(snap.uiTheme); }
     if(snap.defeatEffect) s.defeatEffect=snap.defeatEffect;
@@ -754,9 +773,9 @@
       '<button class="btn small red" data-theme-del="'+esc(name)+'">削除</button>'+
       '</div>'
     ).join('') : '<p class="tiny">まだ保存されたテーマはありません</p>';
-    document.querySelectorAll('[data-theme-apply]').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('[data-theme-apply]').forEach(b=>b.onclick=async()=>{
       if(!confirm('「'+b.dataset.themeApply+'」を適用しますか？今の状態は上書きされます（先に保存推奨）'))return;
-      applyThemeSnapshot(snaps[b.dataset.themeApply]);
+      await applyThemeSnapshot(snaps[b.dataset.themeApply]);
     });
     document.querySelectorAll('[data-theme-del]').forEach(b=>b.onclick=()=>{
       if(!confirm('「'+b.dataset.themeDel+'」を削除しますか？'))return;
@@ -790,8 +809,9 @@
       if(!confirm('今のコンセプト本来の色に戻しますか？'))return;
       delete data.settings.themeColors;
       save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
-      GuildTheme.clearOverride();
-      toast('色をリセットしました。ページを再読み込みすると反映されます');
+      GuildTheme.resetColorsOnly();
+      toast('色を元に戻しました');
+      renderThemeColors();
     };
   }
   const UI_BORDER_COLOR_OPTS=[['gold','金'],['silver','銀'],['blue','青'],['red','赤'],['green','緑'],['custom','カスタムカラー']];
@@ -923,6 +943,11 @@
           GuildTheme.applyPresetTheme(p);
           applyConceptTemplateToSettings(p);
           data.settings.currentPresetId=p.id;
+          // 古いプリセットで個別カスタムしていたカラー/文言/フォントの上書きが残っていると、
+          // 新しいプリセットに切り替えたつもりでも次回読み込み時に古い値が乗ってきてしまうため、ここで消す
+          delete data.settings.themeColors;
+          delete data.settings.themeWords;
+          delete data.settings.themeFonts;
           if(Array.isArray(p.enemies)){
             data.monsters=p.enemies.map(function(e,idx){ return normalizeMonster({ id:GuildUtils.uid('enemy'), name:e.name, stage:e.stage, maxHp:e.maxHp, hp:e.maxHp, bg:e.bg, image:e.image, bgm:e.bgm, scale:e.scale||70, offsetX:e.offsetX||0, offsetY:e.offsetY||0 }, idx); });
             data.currentEnemyIndex=0;
@@ -942,7 +967,17 @@
         };
       });
     });
-    $('clearPreset').onclick=function(){ if(!confirm('コンセプトを解除して既定に戻しますか？'))return; GuildTheme.clearOverride(); toast('解除しました。再読み込みで既定に戻ります'); };
+    $('clearPreset').onclick=function(){
+      if(!confirm('コンセプトを解除して既定に戻しますか？'))return;
+      data.settings.currentPresetId='';
+      delete data.settings.themeColors;
+      delete data.settings.themeWords;
+      delete data.settings.themeFonts;
+      save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
+      GuildTheme.clearOverride();
+      toast('既定のテーマに戻しました');
+      renderThemeEditor();
+    };
   }
   const FONT_TARGETS=[
     ['brand','🏪 店名・見出し用'],['battle','⚔️ 討伐・戦闘UI用（敵名/撃破文字/HP等）'],['button','🔘 ボタンの文字']
@@ -1590,13 +1625,28 @@
         '<p>画面上部のサブタブで切り替えます。</p><ul>'+
         '<li><b>🏪 店舗情報</b>：お店の名前・住所・営業時間など、お客様向け画面にも表示される基本情報。</li>'+
         '<li><b>✏️ テキスト</b>：タイトル画面の呼びかけ文や「冒険者」「戦闘」などの呼び名を変更できます。</li>'+
-        '<li><b>🎨 カラー</b>：画面の配色（ゴールドなど基調色）を変更できます。</li>'+
+        '<li><b>🎨 カラー</b>：画面の配色（ゴールドなど基調色）そのものを変更できます。</li>'+
+        '<li><b>🖼️ UIテーマ</b>：枠線の色・パネルの背景（半透明黒／羊皮紙／ガラス風など）・ボタンの見た目（RPG／SF／魔法学校／和風）・角丸や影・背景ぼかしを設定できます。「🎨 カラー」が色そのものの変更なのに対し、こちらは形・質感の変更です。詳しくは下の「🖼️ UIテーマ」の項目をご覧ください。</li>'+
+        '<li><b>💥 撃破演出</b>：敵を倒した瞬間の見せ方（フラッシュ・リングなど）と、演出用の画像を設定します。詳しくは下の「💥 撃破演出」の項目をご覧ください。</li>'+
         '<li><b>🖼️ 画像</b>：タイトル背景・戦闘背景などの画像を差し替えます。</li>'+
         '<li><b>🎵 BGM</b>：タイトル画面・戦闘・討伐後（エンディング）などのBGMを個別に設定できます。</li>'+
-        '<li><b>⚔️ キャラクター</b>：注文に応じて登場する「敵」の名前・画像・体力（何注文で倒れるか）を設定します。各敵ごとに「登場時／被弾時／撃破時」のセリフを自由に追加でき、複数登録するとその中からランダムで1つ表示されます（未入力なら何も表示されません）。</li>'+
+        '<li><b>⚔️ キャラクター</b>：注文に応じて登場する「敵」の名前・画像・体力（何注文で倒れるか）・大きさ（未設定の敵は自動で70%表示）を設定します。各敵ごとに「登場時／被弾時／撃破時」のセリフを自由に追加でき、複数登録するとその中からランダムで1つ表示されます（未入力なら何も表示されません）。さらに敵ごとに「撃破演出画像」を個別設定でき、設定しておくとその敵を倒した時だけ専用の画像が表示されます（未設定の敵は共通画像が使われます）。</li>'+
         '<li><b>🗺️ ステージ</b>：ボスの出現条件や演出まわりの設定です。</li>'+
         '<li><b>👁️ プレビュー</b>：変更内容をお客様目線で確認できます。保存前に必ずここでチェックしてください。</li>'+
         '</ul><div class="guide-note">画像・BGMはご自身で用意したファイルをアップロードして使えます。ファイル形式に迷ったら画像はPNG/JPG、音声はMP3が安全です。</div>'
+      )+
+      sec('🖼️ UIテーマ（枠・パネル・ボタンの見た目）',
+        '<p>お客様画面の「質素感」を減らすための設定です。特に効果が大きいのは<b>枠内背景を「半透明黒」にして背景ぼかしをONにする</b>組み合わせで、これだけで高級感がかなり変わります。</p><ul>'+
+        '<li><b>枠線の色</b>：金・銀・青・赤・緑・カスタムカラーから選べます。</li>'+
+        '<li><b>枠内背景</b>：黒／半透明黒／半透明青／羊皮紙／木目／ガラス風／カスタム画像。</li>'+
+        '<li><b>ボタンスタイル</b>：RPG／SF／魔法学校／和風の4種類で、ボタンの角の丸さや質感が変わります。</li>'+
+        '<li><b>ボタン角丸・枠の太さ・枠の角丸</b>：スライダーで細かく調整できます。</li>'+
+        '<li><b>ボタン影・背景ぼかし</b>：ON/OFFの切り替えです。</li>'+
+        '</ul><p class="tiny">「既定に戻す」を押すと、いつでも標準の見た目に戻せます。</p>'
+      )+
+      sec('💥 撃破演出（敵を倒した時の見せ方）',
+        '<p>敵を倒した瞬間の演出です。<b>演出スタイル</b>（通常のポップ／フラッシュ／リング）は全ての敵で共通です。</p>'+
+        '<p><b>撃破画像</b>は「撃破時に画像を表示する」をONにすると使えます。ここで設定した画像が全ての敵の共通画像になりますが、「⚔️ キャラクター」タブの各モンスター編集内で敵ごとに専用の撃破画像を設定すると、その敵だけはそちらが優先されます（雑魚は共通画像、ボスだけ専用の絵、といった使い方もできます）。</p>'
       )+
       sec('🍴 メニュータブ（商品登録）',
         '<p>ビール・サワー／焼酎・カクテル／ショット・ボトル／ソフトドリンク／フードなどのカテゴリごとに商品を登録・編集・削除できます。商品名・価格・ダメージ量（1杯で敵にどれだけダメージが入るか）を設定してください。</p>'
@@ -1618,8 +1668,15 @@
       sec('🏪 店舗ロゴについて',
         '<p>「🎭 テーマ編集 → 🏪 店舗情報」で店舗ロゴ画像のURLを登録すると、お客様のタイトル画面と「店舗情報」ボタンの両方にロゴが表示されます。未設定の場合は何も表示されません。</p>'
       )+
+      sec('🧑‍🤝‍🧑 パーティ人数・同行者登録について',
+        '<p>お客様がパーティ人数を入力する画面で、代表者以外の人数分「名前・アイコン」を入力する欄が自動で表示されます（任意入力、空欄でもOK）。</p><ul>'+
+        '<li>入力された同行者は、その場でLv.1・来店1回として顧客リストに登録されます。</li>'+
+        '<li>同じ名前がすでに登録済みの場合は、確認なしでその人として来店回数だけ+1されます（代表者の登録時のような確認ダイアログは出ません）。</li>'+
+        '<li>一度登録しておくと、次回その同行者が一人だけで来店した時も、名前入力画面の「📋 登録済みの冒険者から選ぶ」からその人を選べば、レベルや来店回数を引き継げます。</li>'+
+        '</ul>'
+      )+
       sec('👤 顧客タブ',
-        '<p>来店したお客様の一覧・レベル・来店回数を確認できます。名前で検索も可能です。</p>'
+        '<p>来店したお客様の一覧・レベル・来店回数を確認できます。名前で検索も可能です。パーティ人数画面で登録した同行者も、ここに同じ顧客として一覧表示されます。</p>'
       )+
       sec('⚙️ 設定タブ（重要な設定はここに集約）',
         '<ul>'+
