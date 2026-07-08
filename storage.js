@@ -295,7 +295,7 @@ window.GuildStorage = (() => {
       if(!c || !c.avatarImage) return c;
       const copy=Object.assign({}, c); delete copy.avatarImage; return copy;
     });
-    return {action:'saveAll', settings:data.settings, menu:data.menu, monsters:data.monsters, customers:customersForCloud, sales:data.sales, deletedSaleIds:data.deletedSaleIds||[], deletedCustomerIds:data.deletedCustomerIds||[], salesSettings:data.salesSettings, currentEnemyIndex:data.currentEnemyIndex, progressResetAt:data.progressResetAt||'', monsters:data.monsters};
+    return {action:'saveAll', settings:data.settings, menu:data.menu, monsters:data.monsters, customers:customersForCloud, sales:data.sales, deletedSaleIds:data.deletedSaleIds||[], deletedCustomerIds:data.deletedCustomerIds||[], salesSettings:data.salesSettings, currentEnemyIndex:data.currentEnemyIndex, progressResetAt:data.progressResetAt||'', monsters:data.monsters, lastLocalSaveAt:data.lastLocalSaveAt||0};
   }
   function pushCloud(){
     const url=gasUrl(); if(!url) return;
@@ -309,7 +309,13 @@ window.GuildStorage = (() => {
     try{
       const res=await fetch(url+(url.includes('?')?'&':'?')+'action=sync&v='+Date.now(),{cache:'no-store'});
       const remote=await res.json(); if(!remote||typeof remote!=='object') return false;
-      if(remote.settings && Object.keys(remote.settings).length){
+      const remoteSavedAt = Number(remote.lastLocalSaveAt)||0;
+      const localSavedAt = Number(data.lastLocalSaveAt)||0;
+      // この端末で保存した内容の方がGAS側の最終保存より明らかに新しい場合、GAS側の（まだ追いついていない）
+      // 古いデータで設定・メニュー・敵情報を上書きしない。保存したはずの内容が古いデータに戻される事故を防ぐための保険。
+      // ※GAS側にこの項目がまだ無い場合(0)は今まで通りの動作にする（後方互換）
+      const remoteIsStale = remoteSavedAt>0 && localSavedAt>0 && remoteSavedAt < localSavedAt;
+      if(remote.settings && Object.keys(remote.settings).length && !remoteIsStale){
         // 浅いマージだと themeCustom / notice / audioFiles などのネストしたオブジェクトが
         // 丸ごと置き換わってしまい、片方の端末にしかない項目が消えることがあるため、
         // ネストが深いキーだけは1階層だけ深くマージする
@@ -326,8 +332,10 @@ window.GuildStorage = (() => {
           merged.audioFiles.bgm = Object.assign({}, (data.settings.audioFiles||{}).bgm||{}, remote.settings.audioFiles.bgm);
         }
         data.settings = merged;
+      } else if(remoteIsStale){
+        schedulePush(); // GAS側がまだ古いので、こちらの最新設定を再送しておく
       }
-      if(Array.isArray(remote.menu)&&remote.menu.length){
+      if(Array.isArray(remote.menu)&&remote.menu.length && !remoteIsStale){
         const remoteMenu = remote.menu.map(normalizeMenu);
         const localMenu = Array.isArray(data.menu) ? data.menu : [];
         // GAS側がフードだけ等の不完全メニューなら取り込まず、現在の本番メニューをGASへ戻す
@@ -352,7 +360,7 @@ window.GuildStorage = (() => {
         }
         data.activeBill=[];
       }
-      if(Array.isArray(remote.monsters)&&remote.monsters.length){
+      if(Array.isArray(remote.monsters)&&remote.monsters.length && !remoteIsStale){
         const idx=data.currentEnemyIndex, curHp=(data.monsters[idx]||{}).hp;
         data.monsters=remote.monsters.map(normalizeMonster);
         // 戦闘中の現在HPは端末側を尊重（メニュー定義だけ同期したい場合の保険）
@@ -398,7 +406,7 @@ window.GuildStorage = (() => {
     }catch(e){ return false; }
   }
 
-  function save(){ set(keys.state,data); schedulePush(); }
+  function save(){ data.lastLocalSaveAt=Date.now(); set(keys.state,data); schedulePush(); }
   function resetProgress(opts){
     data.currentEnemyIndex=0;
     data.monsters.forEach(m=>m.hp=m.maxHp);
