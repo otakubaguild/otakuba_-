@@ -26,6 +26,7 @@ window.GuildStorage = (() => {
       bg:fixAssetPath(m.bg || m.background) || 'presets/rpg/grass.png', background:fixAssetPath(m.bg || m.background) || 'presets/rpg/grass.png',
       image:fixAssetPath(m.image) || 'presets/rpg/slime.png', bgm:m.bgm || 'slime', sort:Number(m.sort || i),
       scale:Number.isFinite(Number(m.scale))?Number(m.scale):70, offsetX:Number.isFinite(Number(m.offsetX))?Number(m.offsetX):0, offsetY:Number.isFinite(Number(m.offsetY))?Number(m.offsetY):0,
+      defeatImage:m.defeatImage||'',
       texts:texts};
   }
 

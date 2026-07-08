@@ -478,6 +478,11 @@
     '<label>大きさ <span data-scale-val>'+(Number(m.scale)||70)+'</span>%<input data-field="scale" type="range" min="30" max="250" value="'+(Number(m.scale)||70)+'"></label>'+
     '<label>左右 <span data-ox-val>'+(Number(m.offsetX)||0)+'</span>%<input data-field="offsetX" type="range" min="-60" max="60" value="'+(Number(m.offsetX)||0)+'"></label>'+
     '<label>上下 <span data-oy-val>'+(Number(m.offsetY)||0)+'</span>%<input data-field="offsetY" type="range" min="-60" max="60" value="'+(Number(m.offsetY)||0)+'"></label>'+
+    '<div class="admin-card" style="margin:10px 0"><div class="admin-card-title">💥 撃破演出画像（この敵専用・任意）</div>'+
+    '<p class="tiny">未入力なら、テーマ編集→撃破演出で設定した共通画像が使われます。エフェクトのスタイル（フラッシュ／リングなど）は共通設定のまま、画像だけこの敵専用に差し替えられます。</p>'+
+    '<label>撃破画像 URL / ファイル名<input data-field="defeatImage" value="'+esc(m.defeatImage||'')+'" placeholder="例：defeat_slime.png / https://..."></label>'+
+    (m.defeatImage?('<div style="text-align:center;margin-top:6px"><img src="'+esc(GuildUtils.driveImg(m.defeatImage))+'" style="max-width:120px;max-height:120px;border:2px solid rgba(246,200,79,.4);border-radius:10px;background:#000" onerror="this.style.display=\'none\'"></div>'):'')+
+    '</div>'+
     '<div class="admin-card" style="margin:10px 0"><div class="admin-card-title">🗨️ 専用セリフ（未入力なら何も表示されません）</div>'+
     textCatBlock(m,i,'appear','登場時のセリフ','例：よくぞ来たな、冒険者よ')+
     textCatBlock(m,i,'damage','ダメージを受けた時のセリフ','例：ぐぬぬ…！')+
@@ -485,7 +490,7 @@
     '<p class="tiny">複数追加した場合は、その中からランダムで1つ表示されます。</p></div>'+
     '<div class="toolbar"><button class="btn gold small" data-save-monster="'+i+'">この敵を保存</button><button class="btn small" data-current-monster="'+i+'">現在の敵にする</button><button class="btn small" data-dup-monster="'+i+'">複製</button><button class="btn red small" data-del-monster="'+i+'">削除</button></div></div></section>';}
   function monstersListHtml(){data.monsters=(data.monsters||[]).map(normalizeMonster);return data.monsters.length?data.monsters.map(function(m,i){return monsterCard(m,i);}).join(''):'<div class="empty">なし</div>';}
-  function readMonsterCard(card){var m=data.monsters[+card.dataset.monsterIndex];m.name=card.querySelector('[data-field=name]').value;m.stage=card.querySelector('[data-field=stage]').value;var bgmUrl=(card.querySelector('[data-field=bgmUrl]')||{}).value||'';m.bgm=bgmUrl.trim()?bgmUrl.trim():card.querySelector('[data-field=bgm]').value;m.hp=+card.querySelector('[data-field=hp]').value||0;m.maxHp=+card.querySelector('[data-field=maxHp]').value||500;m.bg=card.querySelector('[data-field=bg]').value;m.background=m.bg;var imgUrl=(card.querySelector('[data-field=imageUrl]')||{}).value||'';m.image=imgUrl.trim()?imgUrl.trim():card.querySelector('[data-field=image]').value;m.scale=+card.querySelector('[data-field=scale]').value||70;m.offsetX=+card.querySelector('[data-field=offsetX]').value||0;m.offsetY=+card.querySelector('[data-field=offsetY]').value||0;m.texts=m.texts&&typeof m.texts==='object'?m.texts:{};['appear','damage','defeat'].forEach(function(cat){var list=card.querySelector('[data-text-cat="'+cat+'"]');m.texts[cat]=list?Array.from(list.querySelectorAll('[data-text-input]')).map(function(inp){return inp.value.trim();}).filter(function(v){return !!v;}):[];});return m;}
+  function readMonsterCard(card){var m=data.monsters[+card.dataset.monsterIndex];m.name=card.querySelector('[data-field=name]').value;m.stage=card.querySelector('[data-field=stage]').value;var bgmUrl=(card.querySelector('[data-field=bgmUrl]')||{}).value||'';m.bgm=bgmUrl.trim()?bgmUrl.trim():card.querySelector('[data-field=bgm]').value;m.hp=+card.querySelector('[data-field=hp]').value||0;m.maxHp=+card.querySelector('[data-field=maxHp]').value||500;m.bg=card.querySelector('[data-field=bg]').value;m.background=m.bg;var imgUrl=(card.querySelector('[data-field=imageUrl]')||{}).value||'';m.image=imgUrl.trim()?imgUrl.trim():card.querySelector('[data-field=image]').value;m.scale=+card.querySelector('[data-field=scale]').value||70;m.offsetX=+card.querySelector('[data-field=offsetX]').value||0;m.offsetY=+card.querySelector('[data-field=offsetY]').value||0;m.defeatImage=(card.querySelector('[data-field=defeatImage]')||{}).value||'';m.texts=m.texts&&typeof m.texts==='object'?m.texts:{};['appear','damage','defeat'].forEach(function(cat){var list=card.querySelector('[data-text-cat="'+cat+'"]');m.texts[cat]=list?Array.from(list.querySelectorAll('[data-text-input]')).map(function(inp){return inp.value.trim();}).filter(function(v){return !!v;}):[];});return m;}
   function saveMonsterForm(){document.querySelectorAll('[data-monster-index]').forEach(readMonsterCard);save();}
   let monsterContainerId='adminContent';
   function renderMonsters(containerId){monsterContainerId=containerId||monsterContainerId;$(monsterContainerId).innerHTML='<h2>⚔️ 討伐モンスター管理</h2><div class="admin-card"><div class="admin-card-title">現在のテーマ：'+esc(PRESET_LABELS[activePresetId()]||activePresetId())+'</div><p class="tiny">背景・敵画像の選択肢は、このテーマの素材だけに絞り込んで表示されます。テーマを変えたい場合は「テーマ編集」の上部から選び直してください。</p></div><div class="toolbar"><button class="btn gold" id="addMonster">追加</button><button class="btn green" id="saveMonsters">全体保存</button><button class="btn" id="monOpenAll">全部開く</button><button class="btn" id="monCloseAll">全部閉じる</button><button class="btn" id="jsonMonsters">JSON</button></div><div class="category-list" id="monsterListBox">'+monstersListHtml()+'</div>';bindMonsterEvents();
@@ -855,12 +860,12 @@
     const fx=Object.assign({style:'pop',image:'',imageEnabled:false}, data.settings.defeatEffect||{});
     $('themeSubContent').innerHTML=
       '<div class="admin-card"><div class="admin-card-title">💥 撃破演出</div>'+
-      '<p class="tiny">敵を倒した瞬間の演出です。ここで選んだ内容は、すべての敵の撃破時に共通で使われます（敵ごとの個別設定はありません）。</p>'+
+      '<p class="tiny">敵を倒した瞬間の演出です。演出スタイル（フラッシュ・リングなど）はすべての敵で共通です。画像は下で共通の1枚を設定できますが、敵ごとに個別の画像を設定したい場合は「⚔️ キャラクター」タブの各モンスター編集内「撃破演出画像」で上書きできます（そちらを設定した敵は、その敵専用の画像が優先されます）。</p>'+
 
       '<label>演出スタイル<select id="fxStyle">'+DEFEAT_STYLE_OPTS.map(([k,l])=>'<option value="'+k+'" '+(fx.style===k?'selected':'')+'>'+l+'</option>').join('')+'</select></label>'+
 
       '<label class="check-row"><input type="checkbox" id="fxImageEnabled" '+(fx.imageEnabled?'checked':'')+'> 撃破時に画像を表示する</label>'+
-      '<label>撃破画像URL / ファイル名<input id="fxImage" value="'+esc(fx.image||'')+'" placeholder="例：defeat_stamp.png / https://..."></label>'+
+      '<label>撃破画像URL / ファイル名（共通・敵ごとの設定がなければこちらが使われます）<input id="fxImage" value="'+esc(fx.image||'')+'" placeholder="例：defeat_stamp.png / https://..."></label>'+
       '<p class="tiny">「倒した敵の画像」でも「撃破スタンプ風の1枚絵」でも構いません。画像ファイルはGitHubに置いて、ファイル名かURLをここに入力してください。</p>'+
       (fx.image?'<div class="fx-preview" style="text-align:center;margin:8px 0"><img src="'+esc(GuildUtils.driveImg(fx.image))+'" style="max-width:140px;max-height:140px;border:2px solid rgba(246,200,79,.45);border-radius:10px;background:#000" onerror="this.style.display=\'none\'"></div>':'')+
 

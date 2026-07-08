@@ -29,12 +29,15 @@ window.GuildBattle = (() => {
       const ring=$('defeatRing');
       if(ring){ ring.classList.remove('on'); void ring.offsetWidth; ring.classList.add('on'); setTimeout(()=>ring.classList.remove('on'),720); }
     }
-    if(cfg.imageEnabled && cfg.image){
-      const img=$('defeatImagePop');
-      if(img){
-        img.src=GuildUtils.driveImg(cfg.image);
-        img.classList.remove('on'); void img.offsetWidth; img.classList.add('on');
-        setTimeout(()=>img.classList.remove('on'),1200);
+    if(cfg.imageEnabled){
+      const imgSrc = (e && e.defeatImage) ? e.defeatImage : cfg.image;
+      if(imgSrc){
+        const img=$('defeatImagePop');
+        if(img){
+          img.src=GuildUtils.driveImg(imgSrc);
+          img.classList.remove('on'); void img.offsetWidth; img.classList.add('on');
+          setTimeout(()=>img.classList.remove('on'),1200);
+        }
       }
     }
   }
