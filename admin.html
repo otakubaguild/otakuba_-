@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#050505">
   <title>管理画面</title>
-  <link rel="stylesheet" href="main.css?v=5.46-btnwrapfix">
+  <link rel="stylesheet" href="main.css?v=5.50-themefix">
   <link rel="stylesheet" href="admin.css?v=5.47-license">
 </head>
 <body>
@@ -34,12 +34,21 @@
     <section class="panel admin-content" id="adminContent"></section>
     <div id="toast" class="toast"></div>
   </main>
-  <script src="theme.js?v=5.41-8bitfull"></script>
+  <script src="theme.js?v=5.50-themefix"></script>
   <script src="utils.js?v=5.41-8bitfull"></script>
   <script src="license-config.js?v=1.0"></script>
   <script src="license.js?v=1.0"></script>
-  <script src="storage.js?v=5.41-8bitfull"></script>
+  <script src="storage.js?v=5.50-themefix"></script>
   <script src="discord.js?v=1.0"></script>
-  <script src="admin.js?v=5.55-billfix"></script>
+  <script src="admin.js?v=5.60-themefix"></script>
+  <script>
+    // iOSのSafariは「戻る」操作でページをJSごとそのまま復元(bfcache)することがあり、
+    // その場合ここまでのスクリプトが再実行されず、切り替え前の古いテーマ・古いデータが
+    // 表示されたままになってしまう。bfcacheから復元されたと分かったら、強制的に再読み込みして
+    // 常に最新のテーマ・データで開き直すようにする。
+    window.addEventListener('pageshow', function(ev){
+      if(ev.persisted){ location.reload(); }
+    });
+  </script>
 </body>
 </html>

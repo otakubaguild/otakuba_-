@@ -10,6 +10,11 @@ window.GuildTheme = (() => {
     fonts:{ mode:'bulk', base:'', brand:'', battle:'', button:'' }
   };
   let theme = JSON.parse(JSON.stringify(FALLBACK));
+  // 「土台」の記録：既定(theme.json)の値と、直近に適用したプリセット「そのまま」の値を separately 保持しておく。
+  // これが無いと、プリセット切替後に個別カラー等をカスタムした状態から「元に戻す」を押した時、
+  // 何を基準に戻せばいいか分からず、古いカスタム値が残り続けてしまう（＝コンセプトを切り替えても反映されない不具合の原因）。
+  let baseTheme = JSON.parse(JSON.stringify(FALLBACK));
+  let presetBaseTheme = null;
 
   // ===== UIテーマ（Phase5：枠・パネル背景・ボタンスタイル・角丸・影・ぼかし）=====
   const UI_FALLBACK = {
@@ -45,6 +50,8 @@ window.GuildTheme = (() => {
         };
       }
     }catch(e){ /* 失敗してもフォールバックで動く */ }
+    // ここまでで確定した「既定(theme.json)」の値を土台として記録しておく（後で「元に戻す」時の基準になる）
+    baseTheme = JSON.parse(JSON.stringify(theme));
     // プリセットで選んで保存したテーマがあれば、それを最優先で使う
     loadOverride();
     loadUiOverride();
@@ -175,6 +182,8 @@ window.GuildTheme = (() => {
       messages: Object.assign({}, FALLBACK.messages, preset.theme.messages||{}),
       fonts: Object.assign({}, FALLBACK.fonts, preset.theme.fonts||{})
     };
+    // このプリセット「そのまま」の値を土台として記録（後で個別カラー等をカスタムしても、ここへ戻せるように）
+    presetBaseTheme = JSON.parse(JSON.stringify(theme));
     applyColors();
     applyFonts();
     applyDomText();
@@ -206,7 +215,23 @@ window.GuildTheme = (() => {
     try{ const s=localStorage.getItem('otakuba.theme.override'); if(s){ const o=JSON.parse(s); if(o&&o.words){ theme=o; return true; } } }catch(e){}
     return false;
   }
-  function clearOverride(){ try{ localStorage.removeItem('otakuba.theme.override'); }catch(e){} }
+  // 「元に戻す」の実体：直近のプリセットが分かればその素の値へ、無ければ既定(theme.json)へ、その場で（リロード不要で）戻す
+  function resetToBase(){
+    theme = JSON.parse(JSON.stringify(baseTheme));
+    presetBaseTheme = null;
+    applyColors();
+    applyFonts();
+    applyDomText();
+    try{ localStorage.setItem('otakuba.theme.override', JSON.stringify(theme)); }catch(e){}
+  }
+  // カラーだけを「今のプリセット本来の色（プリセット未使用なら既定色）」に戻す。brand/words/fontsは変更しない
+  function resetColorsOnly(){
+    const src = presetBaseTheme || baseTheme;
+    theme = Object.assign({}, theme, { color: Object.assign({}, src.color) });
+    applyColors();
+    try{ localStorage.setItem('otakuba.theme.override', JSON.stringify(theme)); }catch(e){}
+  }
+  function clearOverride(){ try{ localStorage.removeItem('otakuba.theme.override'); }catch(e){} resetToBase(); }
 
-  return { init, w, m, b, all, applyColors, applyFonts, applyDomText, lookup, loadPresets, applyPresetTheme, saveWordsOverride, saveFontsOverride, saveColorsOverride, loadOverride, clearOverride, applyUiTheme, saveUiThemeOverride, loadUiOverride, clearUiOverride, getUiTheme };
+  return { init, w, m, b, all, applyColors, applyFonts, applyDomText, lookup, loadPresets, applyPresetTheme, saveWordsOverride, saveFontsOverride, saveColorsOverride, loadOverride, clearOverride, resetToBase, resetColorsOnly, applyUiTheme, saveUiThemeOverride, loadUiOverride, clearUiOverride, getUiTheme };
 })();
