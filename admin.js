@@ -553,6 +553,13 @@
     '</div>').join('');
   }
   function renderSettings(){var s=data.settings;s.notice=Object.assign({enabled:true,title:'本日のお知らせ',body:'',position:'top'},s.notice||{});$('adminContent').innerHTML='<h2>⚙️ 設定</h2>'+
+    '<div class="admin-card"><div class="admin-card-title">🎮 ゲームモード</div>'+
+    '<label class="check-row"><input id="setGameMode" type="checkbox" '+(s.gameMode!==false?'checked':'')+'>ゲームモードON（討伐バトル演出つきのモバイルオーダー）</label>'+
+    '<p class="tiny">オン＝今まで通り、注文するたびに敵にダメージが入るRPG演出つきのモバイルオーダー。オフ＝演出なしの、ただのメニュー＋カート＋会計（お客様の名前登録・レベル・討伐画面は出ません）。カバーチャージや会計・注文履歴の保存はオフでも引き続き動きます。</p>'+
+    '<label class="check-row"><input id="setAllowGameToggle" type="checkbox" '+(s.allowCustomerGameToggle!==false?'checked':'')+'>お客様がタイトル画面でゲーム/通常メニューを選べるようにする</label>'+
+    '<p class="tiny">オン＝タイトル画面に切替ボタンが出て、お客様一人一人が「ゲームで注文」か「通常メニューで注文」かをその場で選べます（上のON/OFFは、その時の初期選択状態になります）。オフ＝切替ボタンを出さず、上のON/OFFが全員に固定で適用されます。</p>'+
+    '<div class="toolbar"><button class="btn gold" id="saveGameMode">この項目だけ保存</button></div>'+
+    '</div>'+
     '<div class="admin-card"><div class="admin-card-title">🏪 基本設定</div>'+
     '<label>通貨単位<input id="setCurrency" value="'+esc(s.currency||'G')+'"></label>'+
     '<label>チャージ（1人）<input id="setCover" type="number" value="'+(s.coverCharge??500)+'"></label>'+
@@ -585,6 +592,7 @@
     '<div class="toolbar"><button class="btn gold" id="saveNotice">この項目だけ保存</button></div>'+
     '</div><div class="toolbar"><button class="btn" id="jsonSettings">詳細JSON</button></div>';
     function pushToast(msg){ save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud(); toast(msg+'（クラウドにも送信）'); }
+    $('saveGameMode').onclick=function(){ s.gameMode=$('setGameMode').checked; s.allowCustomerGameToggle=$('setAllowGameToggle').checked; pushToast('ゲームモードを保存しました'); };
     if($('setPass')) $('setPass').addEventListener('input',function(){ const c=this.value.replace(/[^A-Za-z0-9]/g,''); if(c!==this.value) this.value=c; });
     $('saveBasic').onclick=function(){ s.currency=$('setCurrency').value||'G'; s.coverCharge=+$('setCover').value||0; s.adminPassword=($('setPass').value||'OTAKU').replace(/[^A-Za-z0-9]/g,'')||'OTAKU'; s.cartMode=$('setCartMode').checked; s.questMode=$('setQuestMode').checked; pushToast('基本設定を保存しました'); };
     $('saveNotify').onclick=function(){ s.notifyOn=$('setNotify').checked; s.gasUrl=$('setGas').value.trim(); s.discordWebhookUrl=$('setHook').value.trim(); pushToast('通知・連携設定を保存しました'); };

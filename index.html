@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#050505">
   <title data-theme-title>冒険者ギルド</title>
-  <link rel="stylesheet" href="main.css?v=1.50-themefix">
+  <link rel="stylesheet" href="main.css?v=1.60-gamemode">
   <link rel="stylesheet" href="battle.css?v=1.40-defeatfx">
   <link rel="stylesheet" href="menu.css?v=1.33-lightbox">
   <link rel="stylesheet" href="effects.css?v=1.32-cartmode">
@@ -33,6 +33,10 @@
         <img id="storeLogoImg" class="store-logo" alt="" style="display:none">
         <div class="title-logo" data-theme-html="messages.titleWelcome">ギルドへ<br>ようこそ</div>
         <div class="subtitle">メニューを開きますか？</div>
+        <div class="mode-toggle-row hidden" id="modeToggleRow">
+          <button class="btn small mode-toggle-btn" id="modeBtnGame" type="button">🎮 ゲームで注文</button>
+          <button class="btn small mode-toggle-btn" id="modeBtnPlain" type="button">📋 通常メニューで注文</button>
+        </div>
         <div class="row choice">
           <button class="btn gold" id="btnStartYes">はい</button>
           <button class="btn" id="btnStartNo">いいえ</button>
@@ -357,8 +361,8 @@
   <script src="battle.js?v=1.40-defeatfx"></script>
   <script src="discord.js?v=1.32-cartmode"></script>
   <script src="menu.js?v=1.33-lightbox"></script>
-  <script src="order.js?v=1.37-closedguard"></script>
-  <script src="app.js?v=1.42-partymembers"></script>
+  <script src="order.js?v=1.60-gamemode"></script>
+  <script src="app.js?v=1.60-gamemode"></script>
   <script>
     // iOSのSafariで「戻る」操作をすると、スクリプトを再実行せずにページをそのまま復元(bfcache)する
     // ことがあり、その場合テーマ切り替えやデータ更新が反映されないまま古い画面が表示され続けてしまう。

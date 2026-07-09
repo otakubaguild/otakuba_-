@@ -199,7 +199,9 @@ window.GuildStorage = (() => {
       business:{open:false,openedAt:'',closedAt:'',dailyReports:[]},
       storeInfo:{name:'',address:'',hours:'',phone:'',instagram:'',x:'',website:'',mapUrl:'',description:'',logo:''},
       uiTheme:{borderColor:'gold',borderColorCustom:'',panelBg:'black',panelBgCustom:'',btnStyle:'rpg',btnRadius:9,borderWidth:3,borderRadius:12,btnShadow:true,blur:true},
-      defeatEffect:{style:'pop',image:'',imageEnabled:false}
+      defeatEffect:{style:'pop',image:'',imageEnabled:false},
+      gameMode:true,
+      allowCustomerGameToggle:true
     }, defaults.settings || {});
     data.settings.notice = Object.assign({enabled:true,title:'本日のお知らせ',body:'',position:'top'}, data.settings.notice || {});
     data.settings.business = Object.assign({open:false,openedAt:'',closedAt:'',dailyReports:[]}, data.settings.business || {});

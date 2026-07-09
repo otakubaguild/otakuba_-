@@ -55,9 +55,38 @@ window.GuildApp = {VERSION:'4.0'};
   function hasActiveSession(){
     const bill=Array.isArray(data.activeBill)?data.activeBill:[];
     const c=GuildCustomer.current&&GuildCustomer.current();
+    if(!gameModeOn()) return bill.length>0; // ゲームモードOFF：名前登録しないので伝票の有無だけで判定
     return bill.length>0 && !!(data.currentCustomerId||data.currentCustomer) && !(c&&c.checkedOut===true);
   }
   function isBusinessOpen(){ return !!((data.settings&&data.settings.business)||{}).open; }
+  // ===== ゲームモード（Phase7）：OFFなら討伐演出なしの「ただのメニュー」として動かす =====
+  // sessionGameMode: このお客様（この来店）が選んだモード。nullなら管理画面の既定値に従う
+  let sessionGameMode=null;
+  function gameModeOn(){ if(sessionGameMode!==null) return sessionGameMode; return !!(data.settings && data.settings.gameMode!==false); }
+  function canToggleGameMode(){ return !!(data.settings && data.settings.allowCustomerGameToggle!==false); }
+  function renderModeToggle(){
+    const row=$('modeToggleRow'); if(!row) return;
+    if(!canToggleGameMode() || hasActiveSession()){ row.classList.add('hidden'); return; }
+    row.classList.remove('hidden');
+    const on = gameModeOn();
+    if($('modeBtnGame')) $('modeBtnGame').classList.toggle('active', on);
+    if($('modeBtnPlain')) $('modeBtnPlain').classList.toggle('active', !on);
+  }
+  function setSessionGameMode(on){
+    sessionGameMode=!!on;
+    renderModeToggle();
+  }
+  function enterMenuScreen(){
+    const rpgEl=document.querySelector('#screenMain .rpg');
+    if(rpgEl) rpgEl.classList.toggle('simple-mode', !gameModeOn());
+    GuildUI.closeModals();
+    GuildUI.renderNotice(data.settings);
+    GuildUI.show('screenMain');
+    if(gameModeOn()){
+      applyBattleThemeBg();
+      GuildBattle.render();
+    }
+  }
   let closedPollTimer=null;
   function stopClosedPoll(){ if(closedPollTimer){ clearInterval(closedPollTimer); closedPollTimer=null; } }
   function showClosedScreen(){
@@ -84,6 +113,7 @@ window.GuildApp = {VERSION:'4.0'};
     stopClosedPoll();
     applyStartTheme();
     welcomeText(welcomePrompt());
+    renderModeToggle();
     GuildUI.show('screenWelcome');
     GuildAudio.playBgm((themeCustom().startBgm)||'title');
     const creditEl=$('audioCreditText');
@@ -91,9 +121,7 @@ window.GuildApp = {VERSION:'4.0'};
   }
   function resumeBattle(){
     GuildAudio.stopBgm();
-    GuildUI.show('screenMain');
-    applyBattleThemeBg();
-    GuildBattle.render();
+    enterMenuScreen();
   }
   function applyBattleThemeBg(){
     try{
@@ -287,6 +315,7 @@ window.GuildApp = {VERSION:'4.0'};
   }
   function renderPartyMembers(){
     const box=$('partyMembersBox'); if(!box) return;
+    if(!gameModeOn()){ box.innerHTML=''; return; } // ゲームモードOFF：冒険者登録自体を行わないため、同行者欄も出さない
     readPartyMemberDraft();
     const count=Math.max(1,Math.min(20,Number(data.partyCount||1)||1));
     const extra=count-1;
@@ -346,6 +375,7 @@ window.GuildApp = {VERSION:'4.0'};
   GuildApp.showWelcomeBack=function(){
     applyStartTheme();
     welcomeText((window.GuildTheme?GuildTheme.m('welcomeBack'):'おかえりなさい、冒険者。次のクエストを受けますか？'));
+    renderModeToggle();
     GuildUI.show('screenWelcome');
     GuildAudio.playBgm((themeCustom().startBgm)||'title');
   };
@@ -416,7 +446,18 @@ window.GuildApp = {VERSION:'4.0'};
     GuildBattle.render();
   };
   $('levelUpClose').onclick=()=>$('levelUpOverlay').classList.remove('show');
-  $('btnStartYes').onclick=()=>{ GuildAudio.playSe('ok'); hideMasterMessage(); if(hasActiveSession()){ resumeBattle(); return; } GuildAudio.stopBgm(); GuildUI.show('screenName'); };
+  $('btnStartYes').onclick=()=>{
+    GuildAudio.playSe('ok'); hideMasterMessage();
+    if(hasActiveSession()){ resumeBattle(); return; }
+    GuildAudio.stopBgm();
+    if(!gameModeOn()){
+      // ゲームモードOFF：冒険者名の登録はせず、人数（カバーチャージ計算用）だけ聞いてメニューへ
+      data.currentCustomer=''; data.currentCustomerId=''; GuildStorage.save();
+      renderParty(); GuildUI.show('screenParty');
+      return;
+    }
+    GuildUI.show('screenName');
+  };
   $('btnStartNo').onclick=()=>{ GuildAudio.playSe('cancel'); showMasterMessage(); };
   $('btnAdmin').onclick=()=>location.href='admin.html';
   if($('btnStoreInfo')) $('btnStoreInfo').onclick=()=>{ GuildAudio.playSe('ok'); renderStoreInfo(); $('storeInfoOverlay').classList.add('show'); };
@@ -457,16 +498,19 @@ window.GuildApp = {VERSION:'4.0'};
       if(!nm || nm===repName) return; // 空欄・代表者と同じ名前はスキップ
       if(GuildCustomer.registerOrReuse) GuildCustomer.registerOrReuse(nm, m.avatar||AVATAR_LIST[0]);
     });
-    applyCoverCharge(); GuildUI.closeModals(); GuildUI.renderNotice(data.settings); GuildUI.show('screenMain'); applyBattleThemeBg(); GuildBattle.render();
+    applyCoverCharge(); enterMenuScreen();
   };
-  $('btnBackTitle').onclick=()=>{ GuildAudio.playSe('cancel'); GuildUI.closeModals(); welcomeText('メニューを開きますか？'); showWelcomeScreen(); };
+  $('btnBackTitle').onclick=()=>{ GuildAudio.playSe('cancel'); GuildUI.closeModals(); sessionGameMode=null; welcomeText('メニューを開きますか？'); showWelcomeScreen(); };
   $('btnCloseMenu').onclick=()=>GuildUI.closeModals(); $('btnCancelOrder').onclick=GuildOrder.cancelPending; $('btnNoOrder').onclick=GuildOrder.cancelPending; $('btnDoOrder').onclick=GuildOrder.confirmOrder; $('btnCheckout').onclick=GuildOrder.checkoutAsk; $('btnCancelCheckout').onclick=()=>GuildUI.closeModals(); $('btnNoCheckout').onclick=()=>GuildUI.closeModals(); $('btnDoCheckout').onclick=GuildOrder.checkoutDo;
   if($('btnReceiptConfirm')) $('btnReceiptConfirm').onclick=()=>{
     GuildAudio.playSe('ok');
     GuildUI.closeModals();
+    sessionGameMode=null; // 会計完了＝この方の来店は終了。次のお客様のためにモード選択をリセット
     if(GuildBattle.resetAudioFlag) GuildBattle.resetAudioFlag();
     if(window.GuildApp&&GuildApp.showWelcomeBack) GuildApp.showWelcomeBack(); else showWelcomeScreen();
   };
+  if($('modeBtnGame')) $('modeBtnGame').onclick=()=>{ GuildAudio.playSe('ok'); setSessionGameMode(true); };
+  if($('modeBtnPlain')) $('modeBtnPlain').onclick=()=>{ GuildAudio.playSe('ok'); setSessionGameMode(false); };
   if($('btnCartOpen')) $('btnCartOpen').onclick=()=>GuildOrder.openCartReview();
   if($('btnCartBack')) $('btnCartBack').onclick=()=>{ GuildUI.closeModals(); GuildUI.openModal('modalMenu'); };
   if($('btnCartCancel')) $('btnCartCancel').onclick=()=>GuildOrder.cancelCartReview();
