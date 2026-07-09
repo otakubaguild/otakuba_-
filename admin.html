@@ -26,6 +26,7 @@
     <header class="admin-head">
       <h1 id="adminHeadTitle">管理室</h1>
       <span id="bizStatusBadge" class="biz-badge">🔴 準備中</span>
+      <button class="btn small" id="btnShowTerms">📜 利用規約</button>
       <button class="btn small" id="adminHeaderToIndex">一般画面</button>
       <button class="btn red small" id="logoutBtn">ログアウト</button>
     </header>
@@ -34,7 +35,21 @@
     <section class="panel admin-content" id="adminContent"></section>
     <div id="toast" class="toast"></div>
   </main>
+  <div class="modal" id="modalTerms" style="z-index:99999;position:fixed">
+    <div class="modal-head">
+      <h2>📜 利用規約</h2>
+    </div>
+    <div class="scroll">
+      <div class="panel">
+        <div id="termsBody" class="confirm-text" style="text-align:left;line-height:1.7"></div>
+        <div class="row mt">
+          <button class="btn gold" id="btnCloseTerms">閉じる</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <script src="theme.js?v=5.50-themefix"></script>
+  <script src="terms.js?v=1.0"></script>
   <script src="utils.js?v=5.41-8bitfull"></script>
   <script src="license-config.js?v=1.0"></script>
   <script src="license.js?v=1.0"></script>

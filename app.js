@@ -461,6 +461,8 @@ window.GuildApp = {VERSION:'4.0'};
   $('btnStartNo').onclick=()=>{ GuildAudio.playSe('cancel'); showMasterMessage(); };
   $('btnAdmin').onclick=()=>location.href='admin.html';
   if($('btnStoreInfo')) $('btnStoreInfo').onclick=()=>{ GuildAudio.playSe('ok'); renderStoreInfo(); $('storeInfoOverlay').classList.add('show'); };
+  if($('btnShowTerms')) $('btnShowTerms').onclick=()=>{ GuildAudio.playSe('ok'); const b=$('termsBody'); if(b) b.innerHTML=(window.GuildTerms&&GuildTerms.html)||'利用規約が見つかりません。'; GuildUI.openModal('modalTerms'); };
+  if($('btnCloseTerms')) $('btnCloseTerms').onclick=()=>{ GuildAudio.playSe('cancel'); GuildUI.closeModals(); };
   if($('storeInfoClose')) $('storeInfoClose').onclick=()=>{ GuildAudio.playSe('cancel'); $('storeInfoOverlay').classList.remove('show'); };
   $('btnBackWelcome').onclick=()=>{ GuildAudio.playSe('cancel'); showWelcomeScreen(); };
   $('btnNameOk').onclick=()=>{

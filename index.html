@@ -12,6 +12,7 @@
 
   <style>
     .setup-wizard-overlay{z-index:10050}
+    #modalTerms{z-index:10060}
     .setup-wizard-card{max-width:94vw;width:460px;max-height:90dvh;overflow:auto;text-align:left}
     .setup-step{border:1px solid rgba(255,246,223,.25);border-radius:10px;padding:10px;margin:10px 0;background:rgba(0,0,0,.22)}
     .setup-step label{display:grid;gap:4px;margin:8px 0;font-size:12px;color:var(--gold)}
@@ -334,6 +335,21 @@
           <button class="btn gold" id="setupWizardSave">保存して開始</button>
           <button class="btn" id="setupWizardSkip">あとで設定</button>
         </div>
+        <button class="btn small mt" id="btnShowTerms" type="button" style="width:100%">📜 利用規約を見る</button>
+      </div>
+    </div>
+
+    <div class="modal" id="modalTerms">
+      <div class="modal-head">
+        <h2>📜 利用規約</h2>
+      </div>
+      <div class="scroll">
+        <div class="panel">
+          <div id="termsBody" class="confirm-text" style="text-align:left;line-height:1.7"></div>
+          <div class="row mt">
+            <button class="btn gold" id="btnCloseTerms">閉じる</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -349,6 +365,7 @@
 </div>
 
   <script src="theme.js?v=1.50-themefix"></script>
+  <script src="terms.js?v=1.0"></script>
   <script src="utils.js?v=1.32-cartmode"></script>
   <script src="integrity-config.js?v=1.0"></script>
   <script src="integrity.js?v=1.0"></script>

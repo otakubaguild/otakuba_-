@@ -67,6 +67,8 @@
     setTimeout(()=>{ fx.classList.remove('on'); },1300);
   }
   $('adminBackToIndex').onclick=()=>location.href='index.html';$('adminHeaderToIndex').onclick=()=>location.href='index.html';$('logoutBtn').onclick=()=>{sessionStorage.removeItem(SESSION);showLogin()};
+  if($('btnShowTerms')) $('btnShowTerms').onclick=()=>{ const b=$('termsBody'); if(b) b.innerHTML=(window.GuildTerms&&GuildTerms.html)||'利用規約が見つかりません。'; $('modalTerms').classList.add('active'); };
+  if($('btnCloseTerms')) $('btnCloseTerms').onclick=()=>{ $('modalTerms').classList.remove('active'); };
   function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),1500)}
   function save(){GuildStorage.save()}
   function renderStatusBadge(){
