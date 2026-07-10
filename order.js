@@ -152,7 +152,7 @@ window.GuildOrder = (() => {
   function checkoutDo(){
     const data=GuildStorage.getData();
     // 席料だけでなく、実際に何か注文していたかどうか（ガチャの発生条件に使う）
-    const hadRealOrder = Array.isArray(data.activeBill) && data.activeBill.length>0;
+    const hadRealOrder = Array.isArray(data.activeBill) && data.activeBill.some(i=>i && !i.isCharge);
     const all=withCoverCharge((data.activeBill||[]).slice());
     const total=all.reduce((s,i)=>s+Number(i.subtotal||0),0);
     const c=GuildCustomer.current();
