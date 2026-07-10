@@ -84,13 +84,15 @@ window.GuildApp = {VERSION:'4.0'};
   function isBusinessOpen(){ return !!((data.settings&&data.settings.business)||{}).open; }
   // ===== ゲームモード（Phase7）：OFFなら討伐演出なしの「ただのメニュー」として動かす =====
   // sessionGameMode: このお客様（この来店）が選んだモード。nullなら管理画面の既定値に従う
-  let sessionGameMode=null;
+  // リロードしても忘れないよう、data.sessionGameMode（この端末のlocalStorage）にも保存しておく
+  let sessionGameMode = (data.sessionGameMode===true || data.sessionGameMode===false) ? data.sessionGameMode : null;
   let gameModeNoticeShown=false;
   function gameModeOn(){ if(sessionGameMode!==null) return sessionGameMode; return !!(data.settings && data.settings.gameMode!==false); }
   function canToggleGameMode(){ return !!(data.settings && data.settings.allowCustomerGameToggle!==false); }
   function renderModeToggle(){
     const row=$('modeToggleRow'); if(!row) return;
-    if(!canToggleGameMode() || hasActiveSession()){ row.classList.add('hidden'); return; }
+    // 「注文再開」画面でも、選び直せるようにモード切替は出したままにする
+    if(!canToggleGameMode()){ row.classList.add('hidden'); return; }
     row.classList.remove('hidden');
     const on = gameModeOn();
     if($('modeBtnGame')) $('modeBtnGame').classList.toggle('active', on);
@@ -98,6 +100,7 @@ window.GuildApp = {VERSION:'4.0'};
   }
   function setSessionGameMode(on){
     sessionGameMode=!!on;
+    data.sessionGameMode=sessionGameMode; GuildStorage.save();
     renderModeToggle();
   }
   function enterMenuScreen(isFreshEntry){
@@ -563,12 +566,8 @@ window.GuildApp = {VERSION:'4.0'};
     GuildAudio.playSe('ok'); hideMasterMessage();
     if(hasActiveSession()){ resumeBattle(); return; }
     GuildAudio.stopBgm();
-    if(!gameModeOn()){
-      // ゲームモードOFF：冒険者名の登録はせず、人数（カバーチャージ計算用）だけ聞いてメニューへ
-      data.currentCustomer=''; data.currentCustomerId=''; GuildStorage.save();
-      renderParty(); GuildUI.show('screenParty');
-      return;
-    }
+    // ゲームモードON/OFFに関わらず、誰が・いつ注文したか管理側で把握できるよう、名前入力は必ず経由する。
+    // OFFの時に省略するのは討伐演出などのRPG演出だけ（enterMenuScreen側で分岐）。
     GuildUI.show('screenName');
   };
   $('btnStartNo').onclick=()=>{ GuildAudio.playSe('cancel'); showMasterMessage(); };
@@ -616,12 +615,12 @@ window.GuildApp = {VERSION:'4.0'};
     });
     applyCoverCharge(); enterMenuScreen(true);
   };
-  $('btnBackTitle').onclick=()=>{ GuildAudio.playSe('cancel'); GuildUI.closeModals(); sessionGameMode=null; gameModeNoticeShown=false; welcomeText('メニューを開きますか？'); showWelcomeScreen(); };
+  $('btnBackTitle').onclick=()=>{ GuildAudio.playSe('cancel'); GuildUI.closeModals(); sessionGameMode=null; data.sessionGameMode=null; GuildStorage.save(); gameModeNoticeShown=false; welcomeText('メニューを開きますか？'); showWelcomeScreen(); };
   $('btnCloseMenu').onclick=()=>GuildUI.closeModals(); $('btnCancelOrder').onclick=GuildOrder.cancelPending; $('btnNoOrder').onclick=GuildOrder.cancelPending; $('btnDoOrder').onclick=GuildOrder.confirmOrder; $('btnCheckout').onclick=GuildOrder.checkoutAsk; $('btnCancelCheckout').onclick=()=>GuildUI.closeModals(); $('btnNoCheckout').onclick=()=>GuildUI.closeModals(); $('btnDoCheckout').onclick=GuildOrder.checkoutDo;
   if($('btnReceiptConfirm')) $('btnReceiptConfirm').onclick=()=>{
     GuildAudio.playSe('ok');
     GuildUI.closeModals();
-    sessionGameMode=null; // 会計完了＝この方の来店は終了。次のお客様のためにモード選択をリセット
+    sessionGameMode=null; data.sessionGameMode=null; GuildStorage.save(); // 会計完了＝この方の来店は終了。次のお客様のためにモード選択をリセット
     gameModeNoticeShown=false;
     if(GuildBattle.resetAudioFlag) GuildBattle.resetAudioFlag();
     if(window.GuildApp&&GuildApp.showWelcomeBack) GuildApp.showWelcomeBack(); else showWelcomeScreen();
