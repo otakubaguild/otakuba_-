@@ -320,15 +320,35 @@ window.GuildStorage = (() => {
   function postToGas_(url, payload){
     try{ fetch(url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)}); }catch(e){}
   }
-  // 全データを1回で送らず、3つに分けて別々にPOSTする。
-  // どれか1つが失敗しても、残り2つは影響を受けない（1回あたりの保存データ量も減らせる）
+  // 直近に送った内容のスナップショット。前回と同じ内容のカテゴリは送らない。
+  // GASのロックはスクリプト全体で1個しかないため、毎回3本同時に送ると渋滞の原因になる。
+  // 「実際に変わった分だけ」送ることで、ほとんどの操作は1本のPOSTだけで済むようにする。
+  let lastPushed={game:null, store:null, asset:null};
   function pushCloud(){
     const url=gasUrl(); if(!url) return;
     const {core, asset}=splitSettings_();
     const savedAt=data.lastLocalSaveAt||0;
-    postToGas_(url, {action:'saveGameData', menu:data.menu, monsters:data.monsters, lastLocalSaveAt:savedAt});
-    postToGas_(url, {action:'saveStoreData', settings:core, customers:customersForCloud_(), sales:data.sales, deletedSaleIds:data.deletedSaleIds||[], deletedCustomerIds:data.deletedCustomerIds||[], salesSettings:data.salesSettings, lastLocalSaveAt:savedAt});
-    postToGas_(url, {action:'saveAssetData', assetSettings:asset, lastLocalSaveAt:savedAt});
+
+    const gamePayload={menu:data.menu, monsters:data.monsters};
+    const gameJson=JSON.stringify(gamePayload);
+    if(gameJson!==lastPushed.game){
+      postToGas_(url, Object.assign({action:'saveGameData', lastLocalSaveAt:savedAt}, gamePayload));
+      lastPushed.game=gameJson;
+    }
+
+    const storePayload={settings:core, customers:customersForCloud_(), sales:data.sales, deletedSaleIds:data.deletedSaleIds||[], deletedCustomerIds:data.deletedCustomerIds||[], salesSettings:data.salesSettings};
+    const storeJson=JSON.stringify(storePayload);
+    if(storeJson!==lastPushed.store){
+      postToGas_(url, Object.assign({action:'saveStoreData', lastLocalSaveAt:savedAt}, storePayload));
+      lastPushed.store=storeJson;
+    }
+
+    const assetPayload={assetSettings:asset};
+    const assetJson=JSON.stringify(assetPayload);
+    if(assetJson!==lastPushed.asset){
+      postToGas_(url, Object.assign({action:'saveAssetData', lastLocalSaveAt:savedAt}, assetPayload));
+      lastPushed.asset=assetJson;
+    }
   }
   // 保存が連続しても1.2秒に1回だけ送る（GASの負荷・遅延対策）
   function schedulePush(){ if(!gasUrl())return; clearTimeout(pushTimer); pushTimer=setTimeout(pushCloud,1200); }
