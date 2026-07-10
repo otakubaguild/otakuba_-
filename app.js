@@ -1,6 +1,29 @@
 window.GuildApp = {VERSION:'4.0'};
 (async function(){
   const {$}=GuildUtils; if(window.GuildTheme) await GuildTheme.init(); const data=await GuildStorage.init();
+  // ===== アプリ内ブラウザ（LINE/Instagram/Facebook/Google等）検出 =====
+  // これらのアプリ内蔵ブラウザは保存領域や共有機能に制限があり、正しく動作しないことがあるため、
+  // 気づいてもらえるよう案内バナーを出す（LINEは<head>内のスクリプトで自動的にSafari等へ切り替え済みのはず）。
+  (function checkInAppBrowser(){
+    try{
+      const ua=navigator.userAgent||'';
+      let name=null;
+      if(/FBAN|FBAV/i.test(ua)) name='Facebook';
+      else if(/Instagram/i.test(ua)) name='Instagram';
+      else if(/GSA\//i.test(ua)) name='Google';
+      else if(/Line\//i.test(ua)) name='LINE';
+      else if(/Twitter/i.test(ua)) name='X(Twitter)';
+      if(!name) return;
+      const banner=$('inAppBrowserBanner'); if(!banner) return;
+      $('inAppBrowserText').textContent=name+'のアプリ内ブラウザで開いています。正しく動作しない場合は、右上のメニューや共有ボタンから「ブラウザで開く」を選んでください。';
+      banner.classList.remove('hidden');
+      if($('btnCopyPageUrl')) $('btnCopyPageUrl').onclick=async()=>{
+        try{ await navigator.clipboard.writeText(location.href); GuildUI.toast('URLをコピーしました'); }
+        catch(e){ GuildUI.toast('コピーできませんでした。URL欄を長押しして選択してください'); }
+      };
+      if($('btnCloseInAppBanner')) $('btnCloseInAppBanner').onclick=()=>banner.classList.add('hidden');
+    }catch(e){}
+  })();
   // 他端末で選ばれたコンセプト（RPG/SF/魔法学校）と、呼び名・フォント・カラーをこの端末にも反映
   if(window.GuildTheme){
     try{
@@ -62,6 +85,7 @@ window.GuildApp = {VERSION:'4.0'};
   // ===== ゲームモード（Phase7）：OFFなら討伐演出なしの「ただのメニュー」として動かす =====
   // sessionGameMode: このお客様（この来店）が選んだモード。nullなら管理画面の既定値に従う
   let sessionGameMode=null;
+  let gameModeNoticeShown=false;
   function gameModeOn(){ if(sessionGameMode!==null) return sessionGameMode; return !!(data.settings && data.settings.gameMode!==false); }
   function canToggleGameMode(){ return !!(data.settings && data.settings.allowCustomerGameToggle!==false); }
   function renderModeToggle(){
@@ -76,7 +100,7 @@ window.GuildApp = {VERSION:'4.0'};
     sessionGameMode=!!on;
     renderModeToggle();
   }
-  function enterMenuScreen(){
+  function enterMenuScreen(isFreshEntry){
     const rpgEl=document.querySelector('#screenMain .rpg');
     if(rpgEl) rpgEl.classList.toggle('simple-mode', !gameModeOn());
     GuildUI.closeModals();
@@ -85,6 +109,15 @@ window.GuildApp = {VERSION:'4.0'};
     if(gameModeOn()){
       applyBattleThemeBg();
       GuildBattle.render();
+    }
+    // ゲームモードを選んで「最初にメニューを開いた時」だけ、注意喚起を1回だけ表示する（再開時は出さない）
+    if(isFreshEntry && gameModeOn() && !gameModeNoticeShown){
+      const cfg=Object.assign({enabled:true,text:''}, data.settings.gameModeNotice||{});
+      if(cfg.enabled && cfg.text){
+        gameModeNoticeShown=true;
+        const box=$('gameModeNoticeText'); if(box) box.textContent=cfg.text;
+        GuildUI.openModal('modalGameModeNotice');
+      }
     }
   }
   let closedPollTimer=null;
@@ -466,8 +499,11 @@ window.GuildApp = {VERSION:'4.0'};
     sparkles.innerHTML='';
     const color=rarity.color||'#f6c84f';
     resultBox.style.setProperty('--gacha-color', color);
-    const imgUrl = rarity.image ? GuildUtils.driveImg(rarity.image) : '';
-    img.style.display = rarity.image ? '' : 'none';
+    // このレアリティに複数の画像が登録されていれば、その中から完全ランダムで1枚を選ぶ
+    const imgList = Array.isArray(rarity.images) && rarity.images.length ? rarity.images : (rarity.image ? [rarity.image] : []);
+    const chosenImage = imgList.length ? imgList[Math.floor(Math.random()*imgList.length)] : '';
+    const imgUrl = chosenImage ? GuildUtils.driveImg(chosenImage) : '';
+    img.style.display = chosenImage ? '' : 'none';
     img.src = imgUrl;
     label.textContent = rarity.name||'';
 
@@ -540,6 +576,7 @@ window.GuildApp = {VERSION:'4.0'};
   if($('btnStoreInfo')) $('btnStoreInfo').onclick=()=>{ GuildAudio.playSe('ok'); renderStoreInfo(); $('storeInfoOverlay').classList.add('show'); };
   if($('btnShowTerms')) $('btnShowTerms').onclick=()=>{ GuildAudio.playSe('ok'); const b=$('termsBody'); if(b) b.innerHTML=(window.GuildTerms&&GuildTerms.html)||'利用規約が見つかりません。'; GuildUI.openModal('modalTerms'); };
   if($('btnCloseTerms')) $('btnCloseTerms').onclick=()=>{ GuildAudio.playSe('cancel'); GuildUI.closeModals(); };
+  if($('btnCloseGameModeNotice')) $('btnCloseGameModeNotice').onclick=()=>{ GuildAudio.playSe('ok'); GuildUI.closeModals(); };
   if($('storeInfoClose')) $('storeInfoClose').onclick=()=>{ GuildAudio.playSe('cancel'); $('storeInfoOverlay').classList.remove('show'); };
   $('btnBackWelcome').onclick=()=>{ GuildAudio.playSe('cancel'); showWelcomeScreen(); };
   $('btnNameOk').onclick=()=>{
@@ -577,14 +614,15 @@ window.GuildApp = {VERSION:'4.0'};
       if(!nm || nm===repName) return; // 空欄・代表者と同じ名前はスキップ
       if(GuildCustomer.registerOrReuse) GuildCustomer.registerOrReuse(nm, m.avatar||AVATAR_LIST[0]);
     });
-    applyCoverCharge(); enterMenuScreen();
+    applyCoverCharge(); enterMenuScreen(true);
   };
-  $('btnBackTitle').onclick=()=>{ GuildAudio.playSe('cancel'); GuildUI.closeModals(); sessionGameMode=null; welcomeText('メニューを開きますか？'); showWelcomeScreen(); };
+  $('btnBackTitle').onclick=()=>{ GuildAudio.playSe('cancel'); GuildUI.closeModals(); sessionGameMode=null; gameModeNoticeShown=false; welcomeText('メニューを開きますか？'); showWelcomeScreen(); };
   $('btnCloseMenu').onclick=()=>GuildUI.closeModals(); $('btnCancelOrder').onclick=GuildOrder.cancelPending; $('btnNoOrder').onclick=GuildOrder.cancelPending; $('btnDoOrder').onclick=GuildOrder.confirmOrder; $('btnCheckout').onclick=GuildOrder.checkoutAsk; $('btnCancelCheckout').onclick=()=>GuildUI.closeModals(); $('btnNoCheckout').onclick=()=>GuildUI.closeModals(); $('btnDoCheckout').onclick=GuildOrder.checkoutDo;
   if($('btnReceiptConfirm')) $('btnReceiptConfirm').onclick=()=>{
     GuildAudio.playSe('ok');
     GuildUI.closeModals();
     sessionGameMode=null; // 会計完了＝この方の来店は終了。次のお客様のためにモード選択をリセット
+    gameModeNoticeShown=false;
     if(GuildBattle.resetAudioFlag) GuildBattle.resetAudioFlag();
     if(window.GuildApp&&GuildApp.showWelcomeBack) GuildApp.showWelcomeBack(); else showWelcomeScreen();
   };

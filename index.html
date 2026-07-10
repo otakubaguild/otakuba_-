@@ -1,11 +1,26 @@
 <!doctype html>
 <html lang="ja">
 <head>
+  <script>
+    // LINEアプリ内で開いた場合、標準ブラウザ(Safari/Chrome)へ自動的に切り替える。
+    // アプリ内ブラウザは保存領域や一部機能（共有シート等）に制限があり、正しく動作しないことがあるため。
+    (function(){
+      try{
+        var ua = navigator.userAgent || '';
+        var isLine = /Line\//i.test(ua);
+        var already = /[?&]openExternalBrowser=1/.test(location.href);
+        if(isLine && !already){
+          var sep = location.href.indexOf('?')>-1 ? '&' : '?';
+          location.href = location.href + sep + 'openExternalBrowser=1';
+        }
+      }catch(e){}
+    })();
+  </script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#050505">
   <title data-theme-title>冒険者ギルド</title>
-  <link rel="stylesheet" href="main.css?v=1.71-gachasave">
+  <link rel="stylesheet" href="main.css?v=1.74-inappbrowser">
   <link rel="stylesheet" href="battle.css?v=1.40-defeatfx">
   <link rel="stylesheet" href="menu.css?v=1.33-lightbox">
   <link rel="stylesheet" href="effects.css?v=1.32-cartmode">
@@ -28,6 +43,11 @@
     <div class="app-brand-label">PLAY_ORDER</div>
     <div id="toast" class="toast"></div>
     <div id="imageLightbox" class="image-lightbox"><img id="imageLightboxImg" src="" alt=""></div>
+    <div id="inAppBrowserBanner" class="in-app-browser-banner hidden">
+      <span id="inAppBrowserText"></span>
+      <button type="button" id="btnCopyPageUrl">URLコピー</button>
+      <button type="button" id="btnCloseInAppBanner">✕</button>
+    </div>
 
     <section class="screen active center" id="screenWelcome">
       <div class="panel window">
@@ -355,6 +375,20 @@
       </div>
     </div>
 
+    <div class="modal" id="modalGameModeNotice">
+      <div class="modal-head">
+        <h2>🎮 ご注文の前に</h2>
+      </div>
+      <div class="scroll">
+        <div class="panel">
+          <div id="gameModeNoticeText" class="confirm-text" style="text-align:left;line-height:1.7"></div>
+          <div class="row mt">
+            <button class="btn gold" id="btnCloseGameModeNotice">わかりました</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="modal" id="modalTerms">
       <div class="modal-head">
         <h2>📜 利用規約</h2>
@@ -387,7 +421,7 @@
   <script src="integrity.js?v=1.0"></script>
   <script src="license-config.js?v=1.0"></script>
   <script src="license.js?v=1.0"></script>
-  <script src="storage.js?v=1.70-gacha"></script>
+  <script src="storage.js?v=1.73-syncfix"></script>
   <script src="audio.js?v=1.33-bgmfix"></script>
   <script src="ui.js?v=1.32-cartmode"></script>
   <script src="customer.js?v=1.42-partymembers"></script>
@@ -395,7 +429,7 @@
   <script src="discord.js?v=1.32-cartmode"></script>
   <script src="menu.js?v=1.33-lightbox"></script>
   <script src="order.js?v=1.70-gacha"></script>
-  <script src="app.js?v=1.71-gachasave"></script>
+  <script src="app.js?v=1.74-inappbrowser"></script>
   <script>
     // iOSのSafariで「戻る」操作をすると、スクリプトを再実行せずにページをそのまま復元(bfcache)する
     // ことがあり、その場合テーマ切り替えやデータ更新が反映されないまま古い画面が表示され続けてしまう。

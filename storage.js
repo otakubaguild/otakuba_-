@@ -202,11 +202,12 @@ window.GuildStorage = (() => {
       defeatEffect:{style:'pop',image:'',imageEnabled:false},
       gameMode:true,
       allowCustomerGameToggle:true,
+      gameModeNotice:{enabled:true,text:'演出をお楽しみいただくのは大歓迎ですが、実際に召し上がる予定のないご注文はお控えください。'},
       gachaEffect:{enabled:false,rarities:[
-        {id:'n',name:'ノーマル',weight:60,color:'#b7b7b7',image:'',flashy:false},
-        {id:'r',name:'レア',weight:30,color:'#6cc7ff',image:'',flashy:false},
-        {id:'sr',name:'スーパーレア',weight:8,color:'#caa6ff',image:'',flashy:true},
-        {id:'ssr',name:'超激レア',weight:2,color:'#f6c84f',image:'',flashy:true}
+        {id:'n',name:'ノーマル',weight:60,color:'#b7b7b7',images:[],flashy:false},
+        {id:'r',name:'レア',weight:30,color:'#6cc7ff',images:[],flashy:false},
+        {id:'sr',name:'スーパーレア',weight:8,color:'#caa6ff',images:[],flashy:true},
+        {id:'ssr',name:'超激レア',weight:2,color:'#f6c84f',images:[],flashy:true}
       ]}
     }, defaults.settings || {});
     data.settings.notice = Object.assign({enabled:true,title:'本日のお知らせ',body:'',position:'top'}, data.settings.notice || {});
@@ -276,7 +277,7 @@ window.GuildStorage = (() => {
       damage:'se/se_4.mp3', defeat:'se/se_7.mp3', victory:'se/se_2.mp3', levelup:'se/se_9.mp3'
     }, data.settings.audioFiles.se || {});
     set(keys.state,data);
-    pullCloud().then(()=>{
+    await pullCloud().then(()=>{
       ensureMenuCategories();
       // クラウドの古い設定で上書きされても、必須BGM(特にdaimaou)と、壊れたレガシーファイル名を再補修
       data.settings.audioFiles = data.settings.audioFiles || {};
@@ -327,7 +328,7 @@ window.GuildStorage = (() => {
         // 浅いマージだと themeCustom / notice / audioFiles などのネストしたオブジェクトが
         // 丸ごと置き換わってしまい、片方の端末にしかない項目が消えることがあるため、
         // ネストが深いキーだけは1階層だけ深くマージする
-        const NESTED_KEYS=['themeCustom','notice','audioFiles','storeInfo','uiTheme','defeatEffect','gachaEffect'];
+        const NESTED_KEYS=['themeCustom','notice','audioFiles','storeInfo','uiTheme','defeatEffect','gachaEffect','gameModeNotice'];
         const merged=Object.assign({},data.settings,remote.settings);
         NESTED_KEYS.forEach(function(k){
           if(remote.settings[k] && typeof remote.settings[k]==='object' && !Array.isArray(remote.settings[k])){
