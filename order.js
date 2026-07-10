@@ -151,6 +151,8 @@ window.GuildOrder = (() => {
   function checkoutAsk(){ const data=GuildStorage.getData(); const base=(data.activeBill||[]).slice(); const all=withCoverCharge(base); const total=all.reduce((s,i)=>s+Number(i.subtotal||0),0); $('checkoutConfirmBody').textContent=all.length?`帰還しますか？\n\n${all.map(i=>`・${i.name} ×${Number(i.qty||1)} = ${yen(i.subtotal,data.settings.currency)}`).join('\n')}\n\n会計合計 ${yen(total,data.settings.currency)}\n売上月 ${currentSalesMonth()} 月分\n\n会計のみ行います。ダメージは注文確定時に入ります。`:'未会計の注文はありません。帰還しますか？'; GuildUI.openModal('modalCheckoutConfirm'); }
   function checkoutDo(){
     const data=GuildStorage.getData();
+    // 席料だけでなく、実際に何か注文していたかどうか（ガチャの発生条件に使う）
+    const hadRealOrder = Array.isArray(data.activeBill) && data.activeBill.length>0;
     const all=withCoverCharge((data.activeBill||[]).slice());
     const total=all.reduce((s,i)=>s+Number(i.subtotal||0),0);
     const c=GuildCustomer.current();
@@ -172,7 +174,7 @@ window.GuildOrder = (() => {
     GuildStorage.save(); if(isGameModeOn()) GuildBattle.render();
     $('screenMain').classList.remove('combat-lock');
     const gcfg=(data.settings&&data.settings.gachaEffect)||{enabled:false};
-    if(gcfg.enabled && total>0 && window.GuildApp && GuildApp.showGacha){
+    if(gcfg.enabled && hadRealOrder && window.GuildApp && GuildApp.showGacha){
       const rarity=pickGachaRarity();
       if(rarity){ GuildApp.showGacha(rarity, ()=>showReceipt(all,total,custName)); return; }
     }
