@@ -643,6 +643,19 @@ window.GuildApp = {VERSION:'4.0'};
     GuildUI.show('screenSuspended');
   } else if(!needsSetup && !isBusinessOpen() && !hasActiveSession()){ showClosedScreen(); } else { showWelcomeScreen(); }
   if(needsSetup) showSetupWizard();
+  // クラウド同期は待たずに画面を出しているので、同期が終わった時点で
+  // 営業状態の判定がズレていたら（準備中⇄営業中）、まだタイトル/準備中画面にいる場合だけ静かに直す。
+  // 既に注文中など他の画面に進んでいたら、途中で画面を切り替えて邪魔しない。
+  if(data._cloudSyncPromise){
+    data._cloudSyncPromise.then(()=>{
+      if(needsSetup || hasActiveSession()) return;
+      const onWelcome = $('screenWelcome') && $('screenWelcome').classList.contains('active');
+      const onClosed = $('screenClosed') && $('screenClosed').classList.contains('active');
+      if(!onWelcome && !onClosed) return; // 既に他の画面に進んでいたら何もしない
+      if(!isBusinessOpen() && onWelcome){ showClosedScreen(); }
+      else if(isBusinessOpen() && onClosed){ stopClosedPoll(); showWelcomeScreen(); }
+    });
+  }
   if(tamperResult.tampered && $('tamperOverlay')){
     $('tamperOverlay').classList.add('show');
     $('tamperUnlockBtn').onclick=async()=>{

@@ -277,7 +277,9 @@ window.GuildStorage = (() => {
       damage:'se/se_4.mp3', defeat:'se/se_7.mp3', victory:'se/se_2.mp3', levelup:'se/se_9.mp3'
     }, data.settings.audioFiles.se || {});
     set(keys.state,data);
-    await pullCloud().then(()=>{
+    // ここで待つと初期表示が数秒遅れるので、待たずに画面は即座に出す。
+    // 同期が終わった後に営業状態などがズレていたら、呼び出し側(app.js)で直せるようPromiseを渡しておく。
+    data._cloudSyncPromise = pullCloud().then(()=>{
       ensureMenuCategories();
       // クラウドの古い設定で上書きされても、必須BGM(特にdaimaou)と、壊れたレガシーファイル名を再補修
       data.settings.audioFiles = data.settings.audioFiles || {};
