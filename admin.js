@@ -199,6 +199,7 @@
     $('openAll').onclick=()=>toggleCats(true);
     $('closeAll').onclick=()=>toggleCats(false);
     $('jsonMode').onclick=()=>textareaEditor('menu','menu.json');
+    wireImageUploadButtons_();
   }
 
   function showNewProductForm(opts, defaultCat){
@@ -243,7 +244,7 @@
     };
   }
   function toggleCats(o){document.querySelectorAll('.category-block').forEach(b=>{b.classList.toggle('open',o);b.querySelector('.category-toggle').textContent=o?'閉じる':'開く'})}
-  function productCard(p,i,opts){return `<div class="admin-card product-edit-card" data-menu-index="${i}"><div class="admin-card-title">#${i+1} ${esc(p.name)}</div><label>商品名<input data-field="name" value="${esc(p.name)}"></label><label>ジャンル<select data-field="cat">${opts}</select></label><label>価格<input data-field="price" type="number" value="${p.price}"></label><label>絵文字<input data-field="emoji" value="${esc(p.emoji)}"></label><label>画像<input data-field="image" value="${esc(p.image)}"></label><label>在庫<input data-field="stock" type="number" min="0" placeholder="空欄=無制限" value="${p.stock===''?'':p.stock}"></label><label>説明<textarea data-field="desc">${esc(p.desc)}</textarea></label><label class="check-row"><input data-field="recommended" type="checkbox" ${p.recommended?'checked':''}>⭐おすすめ</label><label class="check-row"><input data-field="limited" type="checkbox" ${p.limited?'checked':''}>👑限定</label><label class="check-row"><input data-field="soldOut" type="checkbox" ${p.soldOut?'checked':''}>❌売切れ</label><label class="check-row"><input data-field="hidden" type="checkbox" ${p.hidden?'checked':''}>非表示</label>
+  function productCard(p,i,opts){return `<div class="admin-card product-edit-card" data-menu-index="${i}"><div class="admin-card-title">#${i+1} ${esc(p.name)}</div><label>商品名<input data-field="name" value="${esc(p.name)}"></label><label>ジャンル<select data-field="cat">${opts}</select></label><label>価格<input data-field="price" type="number" value="${p.price}"></label><label>絵文字<input data-field="emoji" value="${esc(p.emoji)}"></label><label>画像<input data-img-upload data-field="image" value="${esc(p.image)}"></label><label>在庫<input data-field="stock" type="number" min="0" placeholder="空欄=無制限" value="${p.stock===''?'':p.stock}"></label><label>説明<textarea data-field="desc">${esc(p.desc)}</textarea></label><label class="check-row"><input data-field="recommended" type="checkbox" ${p.recommended?'checked':''}>⭐おすすめ</label><label class="check-row"><input data-field="limited" type="checkbox" ${p.limited?'checked':''}>👑限定</label><label class="check-row"><input data-field="soldOut" type="checkbox" ${p.soldOut?'checked':''}>❌売切れ</label><label class="check-row"><input data-field="hidden" type="checkbox" ${p.hidden?'checked':''}>非表示</label>
     <details class="quest-fields" ${p.isQuest?'open':''}><summary>🗡️ 依頼設定（任意・ギルド連携用）</summary>
       <label class="check-row" style="margin-top:0"><input data-field="isQuest" type="checkbox" ${p.isQuest?'checked':''}> 📜 依頼として別枠に表示する（オン＝通常メニューから消え「依頼」タブ専用になります）</label>
       <label>依頼名<input data-field="questName" value="${esc(p.questName||'')}" placeholder="未入力なら商品名を使用"></label>
@@ -477,9 +478,10 @@
     '<label>BGM URL（アップした音源を使う場合はここに貼る）<input data-field="bgmUrl" value="'+esc(/^https?:/i.test(m.bgm)?m.bgm:'')+'" placeholder="https://drive.google.com/..."></label>'+
     '<label>現在HP<input data-field="hp" type="number" value="'+(m.hp||0)+'"></label>'+
     '<label>最大HP<input data-field="maxHp" type="number" value="'+(m.maxHp||500)+'"></label>'+
-    '<label>背景<select data-field="bg">'+optList(themeScopedBgList().concat(themeScopedBgList().includes(m.bg)||!m.bg?[]:[m.bg]),m.bg)+'</select></label>'+
+    '<label>背景（一覧から選択）<select data-field="bg">'+optList(themeScopedBgList().concat(themeScopedBgList().includes(m.bg)||!m.bg||/^https?:/i.test(m.bg)?[]:[m.bg]),m.bg)+'</select></label>'+
+    '<label>背景 URL（アップした画像を使う場合はここに貼る）<input data-img-upload data-field="bgUrl" value="'+esc(/^https?:/i.test(m.bg)?m.bg:'')+'" placeholder="https://drive.google.com/..."></label>'+
     '<label>敵画像（一覧から選択）<select data-field="image">'+optList(themeScopedImgList().concat(themeScopedImgList().includes(m.image)||!m.image||/^https?:/i.test(m.image)?[]:[m.image]),m.image)+'</select></label>'+
-    '<label>敵画像 URL（アップした画像を使う場合はここに貼る）<input data-field="imageUrl" value="'+esc(/^https?:/i.test(m.image)?m.image:'')+'" placeholder="https://drive.google.com/..."></label>'+
+    '<label>敵画像 URL（アップした画像を使う場合はここに貼る）<input data-img-upload data-field="imageUrl" value="'+esc(/^https?:/i.test(m.image)?m.image:'')+'" placeholder="https://drive.google.com/..."></label>'+
     '<div class="enemy-preview" data-preview="'+i+'" style="position:relative;width:min(72vw,230px);height:min(40dvh,230px);margin:8px auto;border:2px solid rgba(255,246,223,.5);border-radius:12px;overflow:hidden;background:#000 center/cover no-repeat;background-image:url('+esc(GuildUtils.driveImg(m.bg))+')"><img data-preview-img src="'+esc(GuildUtils.driveImg(m.image))+'" style="position:absolute;left:50%;top:50%;max-width:100%;max-height:100%;object-fit:contain;transform:translate(calc(-50% + '+(Number(m.offsetX)||0)+'%),calc(-50% + '+(Number(m.offsetY)||0)+'%)) scale('+((Number(m.scale)||70)/100)+')" onerror="this.style.display=\'none\'"></div>'+
     '<p class="tiny" style="margin-top:-4px">※実際のお客様画面と同じ縦横比のプレビューです（画面サイズにより多少前後します）</p>'+
     '<label>大きさ <span data-scale-val>'+(Number(m.scale)||70)+'</span>%<input data-field="scale" type="range" min="30" max="250" value="'+(Number(m.scale)||70)+'"></label>'+
@@ -487,7 +489,7 @@
     '<label>上下 <span data-oy-val>'+(Number(m.offsetY)||0)+'</span>%<input data-field="offsetY" type="range" min="-60" max="60" value="'+(Number(m.offsetY)||0)+'"></label>'+
     '<div class="admin-card" style="margin:10px 0"><div class="admin-card-title">💥 撃破演出画像（この敵専用・任意）</div>'+
     '<p class="tiny">未入力なら、テーマ編集→撃破演出で設定した共通画像が使われます。エフェクトのスタイル（フラッシュ／リングなど）は共通設定のまま、画像だけこの敵専用に差し替えられます。</p>'+
-    '<label>撃破画像 URL / ファイル名<input data-field="defeatImage" value="'+esc(m.defeatImage||'')+'" placeholder="例：defeat_slime.png / https://..."></label>'+
+    '<label>撃破画像 URL / ファイル名<input data-img-upload data-field="defeatImage" value="'+esc(m.defeatImage||'')+'" placeholder="例：defeat_slime.png / https://..."></label>'+
     (m.defeatImage?('<div style="text-align:center;margin-top:6px"><img src="'+esc(GuildUtils.driveImg(m.defeatImage))+'" style="max-width:120px;max-height:120px;border:2px solid rgba(246,200,79,.4);border-radius:10px;background:#000" onerror="this.style.display=\'none\'"></div>'):'')+
     '</div>'+
     '<div class="admin-card" style="margin:10px 0"><div class="admin-card-title">🗨️ 専用セリフ（未入力なら何も表示されません）</div>'+
@@ -497,7 +499,7 @@
     '<p class="tiny">複数追加した場合は、その中からランダムで1つ表示されます。</p></div>'+
     '<div class="toolbar"><button class="btn gold small" data-save-monster="'+i+'">この敵を保存</button><button class="btn small" data-current-monster="'+i+'">現在の敵にする</button><button class="btn small" data-dup-monster="'+i+'">複製</button><button class="btn red small" data-del-monster="'+i+'">削除</button></div></div></section>';}
   function monstersListHtml(){data.monsters=(data.monsters||[]).map(normalizeMonster);return data.monsters.length?data.monsters.map(function(m,i){return monsterCard(m,i);}).join(''):'<div class="empty">なし</div>';}
-  function readMonsterCard(card){var m=data.monsters[+card.dataset.monsterIndex];m.name=card.querySelector('[data-field=name]').value;m.stage=card.querySelector('[data-field=stage]').value;var bgmUrl=(card.querySelector('[data-field=bgmUrl]')||{}).value||'';m.bgm=bgmUrl.trim()?bgmUrl.trim():card.querySelector('[data-field=bgm]').value;m.hp=+card.querySelector('[data-field=hp]').value||0;m.maxHp=+card.querySelector('[data-field=maxHp]').value||500;m.bg=card.querySelector('[data-field=bg]').value;m.background=m.bg;var imgUrl=(card.querySelector('[data-field=imageUrl]')||{}).value||'';m.image=imgUrl.trim()?imgUrl.trim():card.querySelector('[data-field=image]').value;m.scale=+card.querySelector('[data-field=scale]').value||70;m.offsetX=+card.querySelector('[data-field=offsetX]').value||0;m.offsetY=+card.querySelector('[data-field=offsetY]').value||0;m.defeatImage=(card.querySelector('[data-field=defeatImage]')||{}).value||'';m.texts=m.texts&&typeof m.texts==='object'?m.texts:{};['appear','damage','defeat'].forEach(function(cat){var list=card.querySelector('[data-text-cat="'+cat+'"]');m.texts[cat]=list?Array.from(list.querySelectorAll('[data-text-input]')).map(function(inp){return inp.value.trim();}).filter(function(v){return !!v;}):[];});return m;}
+  function readMonsterCard(card){var m=data.monsters[+card.dataset.monsterIndex];m.name=card.querySelector('[data-field=name]').value;m.stage=card.querySelector('[data-field=stage]').value;var bgmUrl=(card.querySelector('[data-field=bgmUrl]')||{}).value||'';m.bgm=bgmUrl.trim()?bgmUrl.trim():card.querySelector('[data-field=bgm]').value;m.hp=+card.querySelector('[data-field=hp]').value||0;m.maxHp=+card.querySelector('[data-field=maxHp]').value||500;m.bg=(function(){var bgUrl=(card.querySelector('[data-field=bgUrl]')||{}).value||'';return bgUrl.trim()?bgUrl.trim():card.querySelector('[data-field=bg]').value;})();m.background=m.bg;var imgUrl=(card.querySelector('[data-field=imageUrl]')||{}).value||'';m.image=imgUrl.trim()?imgUrl.trim():card.querySelector('[data-field=image]').value;m.scale=+card.querySelector('[data-field=scale]').value||70;m.offsetX=+card.querySelector('[data-field=offsetX]').value||0;m.offsetY=+card.querySelector('[data-field=offsetY]').value||0;m.defeatImage=(card.querySelector('[data-field=defeatImage]')||{}).value||'';m.texts=m.texts&&typeof m.texts==='object'?m.texts:{};['appear','damage','defeat'].forEach(function(cat){var list=card.querySelector('[data-text-cat="'+cat+'"]');m.texts[cat]=list?Array.from(list.querySelectorAll('[data-text-input]')).map(function(inp){return inp.value.trim();}).filter(function(v){return !!v;}):[];});return m;}
   function saveMonsterForm(){document.querySelectorAll('[data-monster-index]').forEach(readMonsterCard);save();}
   let monsterContainerId='adminContent';
   function renderMonsters(containerId){monsterContainerId=containerId||monsterContainerId;$(monsterContainerId).innerHTML='<h2>⚔️ 討伐モンスター管理</h2><div class="admin-card"><div class="admin-card-title">現在のテーマ：'+esc(PRESET_LABELS[activePresetId()]||activePresetId())+'</div><p class="tiny">背景・敵画像の選択肢は、このテーマの素材だけに絞り込んで表示されます。テーマを変えたい場合は「テーマ編集」の上部から選び直してください。</p></div><div class="toolbar"><button class="btn gold" id="addMonster">追加</button><button class="btn green" id="saveMonsters">全体保存</button><button class="btn" id="monOpenAll">全部開く</button><button class="btn" id="monCloseAll">全部閉じる</button><button class="btn" id="jsonMonsters">JSON</button></div><div class="category-list" id="monsterListBox">'+monstersListHtml()+'</div>';bindMonsterEvents();
@@ -506,7 +508,7 @@
     $('monOpenAll').onclick=function(){document.querySelectorAll('#monsterListBox .category-block').forEach(function(b){b.classList.add('open');var t=b.querySelector('.category-toggle');if(t)t.textContent='閉じる';});};
     $('monCloseAll').onclick=function(){document.querySelectorAll('#monsterListBox .category-block').forEach(function(b){b.classList.remove('open');var t=b.querySelector('.category-toggle');if(t)t.textContent='開く';});};
     $('jsonMonsters').onclick=function(){textareaEditor('monsters','monsters.json');};}
-  function updatePreview(card){var img=card.querySelector('[data-preview-img]');var box=card.querySelector('[data-preview]');if(!img||!box)return;var sc=(+card.querySelector('[data-field=scale]').value||70)/100;var ox=+card.querySelector('[data-field=offsetX]').value||0;var oy=+card.querySelector('[data-field=offsetY]').value||0;var imgSrc=card.querySelector('[data-field=image]').value;var imgUrlField=(card.querySelector('[data-field=imageUrl]')||{}).value||'';var finalImg=imgUrlField.trim()?imgUrlField.trim():imgSrc;var bgSrc=card.querySelector('[data-field=bg]').value;img.src=GuildUtils.driveImg(finalImg);img.style.display='';box.style.backgroundImage='url('+GuildUtils.driveImg(bgSrc)+')';img.style.transform='translate(calc(-50% + '+ox+'%),calc(-50% + '+oy+'%)) scale('+sc+')';var sv=card.querySelector('[data-scale-val]');if(sv)sv.textContent=+card.querySelector('[data-field=scale]').value||70;var oxv=card.querySelector('[data-ox-val]');if(oxv)oxv.textContent=ox;var oyv=card.querySelector('[data-oy-val]');if(oyv)oyv.textContent=oy;}
+  function updatePreview(card){var img=card.querySelector('[data-preview-img]');var box=card.querySelector('[data-preview]');if(!img||!box)return;var sc=(+card.querySelector('[data-field=scale]').value||70)/100;var ox=+card.querySelector('[data-field=offsetX]').value||0;var oy=+card.querySelector('[data-field=offsetY]').value||0;var imgSrc=card.querySelector('[data-field=image]').value;var imgUrlField=(card.querySelector('[data-field=imageUrl]')||{}).value||'';var finalImg=imgUrlField.trim()?imgUrlField.trim():imgSrc;var bgSrc=card.querySelector('[data-field=bg]').value;var bgUrlField=(card.querySelector('[data-field=bgUrl]')||{}).value||'';var finalBg=bgUrlField.trim()?bgUrlField.trim():bgSrc;img.src=GuildUtils.driveImg(finalImg);img.style.display='';box.style.backgroundImage='url('+GuildUtils.driveImg(finalBg)+')';img.style.transform='translate(calc(-50% + '+ox+'%),calc(-50% + '+oy+'%)) scale('+sc+')';var sv=card.querySelector('[data-scale-val]');if(sv)sv.textContent=+card.querySelector('[data-field=scale]').value||70;var oxv=card.querySelector('[data-ox-val]');if(oxv)oxv.textContent=ox;var oyv=card.querySelector('[data-oy-val]');if(oyv)oyv.textContent=oy;}
   function bindMonsterEvents(){
     document.querySelectorAll('[data-bgm-play]').forEach(function(b){b.onclick=function(){
       var card=b.closest('[data-monster-index]');
@@ -517,7 +519,7 @@
     };});
     document.querySelectorAll('[data-bgm-stop]').forEach(function(b){b.onclick=stopAudioPreview;});
     document.querySelectorAll('[data-monster-toggle]').forEach(function(h){h.onclick=function(){var b=h.closest('.category-block');b.classList.toggle('open');h.querySelector('.category-toggle').textContent=b.classList.contains('open')?'閉じる':'開く';};});
-    document.querySelectorAll('[data-monster-index]').forEach(function(card){['scale','offsetX','offsetY'].forEach(function(f){var el=card.querySelector('[data-field='+f+']');if(el)el.addEventListener('input',function(){updatePreview(card);});});var imgSel=card.querySelector('[data-field=image]');if(imgSel)imgSel.addEventListener('change',function(){updatePreview(card);});var imgUrlEl=card.querySelector('[data-field=imageUrl]');if(imgUrlEl)imgUrlEl.addEventListener('input',function(){updatePreview(card);});var bgSel=card.querySelector('[data-field=bg]');if(bgSel)bgSel.addEventListener('change',function(){updatePreview(card);});});
+    document.querySelectorAll('[data-monster-index]').forEach(function(card){['scale','offsetX','offsetY'].forEach(function(f){var el=card.querySelector('[data-field='+f+']');if(el)el.addEventListener('input',function(){updatePreview(card);});});var imgSel=card.querySelector('[data-field=image]');if(imgSel)imgSel.addEventListener('change',function(){updatePreview(card);});var imgUrlEl=card.querySelector('[data-field=imageUrl]');if(imgUrlEl)imgUrlEl.addEventListener('input',function(){updatePreview(card);});var bgSel=card.querySelector('[data-field=bg]');if(bgSel)bgSel.addEventListener('change',function(){updatePreview(card);});var bgUrlEl=card.querySelector('[data-field=bgUrl]');if(bgUrlEl)bgUrlEl.addEventListener('input',function(){updatePreview(card);});});
     document.querySelectorAll('[data-save-monster]').forEach(function(b){b.onclick=function(){var card=b.closest('[data-monster-index]');readMonsterCard(card);save();if(GuildStorage.pushCloud)GuildStorage.pushCloud();toast('保存しました');var orig=b.textContent;b.textContent='✓ 保存しました';b.classList.add('green');setTimeout(function(){b.textContent=orig;b.classList.remove('green');},1400);};});
     document.querySelectorAll('[data-current-monster]').forEach(function(b){b.onclick=function(){saveMonsterForm();data.currentEnemyIndex=+b.dataset.currentMonster;save();toast('現在の敵にしました');if(GuildStorage.pushCloud)GuildStorage.pushCloud();};});
     document.querySelectorAll('[data-dup-monster]').forEach(function(b){b.onclick=function(){saveMonsterForm();var src=data.monsters[+b.dataset.dupMonster];var copy=JSON.parse(JSON.stringify(src));copy.id=GuildUtils.uid('enemy');copy.name=src.name+'（複製）';data.monsters.splice(+b.dataset.dupMonster+1,0,copy);save();renderMonsters();};});
@@ -542,6 +544,7 @@
         if(rmBtn){ var row2=rmBtn.closest('.text-row'); if(row2) row2.remove(); return; }
       });
     }
+    wireImageUploadButtons_();
   }
 
   // ===== 設定ボタン編集 =====
@@ -898,7 +901,7 @@
       '<label>演出スタイル<select id="fxStyle">'+DEFEAT_STYLE_OPTS.map(([k,l])=>'<option value="'+k+'" '+(fx.style===k?'selected':'')+'>'+l+'</option>').join('')+'</select></label>'+
 
       '<label class="check-row"><input type="checkbox" id="fxImageEnabled" '+(fx.imageEnabled?'checked':'')+'> 撃破時に画像を表示する</label>'+
-      '<label>撃破画像URL / ファイル名（共通・敵ごとの設定がなければこちらが使われます）<input id="fxImage" value="'+esc(fx.image||'')+'" placeholder="例：defeat_stamp.png / https://..."></label>'+
+      '<label>撃破画像URL / ファイル名（共通・敵ごとの設定がなければこちらが使われます）<input data-img-upload id="fxImage" value="'+esc(fx.image||'')+'" placeholder="例：defeat_stamp.png / https://..."></label>'+
       '<p class="tiny">「倒した敵の画像」でも「撃破スタンプ風の1枚絵」でも構いません。画像ファイルはGitHubに置いて、ファイル名かURLをここに入力してください。</p>'+
       (fx.image?'<div class="fx-preview" style="text-align:center;margin:8px 0"><img src="'+esc(GuildUtils.driveImg(fx.image))+'" style="max-width:140px;max-height:140px;border:2px solid rgba(246,200,79,.45);border-radius:10px;background:#000" onerror="this.style.display=\'none\'"></div>':'')+
 
@@ -923,6 +926,7 @@
       toast('撃破演出を既定に戻しました');
       renderThemeEffect();
     };
+    wireImageUploadButtons_();
   }
   const GACHA_DEFAULT_RARITIES=[
     {id:'n',name:'ノーマル',weight:60,color:'#b7b7b7',images:[],flashy:false},
@@ -965,8 +969,8 @@
         '<label>確率（%）<input data-r-weight type="number" min="0" max="100" step="0.1" value="'+(Number(r.weight)||0)+'"></label>'+
         '</div>'+
         '<label>色<input data-r-color type="color" value="'+esc(r.color||'#f6c84f')+'" style="height:40px;padding:2px"></label>'+
-        '<label>画像URL / ファイル名（1行に1枚。複数入れておくと、その中からランダムで1枚が使われます）<textarea data-r-images rows="'+Math.max(3,imgs.length+1)+'" placeholder="例：\ngacha_ssr_1.png\ngacha_ssr_2.png\nhttps://...">'+esc(imgs.join('\n'))+'</textarea></label>'+
-        (imgs.length?('<div style="display:flex;flex-wrap:wrap;gap:6px;margin:6px 0">'+imgs.map(function(u){return '<img src="'+esc(GuildUtils.driveImg(u))+'" style="width:64px;height:64px;object-fit:cover;border:2px solid rgba(246,200,79,.4);border-radius:8px;background:#000" onerror="this.style.display=\'none\'">';}).join('')+'</div>'):'')+
+        '<label>画像URL / ファイル名（1行に1枚。複数入れておくと、その中からランダムで1枚が使われます）<textarea data-img-upload-multi data-r-images rows="'+Math.max(3,imgs.length+1)+'" placeholder="例：\ngacha_ssr_1.png\ngacha_ssr_2.png\nhttps://...">'+esc(imgs.join('\n'))+'</textarea></label>'+
+        (imgs.length?('<div style="display:flex;flex-wrap:wrap;gap:6px;margin:6px 0">'+imgs.map(function(u){return '<img src="'+esc(GuildUtils.driveImg(u))+'" style="max-width:100px;max-height:100px;border:2px solid rgba(246,200,79,.4);border-radius:10px;background:#000" onerror="this.style.display=\'none\'">';}).join('')+'</div>'):'')+
         '<label class="check-row"><input data-r-flashy type="checkbox" '+(r.flashy?'checked':'')+'> 豪華演出にする（光の演出が増えます。レア度が高いものにおすすめ）</label>'+
         '<div class="toolbar"><button class="btn small red" data-remove-rarity="'+i+'">このレアリティを削除</button></div>'+
         '</div>';
@@ -977,6 +981,7 @@
       });
       $('gachaRarityList').querySelectorAll('[data-r-weight]').forEach(inp=>inp.oninput=updateTotalLabel);
       updateTotalLabel();
+      wireImageUploadButtons_();
     }
     renderRarityRows();
     $('addGachaRarity').onclick=function(){
@@ -1216,12 +1221,12 @@
     const c=ensureThemeCustom();
     $('themeSubContent').innerHTML=
       '<div class="admin-card"><div class="admin-card-title">🎬 スタート画面 背景</div>'+
-      '<label>背景画像URL / ファイル名<input id="tcStartBg" value="'+esc(c.startBg||'')+'" placeholder="例：start_bg.png / https://..."></label></div>'+
+      '<label>背景画像URL / ファイル名<input data-img-upload id="tcStartBg" value="'+esc(c.startBg||'')+'" placeholder="例：start_bg.png / https://..."></label></div>'+
       '<div class="admin-card"><div class="admin-card-title">🏆 討伐完了画面</div>'+
-      '<label>背景画像URL / ファイル名<input id="tcVictoryBg" value="'+esc(c.victoryBg||'')+'" placeholder="例：victory_bg.png / https://..."></label>'+
-      '<label>中央画像URL / ファイル名<input id="tcVictoryImage" value="'+esc(c.victoryImage||'victory_clear.PNG')+'" placeholder="例：victory_clear.PNG / https://..."></label></div>'+
+      '<label>背景画像URL / ファイル名<input data-img-upload id="tcVictoryBg" value="'+esc(c.victoryBg||'')+'" placeholder="例：victory_bg.png / https://..."></label>'+
+      '<label>中央画像URL / ファイル名<input data-img-upload id="tcVictoryImage" value="'+esc(c.victoryImage||'victory_clear.PNG')+'" placeholder="例：victory_clear.PNG / https://..."></label></div>'+
       '<div class="admin-card"><div class="admin-card-title">🧙 マスター画像</div>'+
-      '<label>マスター画像URL / ファイル名<input id="tcMasterImage" value="'+esc(c.masterImage||'master_no.jpeg')+'" placeholder="例：master_no.jpeg / https://..."></label></div>'+
+      '<label>マスター画像URL / ファイル名<input data-img-upload id="tcMasterImage" value="'+esc(c.masterImage||'master_no.jpeg')+'" placeholder="例：master_no.jpeg / https://..."></label></div>'+
       '<div class="toolbar"><button class="btn gold" id="saveThemeImage">画像設定を保存</button><button class="btn" id="clearThemeCustom">すべて初期化</button></div>'+
       '<h3>画像をアップロードする</h3>'+uploadWidgetHtml();
     $('saveThemeImage').onclick=function(){
@@ -1235,6 +1240,7 @@
     };
     bindThemeCustomReset();
     bindUploadWidget();
+    wireImageUploadButtons_();
   }
   // BGM/SEの試聴共通処理。target はキー名(例:'slime')・生ファイル名・URLのどれでもOK
   function previewAudioTarget(target){
@@ -1361,7 +1367,7 @@
       '<div class="admin-card"><p class="tiny">一般画面の「店舗情報」ボタンに表示されます。営業時間・SNS・地図など、お客様に見せたい情報を登録できます。</p></div>'+
       '<div class="admin-card">'+
       '<label>店舗名<input id="infoName" value="'+esc(i.name||s.storeName||s.shopName||'')+'" placeholder="例：〇〇バー / △△カフェ"></label>'+
-      '<label>店舗ロゴ画像URL（アップロードした画像や外部URLを貼り付け）<input id="infoLogo" value="'+esc(i.logo||'')+'" placeholder="https://drive.google.com/... または https://...png"></label>'+
+      '<label>店舗ロゴ画像URL（アップロードした画像や外部URLを貼り付け）<input data-img-upload id="infoLogo" value="'+esc(i.logo||'')+'" placeholder="https://drive.google.com/... または https://...png"></label>'+
       '<div id="infoLogoPreview" style="margin:6px 0 12px">'+(i.logo?('<img src="'+esc(GuildUtils.driveImg(i.logo))+'" alt="ロゴ" style="max-width:120px;max-height:120px;border-radius:10px;border:1px solid rgba(246,200,79,.4)" onerror="this.style.display=\'none\'">'):'<span class="tiny">未設定（タイトル画面・店舗情報にはロゴなしで表示されます）</span>')+'</div>'+
       '<label>紹介文<textarea id="infoDesc" placeholder="例：ゲームを遊びながら注文できるバーです">'+esc(i.description||'')+'</textarea></label>'+
       '<label>営業時間<textarea id="infoHours" placeholder="例：20:00〜LAST / 定休日：月曜">'+esc(i.hours||'')+'</textarea></label>'+
@@ -1398,6 +1404,7 @@
       const box=$('infoLogoPreview'); const v=this.value.trim();
       box.innerHTML=v?('<img src="'+esc(GuildUtils.driveImg(v))+'" alt="ロゴ" style="max-width:120px;max-height:120px;border-radius:10px;border:1px solid rgba(246,200,79,.4)" onerror="this.style.display=\'none\'">'):'<span class="tiny">未設定（タイトル画面・店舗情報にはロゴなしで表示されます）</span>';
     });
+    wireImageUploadButtons_();
   }
 
   function renderQR(){
@@ -1448,6 +1455,68 @@
       catch(e){ $('qrUrlText').select(); toast('URLを選択しました'); }
     };
     $('openQrUrl').onclick=function(){ window.open($('qrUrlText').value,'_blank'); };
+  }
+
+  // ===== 各画像入力欄に直接アップロードボタンを付ける共通の仕組み =====
+  // ファイルを1つアップロードしてURLを返す（在庫タブのdoUploadと同じ経路を共通化したもの）
+  async function uploadImageFileGeneric_(file, labelHint){
+    const url=(data.settings.gasUrl||'').trim();
+    if(!url){ toast('先に☁️同期タブでGAS URLを設定してください'); return null; }
+    if(file.size>8*1024*1024){ if(!confirm('8MBを超えています。GAS経由だと失敗しやすいですが試しますか？')) return null; }
+    const label=(labelHint||file.name.replace(/\.[^.]+$/,'')).replace(/[^\w\-]/g,'_').slice(0,40);
+    const ext=(file.name.match(/\.[^.]+$/)||[''])[0]||'.png';
+    const filename=label+'_'+Date.now()+ext;
+    try{
+      const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file);});
+      const res=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'uploadFile',filename,mimeType:file.type,data:b64})});
+      const j=await res.json();
+      if(j&&j.ok&&j.url){
+        data.settings.uploadHistory=data.settings.uploadHistory||[]; data.settings.uploadHistory.push({name:filename,url:j.url,at:new Date().toISOString()}); save();
+        return j.url;
+      }
+      toast('❌ アップロード失敗：'+((j&&j.error)||'不明なエラー'));
+      return null;
+    }catch(e){ toast('❌ 通信失敗：'+String(e)); return null; }
+  }
+  // 画面内の「data-img-upload」付き<input>（単一URL用）と「data-img-upload-multi」付き<textarea>（複数行・末尾追記用）に
+  // それぞれ「📤 端末から画像を選ぶ」ボタンを自動で差し込む。各render関数の最後で呼び出す。
+  function wireImageUploadButtons_(){
+    document.querySelectorAll('[data-img-upload]').forEach(function(input){
+      if(input.dataset.uploadWired) return; input.dataset.uploadWired='1';
+      const wrap=document.createElement('div'); wrap.style.cssText='display:flex;gap:8px;align-items:center;margin:4px 0 10px';
+      const btn=document.createElement('label'); btn.className='btn small'; btn.style.cssText='cursor:pointer;white-space:nowrap'; btn.textContent='📤 端末から画像を選ぶ';
+      const file=document.createElement('input'); file.type='file'; file.accept='image/*'; file.style.display='none';
+      btn.appendChild(file);
+      const status=document.createElement('span'); status.className='tiny';
+      file.onchange=async function(){
+        const f=file.files[0]; if(!f) return;
+        status.textContent='アップロード中…';
+        const url=await uploadImageFileGeneric_(f, input.name||input.id||'image');
+        if(url){ input.value=url; input.dispatchEvent(new Event('input',{bubbles:true})); input.dispatchEvent(new Event('change',{bubbles:true})); status.textContent='✅ 完了'; setTimeout(()=>{status.textContent='';},1800); }
+        else status.textContent='';
+        file.value='';
+      };
+      wrap.appendChild(btn); wrap.appendChild(status);
+      input.insertAdjacentElement('afterend', wrap);
+    });
+    document.querySelectorAll('[data-img-upload-multi]').forEach(function(textarea){
+      if(textarea.dataset.uploadWired) return; textarea.dataset.uploadWired='1';
+      const wrap=document.createElement('div'); wrap.style.cssText='display:flex;gap:8px;align-items:center;margin:4px 0 10px';
+      const btn=document.createElement('label'); btn.className='btn small'; btn.style.cssText='cursor:pointer;white-space:nowrap'; btn.textContent='📤 端末から画像を追加';
+      const file=document.createElement('input'); file.type='file'; file.accept='image/*'; file.style.display='none';
+      btn.appendChild(file);
+      const status=document.createElement('span'); status.className='tiny';
+      file.onchange=async function(){
+        const f=file.files[0]; if(!f) return;
+        status.textContent='アップロード中…';
+        const url=await uploadImageFileGeneric_(f, textarea.name||textarea.id||'image');
+        if(url){ const cur=textarea.value.trim(); textarea.value=cur?(cur+'\n'+url):url; textarea.dispatchEvent(new Event('input',{bubbles:true})); status.textContent='✅ 追加しました'; setTimeout(()=>{status.textContent='';},1800); }
+        else status.textContent='';
+        file.value='';
+      };
+      wrap.appendChild(btn); wrap.appendChild(status);
+      textarea.insertAdjacentElement('afterend', wrap);
+    });
   }
 
   function uploadWidgetHtml(){
