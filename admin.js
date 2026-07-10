@@ -560,6 +560,9 @@
     '<p class="tiny">オン＝今まで通り、注文するたびに敵にダメージが入るRPG演出つきのモバイルオーダー。オフ＝演出なしの、ただのメニュー＋カート＋会計（お客様の名前登録・レベル・討伐画面は出ません）。カバーチャージや会計・注文履歴の保存はオフでも引き続き動きます。</p>'+
     '<label class="check-row"><input id="setAllowGameToggle" type="checkbox" '+(s.allowCustomerGameToggle!==false?'checked':'')+'>お客様がタイトル画面でゲーム/通常メニューを選べるようにする</label>'+
     '<p class="tiny">オン＝タイトル画面に切替ボタンが出て、お客様一人一人が「ゲームで注文」か「通常メニューで注文」かをその場で選べます（上のON/OFFは、その時の初期選択状態になります）。オフ＝切替ボタンを出さず、上のON/OFFが全員に固定で適用されます。</p>'+
+    '<label class="check-row"><input id="setGameNoticeEnabled" type="checkbox" '+((s.gameModeNotice&&s.gameModeNotice.enabled!==false)?'checked':'')+'>ゲームで注文を選んだ時、最初にメニューを開いた時だけ注意喚起を表示する</label>'+
+    '<label>注意喚起の文言<textarea id="setGameNoticeText" placeholder="例：演出をお楽しみいただくのは大歓迎ですが、実際に召し上がる予定のないご注文はお控えください。">'+esc((s.gameModeNotice&&s.gameModeNotice.text)||'')+'</textarea></label>'+
+    '<p class="tiny">「ゲームで注文」を選んだお客様が最初にメニューを開いた時だけ、1回表示されます（同じ来店中に再度メニューへ戻っても再表示されません）。演出目的で実際には飲食しないご注文を防ぐための注意喚起として使えます。</p>'+
     '<div class="toolbar"><button class="btn gold" id="saveGameMode">この項目だけ保存</button></div>'+
     '</div>'+
     '<div class="admin-card"><div class="admin-card-title">🏪 基本設定</div>'+
@@ -594,7 +597,7 @@
     '<div class="toolbar"><button class="btn gold" id="saveNotice">この項目だけ保存</button></div>'+
     '</div><div class="toolbar"><button class="btn" id="jsonSettings">詳細JSON</button></div>';
     function pushToast(msg){ save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud(); toast(msg+'（クラウドにも送信）'); }
-    $('saveGameMode').onclick=function(){ s.gameMode=$('setGameMode').checked; s.allowCustomerGameToggle=$('setAllowGameToggle').checked; pushToast('ゲームモードを保存しました'); };
+    $('saveGameMode').onclick=function(){ s.gameMode=$('setGameMode').checked; s.allowCustomerGameToggle=$('setAllowGameToggle').checked; s.gameModeNotice={enabled:$('setGameNoticeEnabled').checked, text:$('setGameNoticeText').value.trim()}; pushToast('ゲームモードを保存しました'); };
     if($('setPass')) $('setPass').addEventListener('input',function(){ const c=this.value.replace(/[^A-Za-z0-9]/g,''); if(c!==this.value) this.value=c; });
     $('saveBasic').onclick=function(){ s.currency=$('setCurrency').value||'G'; s.coverCharge=+$('setCover').value||0; s.adminPassword=($('setPass').value||'OTAKU').replace(/[^A-Za-z0-9]/g,'')||'OTAKU'; s.cartMode=$('setCartMode').checked; s.questMode=$('setQuestMode').checked; pushToast('基本設定を保存しました'); };
     $('saveNotify').onclick=function(){ s.notifyOn=$('setNotify').checked; s.gasUrl=$('setGas').value.trim(); s.discordWebhookUrl=$('setHook').value.trim(); pushToast('通知・連携設定を保存しました'); };
@@ -922,16 +925,22 @@
     };
   }
   const GACHA_DEFAULT_RARITIES=[
-    {id:'n',name:'ノーマル',weight:60,color:'#b7b7b7',image:'',flashy:false},
-    {id:'r',name:'レア',weight:30,color:'#6cc7ff',image:'',flashy:false},
-    {id:'sr',name:'スーパーレア',weight:8,color:'#caa6ff',image:'',flashy:true},
-    {id:'ssr',name:'超激レア',weight:2,color:'#f6c84f',image:'',flashy:true}
+    {id:'n',name:'ノーマル',weight:60,color:'#b7b7b7',images:[],flashy:false},
+    {id:'r',name:'レア',weight:30,color:'#6cc7ff',images:[],flashy:false},
+    {id:'sr',name:'スーパーレア',weight:8,color:'#caa6ff',images:[],flashy:true},
+    {id:'ssr',name:'超激レア',weight:2,color:'#f6c84f',images:[],flashy:true}
   ];
-  function gachaCfg(){ const g=Object.assign({enabled:false,rarities:null},data.settings.gachaEffect||{}); if(!Array.isArray(g.rarities)||!g.rarities.length) g.rarities=JSON.parse(JSON.stringify(GACHA_DEFAULT_RARITIES)); return g; }
+  // 古い形式（image:単一文字列）で保存されていたものも、images配列として扱えるようにする
+  function gachaRarityImages_(r){
+    if(Array.isArray(r.images)) return r.images.filter(Boolean);
+    if(r.image) return [r.image];
+    return [];
+  }
+  function gachaCfg(){ const g=Object.assign({enabled:false,rarities:null},data.settings.gachaEffect||{}); if(!Array.isArray(g.rarities)||!g.rarities.length) g.rarities=JSON.parse(JSON.stringify(GACHA_DEFAULT_RARITIES)); g.rarities=g.rarities.map(r=>Object.assign({},r,{images:gachaRarityImages_(r)})); return g; }
   function renderThemeGacha(){
     const g=gachaCfg();
     let html='<div class="admin-card"><div class="admin-card-title">🎰 会計ガチャ</div>'+
-      '<p class="tiny">会計（お客様が退店・支払い完了）のタイミングで、抽選演出を挟んでからレシートを表示します。レアリティごとに確率（%）・色・画像を自由に設定できます。合計が100%になるように調整してください（100%からズレていても動作はしますが、実際の出現率が意図とズレます）。</p>'+
+      '<p class="tiny">会計（お客様が退店・支払い完了）のタイミングで、抽選演出を挟んでからレシートを表示します。レアリティごとに確率（%）・色・画像を自由に設定できます。合計が100%になるように調整してください（100%からズレていても動作はしますが、実際の出現率が意図とズレます）。1つのレアリティに複数の画像を登録すると、当たった時にその中から完全ランダムで1枚が使われます（同じレアリティでも毎回違う絵が出せます）。</p>'+
       '<label class="check-row"><input type="checkbox" id="gachaEnabled" '+(g.enabled?'checked':'')+'> 会計ガチャを有効にする</label>'+
       '<div id="gachaTotalLabel" class="tiny mt" style="font-weight:800"></div>'+
       '<div id="gachaRarityList" class="mt"></div>'+
@@ -948,19 +957,20 @@
       el.style.color=ok?'var(--green)':'var(--red)';
     }
     function renderRarityRows(){
-      $('gachaRarityList').innerHTML=g.rarities.map((r,i)=>
-        '<div class="admin-card" data-rarity-row="'+i+'" style="margin:8px 0">'+
+      $('gachaRarityList').innerHTML=g.rarities.map((r,i)=>{
+        const imgs=gachaRarityImages_(r);
+        return '<div class="admin-card" data-rarity-row="'+i+'" style="margin:8px 0">'+
         '<div class="grid">'+
         '<label>名前<input data-r-name value="'+esc(r.name||'')+'" placeholder="例：SSR"></label>'+
         '<label>確率（%）<input data-r-weight type="number" min="0" max="100" step="0.1" value="'+(Number(r.weight)||0)+'"></label>'+
         '</div>'+
         '<label>色<input data-r-color type="color" value="'+esc(r.color||'#f6c84f')+'" style="height:40px;padding:2px"></label>'+
-        '<label>画像URL / ファイル名<input data-r-image value="'+esc(r.image||'')+'" placeholder="例：gacha_ssr.png / https://..."></label>'+
-        (r.image?'<div style="text-align:center;margin:6px 0"><img src="'+esc(GuildUtils.driveImg(r.image))+'" style="max-width:100px;max-height:100px;border:2px solid rgba(246,200,79,.4);border-radius:10px;background:#000" onerror="this.style.display=\'none\'"></div>':'')+
+        '<label>画像URL / ファイル名（1行に1枚。複数入れておくと、その中からランダムで1枚が使われます）<textarea data-r-images rows="'+Math.max(3,imgs.length+1)+'" placeholder="例：\ngacha_ssr_1.png\ngacha_ssr_2.png\nhttps://...">'+esc(imgs.join('\n'))+'</textarea></label>'+
+        (imgs.length?('<div style="display:flex;flex-wrap:wrap;gap:6px;margin:6px 0">'+imgs.map(function(u){return '<img src="'+esc(GuildUtils.driveImg(u))+'" style="width:64px;height:64px;object-fit:cover;border:2px solid rgba(246,200,79,.4);border-radius:8px;background:#000" onerror="this.style.display=\'none\'">';}).join('')+'</div>'):'')+
         '<label class="check-row"><input data-r-flashy type="checkbox" '+(r.flashy?'checked':'')+'> 豪華演出にする（光の演出が増えます。レア度が高いものにおすすめ）</label>'+
         '<div class="toolbar"><button class="btn small red" data-remove-rarity="'+i+'">このレアリティを削除</button></div>'+
-        '</div>'
-      ).join('');
+        '</div>';
+      }).join('');
       $('gachaRarityList').querySelectorAll('[data-remove-rarity]').forEach(b=>b.onclick=function(){
         g.rarities.splice(Number(this.dataset.removeRarity),1);
         renderRarityRows();
@@ -970,18 +980,19 @@
     }
     renderRarityRows();
     $('addGachaRarity').onclick=function(){
-      g.rarities.push({id:GuildUtils.uid('rarity'),name:'新しいレアリティ',weight:10,color:'#f6c84f',image:'',flashy:false});
+      g.rarities.push({id:GuildUtils.uid('rarity'),name:'新しいレアリティ',weight:10,color:'#f6c84f',images:[],flashy:false});
       renderRarityRows();
     };
     $('saveGacha').onclick=function(){
       const rows=Array.from(document.querySelectorAll('[data-rarity-row]'));
       const rarities=rows.map(function(row,i){
+        const images=row.querySelector('[data-r-images]').value.split('\n').map(s=>s.trim()).filter(Boolean);
         return {
           id:(g.rarities[i]&&g.rarities[i].id)||GuildUtils.uid('rarity'),
           name:row.querySelector('[data-r-name]').value.trim()||'名称未設定',
           weight:Math.max(0,Number(row.querySelector('[data-r-weight]').value)||0),
           color:row.querySelector('[data-r-color]').value||'#f6c84f',
-          image:row.querySelector('[data-r-image]').value.trim(),
+          images:images,
           flashy:row.querySelector('[data-r-flashy]').checked
         };
       });
@@ -1665,6 +1676,28 @@
         rows.lastElementChild.outerHTML=sysRow('bad','GAS連携','接続できませんでした。URLが正しいか、GASのデプロイが「全員がアクセス可」になっているか確認してください。');
       }
     }
+    // QR設定（店舗ID方式を使っているのに stores.json に登録が無い場合の事故防止）
+    if(s.storeId && s.storeId.trim()){
+      append(sysRow('','QR設定','確認中…'));
+      try{
+        const stores=await fetch('stores.json?v='+Date.now(),{cache:'no-store'}).then(r=>r.json());
+        let rec=null;
+        if(stores){
+          if(Array.isArray(stores.stores)) rec=stores.stores.find(x=>x&&x.id===s.storeId);
+          else if(stores.stores && stores.stores[s.storeId]) rec=stores.stores[s.storeId];
+          else if(stores[s.storeId]) rec=stores[s.storeId];
+        }
+        if(!rec){
+          rows.lastElementChild.outerHTML=sysRow('bad','QR設定','店舗ID「'+esc(s.storeId)+'」方式のQRを使っていますが、stores.jsonに対応する登録がありません。このままだと、QRで初めて開いた端末がGAS URLを認識できず「準備中」のまま同期できません。「🔳 QR」タブで「GAS直指定方式（?gas=）」に切り替えるか、stores.jsonに登録してください。');
+        } else if(!rec.gasUrl || rec.gasUrl.trim()!==((s.gasUrl||'').trim())){
+          rows.lastElementChild.outerHTML=sysRow('warn','QR設定','stores.jsonの登録内容が、今設定しているGAS URLと一致していません。QRで開いた端末が別のGASに繋がる可能性があります。stores.jsonの内容を確認してください。');
+        } else {
+          rows.lastElementChild.outerHTML=sysRow('ok','QR設定','店舗ID「'+esc(s.storeId)+'」はstores.jsonに正しく登録されています。');
+        }
+      }catch(e){
+        rows.lastElementChild.outerHTML=sysRow('warn','QR設定','stores.jsonを確認できませんでした。');
+      }
+    }
     // Discord
     if(!gasSet){
       append(sysRow('warn','Discord通知','GAS連携が未設定のため通知は送信されません。'));
@@ -1741,6 +1774,7 @@
         '<p>会計（お客様の退店・お支払い完了）のタイミングで抽選演出を挟んでから、レシート画面を表示する機能です。</p><ul>'+
         '<li><b>ON/OFF</b>：使わない場合はOFFのままでOKです（今まで通り、会計後すぐレシートが出ます）。</li>'+
         '<li><b>レアリティ</b>：好きな数だけ追加・削除できます。それぞれに名前・<b>確率（%）</b>・色・画像を設定します。全レアリティの確率の合計が100%になるように調整してください（画面にリアルタイムで合計が表示されます）。</li>'+
+        '<li><b>画像は1つのレアリティに複数登録できます</b>（1行に1枚）。複数登録しておくと、そのレアリティが当たるたびに、その中から完全ランダムで1枚が選ばれます（同じ「SSR」でも毎回違う絵が出せます）。</li>'+
         '<li><b>豪華演出にする</b>：チェックを入れたレアリティは、当たった時に光の放射線とキラキラエフェクトが追加されます。SR・SSRなど当たりにくいものに付けるのがおすすめです。</li>'+
         '<li>会計金額が0円（未注文のまま退店）の時はガチャは出ません。</li>'+
         '<li>お客様側は、出てきたカード画像を「📥 画像を保存」ボタンからご自身のスマホに保存できます（写真として保存／ファイルとして保存、どちらも選べます）。</li>'+
@@ -1761,7 +1795,8 @@
         '<p>お客様がスマホから注文画面を開くためのQRコードを発行できます。テーブルに設置する用途を想定しています。</p>'
       )+
       sec('🩺 システムチェックタブ',
-        '<p>GAS連携・Discord通知・営業状態・バックアップの状態をまとめて確認できます。🟢は正常、🟡は注意、🔴は要対応です。トラブルが起きた時はまずここを開いてください。Discordのテスト通知もここから送れます。契約プランによっては、お支払い状況もここに表示されます。</p>'
+        '<p>GAS連携・Discord通知・営業状態・バックアップの状態をまとめて確認できます。🟢は正常、🟡は注意、🔴は要対応です。トラブルが起きた時はまずここを開いてください。Discordのテスト通知もここから送れます。契約プランによっては、お支払い状況もここに表示されます。</p>'+
+        '<p>店舗ID方式（?store=）のQRを使っている場合は、<b>QR設定</b>の項目もここに表示されます。stores.jsonへの登録漏れがあると🔴で警告されるので、「QRで開くと準備中のまま」といった事故に事前に気づけます。</p>'
       )+
       sec('🏪 店舗ロゴについて',
         '<p>「🎭 テーマ編集 → 🏪 店舗情報」で店舗ロゴ画像のURLを登録すると、お客様のタイトル画面と「店舗情報」ボタンの両方にロゴが表示されます。未設定の場合は何も表示されません。</p>'
@@ -1778,7 +1813,7 @@
       )+
       sec('⚙️ 設定タブ（重要な設定はここに集約）',
         '<ul>'+
-        '<li><b>🎮 ゲームモード</b>：ONなら今まで通りの討伐演出つきモバイルオーダー、OFFなら演出なしの「ただのメニュー＋カート＋会計」になります（お客様の名前登録・レベル・討伐画面は出ません）。カバーチャージや会計・注文履歴の保存はOFFでも引き続き動きます。あわせて「お客様がタイトル画面でゲーム/通常メニューを選べるようにする」もONにしておくと、タイトル画面に切替ボタンが出て、<b>お客様一人一人がその場でどちらか選べます</b>（選択はその来店だけの一時的なもので、会計が終わるとリセットされ、次のお客様はまた自由に選べます）。イベント等で店側が一つのモードに統一したい時は、この切替ボタンの表示だけOFFにできます。</li>'+
+        '<li><b>🎮 ゲームモード</b>：ONなら今まで通りの討伐演出つきモバイルオーダー、OFFなら演出なしの「ただのメニュー＋カート＋会計」になります（お客様の名前登録・レベル・討伐画面は出ません）。カバーチャージや会計・注文履歴の保存はOFFでも引き続き動きます。あわせて「お客様がタイトル画面でゲーム/通常メニューを選べるようにする」もONにしておくと、タイトル画面に切替ボタンが出て、<b>お客様一人一人がその場でどちらか選べます</b>（選択はその来店だけの一時的なもので、会計が終わるとリセットされ、次のお客様はまた自由に選べます）。イベント等で店側が一つのモードに統一したい時は、この切替ボタンの表示だけOFFにできます。さらに「注意喚起を表示する」をONにしておくと、<b>ゲームモードを選んで最初にメニューを開いた時だけ</b>、演出目的の注文を控えてもらうための注意文が1回だけ表示されます（同じ来店中にメニューへ戻っても再表示されず、会計後の次のお客様にはまた新しく表示されます）。</li>'+
         '<li><b>基本設定</b>：通貨単位、チャージ料金、<b>管理パスワード</b>（この管理画面に入るためのパスワードです。必ず初期値から変更してください）、カートモードのON/OFF。</li>'+
         '<li><b>通知・連携</b>：<b>GAS URL</b>（Googleスプレッドシートと連携するためのURL）と、<b>Discord通知URL</b>（注文や会計をDiscordに通知したい場合のウェブフックURL）を設定します。</li>'+
         '<li><b>レベル計算方式</b>：お客様のレベルを「来店回数」か「合計金額」のどちらで上げるか選べます。</li>'+
