@@ -41,7 +41,7 @@
     ['reset','🧹 reset','hard'],
   ];
   // テーマ編集タブ内のサブナビ（Phase4-3: 店舗情報/テキスト/画像/BGM/キャラクター/ステージ/プレビューを1画面にまとめる）
-  const THEME_SUBTABS=[['store','🏪 店舗情報'],['text','✏️ テキスト'],['color','🎨 カラー'],['ui','🖼️ UIテーマ'],['effect','💥 撃破演出'],['image','🖼️ 画像'],['bgm','🎵 BGM'],['character','⚔️ キャラクター'],['stage','🗺️ ステージ'],['preview','👁️ プレビュー']];
+  const THEME_SUBTABS=[['store','🏪 店舗情報'],['text','✏️ テキスト'],['color','🎨 カラー'],['ui','🖼️ UIテーマ'],['effect','💥 撃破演出'],['gacha','🎰 会計ガチャ'],['image','🖼️ 画像'],['bgm','🎵 BGM'],['character','⚔️ キャラクター'],['stage','🗺️ ステージ'],['preview','👁️ プレビュー']];
   let themeSubTab='store';
   const MODE_KEY='otakuba.admin.mode';
   // 既存ユーザーの操作感を壊さないよう、初回デフォルトは「くわしい」＝これまで通り全タブ表示。新規は店側の判断でモード変更可能。
@@ -921,12 +921,90 @@
       renderThemeEffect();
     };
   }
+  const GACHA_DEFAULT_RARITIES=[
+    {id:'n',name:'ノーマル',weight:60,color:'#b7b7b7',image:'',flashy:false},
+    {id:'r',name:'レア',weight:30,color:'#6cc7ff',image:'',flashy:false},
+    {id:'sr',name:'スーパーレア',weight:8,color:'#caa6ff',image:'',flashy:true},
+    {id:'ssr',name:'超激レア',weight:2,color:'#f6c84f',image:'',flashy:true}
+  ];
+  function gachaCfg(){ const g=Object.assign({enabled:false,rarities:null},data.settings.gachaEffect||{}); if(!Array.isArray(g.rarities)||!g.rarities.length) g.rarities=JSON.parse(JSON.stringify(GACHA_DEFAULT_RARITIES)); return g; }
+  function renderThemeGacha(){
+    const g=gachaCfg();
+    let html='<div class="admin-card"><div class="admin-card-title">🎰 会計ガチャ</div>'+
+      '<p class="tiny">会計（お客様が退店・支払い完了）のタイミングで、抽選演出を挟んでからレシートを表示します。レアリティごとに確率（%）・色・画像を自由に設定できます。合計が100%になるように調整してください（100%からズレていても動作はしますが、実際の出現率が意図とズレます）。</p>'+
+      '<label class="check-row"><input type="checkbox" id="gachaEnabled" '+(g.enabled?'checked':'')+'> 会計ガチャを有効にする</label>'+
+      '<div id="gachaTotalLabel" class="tiny mt" style="font-weight:800"></div>'+
+      '<div id="gachaRarityList" class="mt"></div>'+
+      '<div class="toolbar"><button class="btn" id="addGachaRarity">＋ レアリティを追加</button></div>'+
+      '<div class="toolbar"><button class="btn gold" id="saveGacha">会計ガチャを保存</button><button class="btn" id="resetGacha">既定に戻す</button></div>'+
+      '</div>';
+    $('themeSubContent').innerHTML=html;
+    function updateTotalLabel(){
+      const rows=Array.from(document.querySelectorAll('[data-rarity-row]'));
+      const total=rows.reduce((s,row)=>s+(Number(row.querySelector('[data-r-weight]').value)||0),0);
+      const el=$('gachaTotalLabel'); if(!el) return;
+      const ok=Math.abs(total-100)<0.05;
+      el.textContent='合計：'+total+'%'+(ok?'（OK）':'（100%になるよう調整してください）');
+      el.style.color=ok?'var(--green)':'var(--red)';
+    }
+    function renderRarityRows(){
+      $('gachaRarityList').innerHTML=g.rarities.map((r,i)=>
+        '<div class="admin-card" data-rarity-row="'+i+'" style="margin:8px 0">'+
+        '<div class="grid">'+
+        '<label>名前<input data-r-name value="'+esc(r.name||'')+'" placeholder="例：SSR"></label>'+
+        '<label>確率（%）<input data-r-weight type="number" min="0" max="100" step="0.1" value="'+(Number(r.weight)||0)+'"></label>'+
+        '</div>'+
+        '<label>色<input data-r-color type="color" value="'+esc(r.color||'#f6c84f')+'" style="height:40px;padding:2px"></label>'+
+        '<label>画像URL / ファイル名<input data-r-image value="'+esc(r.image||'')+'" placeholder="例：gacha_ssr.png / https://..."></label>'+
+        (r.image?'<div style="text-align:center;margin:6px 0"><img src="'+esc(GuildUtils.driveImg(r.image))+'" style="max-width:100px;max-height:100px;border:2px solid rgba(246,200,79,.4);border-radius:10px;background:#000" onerror="this.style.display=\'none\'"></div>':'')+
+        '<label class="check-row"><input data-r-flashy type="checkbox" '+(r.flashy?'checked':'')+'> 豪華演出にする（光の演出が増えます。レア度が高いものにおすすめ）</label>'+
+        '<div class="toolbar"><button class="btn small red" data-remove-rarity="'+i+'">このレアリティを削除</button></div>'+
+        '</div>'
+      ).join('');
+      $('gachaRarityList').querySelectorAll('[data-remove-rarity]').forEach(b=>b.onclick=function(){
+        g.rarities.splice(Number(this.dataset.removeRarity),1);
+        renderRarityRows();
+      });
+      $('gachaRarityList').querySelectorAll('[data-r-weight]').forEach(inp=>inp.oninput=updateTotalLabel);
+      updateTotalLabel();
+    }
+    renderRarityRows();
+    $('addGachaRarity').onclick=function(){
+      g.rarities.push({id:GuildUtils.uid('rarity'),name:'新しいレアリティ',weight:10,color:'#f6c84f',image:'',flashy:false});
+      renderRarityRows();
+    };
+    $('saveGacha').onclick=function(){
+      const rows=Array.from(document.querySelectorAll('[data-rarity-row]'));
+      const rarities=rows.map(function(row,i){
+        return {
+          id:(g.rarities[i]&&g.rarities[i].id)||GuildUtils.uid('rarity'),
+          name:row.querySelector('[data-r-name]').value.trim()||'名称未設定',
+          weight:Math.max(0,Number(row.querySelector('[data-r-weight]').value)||0),
+          color:row.querySelector('[data-r-color]').value||'#f6c84f',
+          image:row.querySelector('[data-r-image]').value.trim(),
+          flashy:row.querySelector('[data-r-flashy]').checked
+        };
+      });
+      data.settings.gachaEffect={enabled:$('gachaEnabled').checked, rarities};
+      save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
+      toast('会計ガチャを保存しました（全端末に反映されます）');
+      renderThemeGacha();
+    };
+    $('resetGacha').onclick=function(){
+      if(!confirm('会計ガチャの内容を既定（N/R/SR/SSRの4段階）に戻しますか？'))return;
+      data.settings.gachaEffect={enabled:false, rarities:JSON.parse(JSON.stringify(GACHA_DEFAULT_RARITIES))};
+      save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
+      toast('会計ガチャを既定に戻しました');
+      renderThemeGacha();
+    };
+  }
   function renderThemeSub(){
     if(themeSubTab==='store') renderStoreInfoAdmin('themeSubContent');
     if(themeSubTab==='text') renderThemeText();
     if(themeSubTab==='color') renderThemeColors();
     if(themeSubTab==='ui') renderThemeUi();
     if(themeSubTab==='effect') renderThemeEffect();
+    if(themeSubTab==='gacha') renderThemeGacha();
     if(themeSubTab==='image') renderThemeImage();
     if(themeSubTab==='bgm') renderThemeBgm();
     if(themeSubTab==='character') renderMonsters('themeSubContent');

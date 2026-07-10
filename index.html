@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#050505">
   <title data-theme-title>冒険者ギルド</title>
-  <link rel="stylesheet" href="main.css?v=1.60-gamemode">
+  <link rel="stylesheet" href="main.css?v=1.71-gachasave">
   <link rel="stylesheet" href="battle.css?v=1.40-defeatfx">
   <link rel="stylesheet" href="menu.css?v=1.33-lightbox">
   <link rel="stylesheet" href="effects.css?v=1.32-cartmode">
@@ -259,6 +259,22 @@
       </div>
     </div>
 
+    <div id="gachaOverlay" class="level-up-overlay gacha-overlay">
+      <div class="gacha-flash" id="gachaFlash"></div>
+      <div class="panel window gacha-card" id="gachaCard">
+        <div class="gacha-capsule" id="gachaCapsule">🎰</div>
+        <div class="gacha-suspense" id="gachaSuspense">ガチャ抽選中…</div>
+        <div class="gacha-result hidden" id="gachaResultBox">
+          <div class="gacha-rays" id="gachaRays"></div>
+          <div class="gacha-sparkles" id="gachaSparkles"></div>
+          <img id="gachaResultImg" class="gacha-result-img" alt="" onerror="this.style.display='none'">
+          <div class="gacha-rarity-label" id="gachaRarityLabel"></div>
+        </div>
+        <button class="btn gold mt hidden" id="btnGachaNext">🧾 レシートを見る</button>
+        <button class="btn small mt hidden" id="btnGachaSave" type="button">📥 画像を保存</button>
+      </div>
+    </div>
+
     <div id="guildReturnOverlay" class="victory-clear-overlay">
       <div class="panel window center">
         <div class="level-up-title">🏆 <span data-theme-text="words.bossDefeatText">魔王討伐！</span></div>
@@ -371,15 +387,15 @@
   <script src="integrity.js?v=1.0"></script>
   <script src="license-config.js?v=1.0"></script>
   <script src="license.js?v=1.0"></script>
-  <script src="storage.js?v=1.50-themefix"></script>
+  <script src="storage.js?v=1.70-gacha"></script>
   <script src="audio.js?v=1.33-bgmfix"></script>
   <script src="ui.js?v=1.32-cartmode"></script>
   <script src="customer.js?v=1.42-partymembers"></script>
   <script src="battle.js?v=1.40-defeatfx"></script>
   <script src="discord.js?v=1.32-cartmode"></script>
   <script src="menu.js?v=1.33-lightbox"></script>
-  <script src="order.js?v=1.60-gamemode"></script>
-  <script src="app.js?v=1.60-gamemode"></script>
+  <script src="order.js?v=1.70-gacha"></script>
+  <script src="app.js?v=1.71-gachasave"></script>
   <script>
     // iOSのSafariで「戻る」操作をすると、スクリプトを再実行せずにページをそのまま復元(bfcache)する
     // ことがあり、その場合テーマ切り替えやデータ更新が反映されないまま古い画面が表示され続けてしまう。

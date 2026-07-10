@@ -99,6 +99,17 @@ window.GuildOrder = (() => {
   function addToBill(item){ const data=GuildStorage.getData(); data.activeBill=data.activeBill||[]; const old=data.activeBill.find(x=>x.id===item.id && !x.isCharge); if(old){old.qty+=item.qty;old.subtotal+=item.subtotal;}else data.activeBill.push(Object.assign({},item)); GuildStorage.save(); }
   function currentSalesMonth(){ const data=GuildStorage.getData(); data.salesSettings=data.salesSettings||{}; if(!data.salesSettings.currentMonth)data.salesSettings.currentMonth=new Date().toISOString().slice(0,7); return data.salesSettings.currentMonth; }
   function withCoverCharge(items){ const data=GuildStorage.getData(); const list=(items||[]).slice(); if(list.some(i=>i.isCharge)) return list; const cover=Number(data.settings&&data.settings.coverCharge)||0; const party=Math.max(1,Number(data.partyCount||1)||1); if(cover>0){ const label=(window.GuildTheme?GuildTheme.w('customerRegister'):'席料'); list.unshift({id:'cover-charge',name:label,cat:'charge',price:cover,qty:party,subtotal:cover*party,isCharge:true}); } return list; }
+  // ===== 会計ガチャ（Phase8）：重み付き抽選で1つレアリティを選ぶ =====
+  function pickGachaRarity(){
+    const data=GuildStorage.getData();
+    const cfg=(data.settings&&data.settings.gachaEffect)||{enabled:false,rarities:[]};
+    const list=(Array.isArray(cfg.rarities)?cfg.rarities:[]).filter(r=>Number(r.weight)>0);
+    if(!list.length) return null;
+    const total=list.reduce((s,r)=>s+Number(r.weight||0),0);
+    let roll=Math.random()*total;
+    for(const r of list){ roll-=Number(r.weight||0); if(roll<=0) return r; }
+    return list[list.length-1];
+  }
   function record(type, items, total, reason=''){ const data=GuildStorage.getData(); const c=GuildCustomer.current()||{name:'未登録',level:1,title:'',id:''}; const rec={id:GuildUtils.uid(type==='checkout'?'sale':'order'),type,customer:c.name,customerId:c.id||'',items,total,partyCount:data.partyCount||1,time:new Date().toISOString(),timeText:todayText(),reason}; if(type==='checkout'){ rec.accountingMonth=currentSalesMonth(); data.sales.push(rec); c.total=(Number(c.total)||0)+Number(total||0); c.lastVisit=rec.timeText; GuildStorage.save(); } return rec; }
   function payload(type,sale,items,total,extra={}){
     const data=GuildStorage.getData(); const c=GuildCustomer.current(); const e=(isGameModeOn()&&GuildBattle.enemy)?GuildBattle.enemy():null;
@@ -160,6 +171,11 @@ window.GuildOrder = (() => {
     data.activeBill=[];
     GuildStorage.save(); if(isGameModeOn()) GuildBattle.render();
     $('screenMain').classList.remove('combat-lock');
+    const gcfg=(data.settings&&data.settings.gachaEffect)||{enabled:false};
+    if(gcfg.enabled && total>0 && window.GuildApp && GuildApp.showGacha){
+      const rarity=pickGachaRarity();
+      if(rarity){ GuildApp.showGacha(rarity, ()=>showReceipt(all,total,custName)); return; }
+    }
     showReceipt(all,total,custName);
   }
   function showReceipt(items,total,custName){

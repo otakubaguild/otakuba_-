@@ -201,7 +201,13 @@ window.GuildStorage = (() => {
       uiTheme:{borderColor:'gold',borderColorCustom:'',panelBg:'black',panelBgCustom:'',btnStyle:'rpg',btnRadius:9,borderWidth:3,borderRadius:12,btnShadow:true,blur:true},
       defeatEffect:{style:'pop',image:'',imageEnabled:false},
       gameMode:true,
-      allowCustomerGameToggle:true
+      allowCustomerGameToggle:true,
+      gachaEffect:{enabled:false,rarities:[
+        {id:'n',name:'ノーマル',weight:60,color:'#b7b7b7',image:'',flashy:false},
+        {id:'r',name:'レア',weight:30,color:'#6cc7ff',image:'',flashy:false},
+        {id:'sr',name:'スーパーレア',weight:8,color:'#caa6ff',image:'',flashy:true},
+        {id:'ssr',name:'超激レア',weight:2,color:'#f6c84f',image:'',flashy:true}
+      ]}
     }, defaults.settings || {});
     data.settings.notice = Object.assign({enabled:true,title:'本日のお知らせ',body:'',position:'top'}, data.settings.notice || {});
     data.settings.business = Object.assign({open:false,openedAt:'',closedAt:'',dailyReports:[]}, data.settings.business || {});
@@ -321,7 +327,7 @@ window.GuildStorage = (() => {
         // 浅いマージだと themeCustom / notice / audioFiles などのネストしたオブジェクトが
         // 丸ごと置き換わってしまい、片方の端末にしかない項目が消えることがあるため、
         // ネストが深いキーだけは1階層だけ深くマージする
-        const NESTED_KEYS=['themeCustom','notice','audioFiles','storeInfo','uiTheme','defeatEffect'];
+        const NESTED_KEYS=['themeCustom','notice','audioFiles','storeInfo','uiTheme','defeatEffect','gachaEffect'];
         const merged=Object.assign({},data.settings,remote.settings);
         NESTED_KEYS.forEach(function(k){
           if(remote.settings[k] && typeof remote.settings[k]==='object' && !Array.isArray(remote.settings[k])){

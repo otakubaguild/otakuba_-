@@ -426,7 +426,84 @@ window.GuildApp = {VERSION:'4.0'};
     hideSetupWizard();
     GuildUI.toast('あとで管理画面から設定できます');
   };
+  // 画像を「写真に保存」または「ファイルに保存」できるようにする（iOS Safariの共有シート経由）。
+  // 共有シートが使えない環境では、新しいタブで開いて「長押しで保存」を案内するフォールバックにする。
+  async function saveImageToDevice(url, filename){
+    try{
+      const res=await fetch(url);
+      const blob=await res.blob();
+      const file=new File([blob], filename, {type: blob.type||'image/png'});
+      if(navigator.canShare && navigator.canShare({files:[file]})){
+        await navigator.share({files:[file], title:filename});
+        return;
+      }
+    }catch(e){}
+    window.open(url, '_blank');
+    GuildUI.toast('画像を長押しして「写真に追加」を選んでください');
+  }
   GuildApp.showLevelUp=function(oldLevel,newLevel){ const o=$('levelUpOverlay'); $('levelUpText').textContent=`Lv.${oldLevel} → Lv.${newLevel}`; o.classList.add('show'); };
+  GuildApp.showGacha=function(rarity, onDone){
+    const overlay=$('gachaOverlay');
+    const capsule=$('gachaCapsule');
+    const suspense=$('gachaSuspense');
+    const resultBox=$('gachaResultBox');
+    const img=$('gachaResultImg');
+    const label=$('gachaRarityLabel');
+    const sparkles=$('gachaSparkles');
+    const nextBtn=$('btnGachaNext');
+    const saveBtn=$('btnGachaSave');
+    const flash=$('gachaFlash');
+    if(!overlay||!rarity) { if(onDone) onDone(); return; }
+
+    // リセット
+    capsule.classList.remove('settled');
+    suspense.classList.remove('hidden');
+    resultBox.classList.add('hidden');
+    nextBtn.classList.add('hidden');
+    if(saveBtn) saveBtn.classList.add('hidden');
+    flash.classList.remove('on');
+    sparkles.classList.remove('on');
+    sparkles.innerHTML='';
+    const color=rarity.color||'#f6c84f';
+    resultBox.style.setProperty('--gacha-color', color);
+    const imgUrl = rarity.image ? GuildUtils.driveImg(rarity.image) : '';
+    img.style.display = rarity.image ? '' : 'none';
+    img.src = imgUrl;
+    label.textContent = rarity.name||'';
+
+    overlay.classList.add('show');
+    GuildAudio.playSe(rarity.flashy?'levelup':'confirm');
+
+    setTimeout(()=>{
+      capsule.classList.add('settled');
+      suspense.classList.add('hidden');
+      flash.classList.add('on');
+      setTimeout(()=>flash.classList.remove('on'),420);
+      resultBox.classList.remove('hidden');
+      if(rarity.flashy){
+        GuildAudio.playSe('victory');
+        sparkles.innerHTML = Array.from({length:10}).map(()=>
+          '<span style="left:'+(Math.random()*90+5)+'%;top:'+(Math.random()*70+15)+'%;animation-delay:'+(Math.random()*0.6).toFixed(2)+'s">✨</span>'
+        ).join('');
+        sparkles.classList.add('on');
+      }
+      nextBtn.classList.remove('hidden');
+      if(saveBtn){
+        if(imgUrl){
+          saveBtn.classList.remove('hidden');
+          saveBtn.onclick=()=>saveImageToDevice(imgUrl, (rarity.name||'gacha')+'.png');
+        } else {
+          saveBtn.classList.add('hidden');
+        }
+      }
+    }, 950);
+
+    nextBtn.onclick=function(){
+      GuildAudio.playSe('ok');
+      overlay.classList.remove('show');
+      if(onDone) onDone();
+    };
+  };
   GuildApp.showVictoryClear=function(){ const o=$('guildReturnOverlay'); if(o) o.classList.add('show'); };
   if($('guildReturnBtn')) $('guildReturnBtn').onclick=(ev)=>{
     if(ev&&ev.stopPropagation) ev.stopPropagation();
