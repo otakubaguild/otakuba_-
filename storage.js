@@ -298,17 +298,35 @@ window.GuildStorage = (() => {
   function gasUrl(){ return (data.settings && (data.settings.gasUrl||'').trim()) || ''; }
   // 共有すべき管理データだけを送る（戦闘の一時状態は端末ローカルのまま）
   function saleKey(s){ return s && (s.id || s.saleId || (String(s.time||'')+'|'+String(s.customer||'')+'|'+String(s.total||'')+'|'+JSON.stringify(s.items||[]))); }
-  function sharedPayload(){
+  // 「画像・BGM・SE」に分類する設定項目。GAS側の分類と必ず一致させること
+  const ASSET_SETTINGS_KEYS=['themeCustom','audioFiles','uiTheme','gachaEffect','defeatEffect','storeInfo'];
+  function splitSettings_(){
+    const core={}, asset={};
+    Object.keys(data.settings||{}).forEach(function(k){
+      if(ASSET_SETTINGS_KEYS.indexOf(k)>=0) asset[k]=data.settings[k];
+      else core[k]=data.settings[k];
+    });
+    return {core, asset};
+  }
+  function customersForCloud_(){
     // avatarImage（顧客が選んだ画像アイコン）は容量が大きくなりがちなので、クラウド送信からは除外する（この端末のブラウザだけに残す）
-    const customersForCloud=(data.customers||[]).map(function(c){
+    return (data.customers||[]).map(function(c){
       if(!c || !c.avatarImage) return c;
       const copy=Object.assign({}, c); delete copy.avatarImage; return copy;
     });
-    return {action:'saveAll', settings:data.settings, menu:data.menu, monsters:data.monsters, customers:customersForCloud, sales:data.sales, deletedSaleIds:data.deletedSaleIds||[], deletedCustomerIds:data.deletedCustomerIds||[], salesSettings:data.salesSettings, currentEnemyIndex:data.currentEnemyIndex, progressResetAt:data.progressResetAt||'', monsters:data.monsters, lastLocalSaveAt:data.lastLocalSaveAt||0};
   }
+  function postToGas_(url, payload){
+    try{ fetch(url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)}); }catch(e){}
+  }
+  // 全データを1回で送らず、3つに分けて別々にPOSTする。
+  // どれか1つが失敗しても、残り2つは影響を受けない（1回あたりの保存データ量も減らせる）
   function pushCloud(){
     const url=gasUrl(); if(!url) return;
-    try{ fetch(url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(sharedPayload())}); }catch(e){}
+    const {core, asset}=splitSettings_();
+    const savedAt=data.lastLocalSaveAt||0;
+    postToGas_(url, {action:'saveGameData', menu:data.menu, monsters:data.monsters, lastLocalSaveAt:savedAt});
+    postToGas_(url, {action:'saveStoreData', settings:core, customers:customersForCloud_(), sales:data.sales, deletedSaleIds:data.deletedSaleIds||[], deletedCustomerIds:data.deletedCustomerIds||[], salesSettings:data.salesSettings, lastLocalSaveAt:savedAt});
+    postToGas_(url, {action:'saveAssetData', assetSettings:asset, lastLocalSaveAt:savedAt});
   }
   // 保存が連続しても1.2秒に1回だけ送る（GASの負荷・遅延対策）
   function schedulePush(){ if(!gasUrl())return; clearTimeout(pushTimer); pushTimer=setTimeout(pushCloud,1200); }
