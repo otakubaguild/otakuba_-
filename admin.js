@@ -384,6 +384,7 @@
   ];
   var BGM_LIST=['title','slime','goblin','orc','cave','ruins','maou','daimaou','ending'];
   for(var _bi=1;_bi<=59;_bi++){ BGM_LIST.push('bgm/bgm_'+_bi+'.mp3'); }
+  for(var _hi=1;_hi<=28;_hi++){ BGM_LIST.push('bgm/horror_'+_hi+'.mp3'); }
   var SE_LIST_ALL=[]; for(var _si=1;_si<=23;_si++){ SE_LIST_ALL.push('se/se_'+_si+'.mp3'); }
   var RPG_BARE_FILES=['slime.png','goblin.png','orc.png','skeleton.png','mimic.png','minotaur.png','gargoyle.png','dragon.png','dark_wizard.png','maou.png','maou_new.png','grass.png','forest.png','cave.png','ruins.png','volcano.png','castle.png','victory_clear.PNG','background.jpg'];
   var PRESET_LABELS={rpg:'⚔️ RPG',space:'🚀 SF',magic:'🪄 魔法学校'};
@@ -415,7 +416,13 @@
     'bgm/bgm_70.mp3':'ファミコン風19','bgm/bgm_71.mp3':'ファミコン風05','bgm/bgm_72.mp3':'ファミコン風17','bgm/bgm_73.mp3':'ファミコン風18','bgm/bgm_74.mp3':'ファミコン風10',
     'bgm/bgm_75.mp3':'ファミコン風14','bgm/bgm_76.mp3':'ファミコン風09','bgm/bgm_77.mp3':'ファミコン風11','bgm/bgm_78.mp3':'ファミコン風12','bgm/bgm_79.mp3':'ファミコン風13',
     'bgm/bgm_80.mp3':'ファミコン風21','bgm/bgm_81.mp3':'ファミコン風27','bgm/bgm_82.mp3':'ファミコン風28','bgm/bgm_83.mp3':'ファミコン風25',
-    'bgm/bgm_84.mp3':'ファミコン風22','bgm/bgm_85.mp3':'ファミコン風26','bgm/bgm_86.mp3':'ファミコン風23','bgm/bgm_87.mp3':'ファミコン風24'
+    'bgm/bgm_84.mp3':'ファミコン風22','bgm/bgm_85.mp3':'ファミコン風26','bgm/bgm_86.mp3':'ファミコン風23','bgm/bgm_87.mp3':'ファミコン風24',
+    'bgm/horror_1.mp3':'ホラー01','bgm/horror_2.mp3':'ホラー02','bgm/horror_3.mp3':'ホラー03','bgm/horror_4.mp3':'ホラー04','bgm/horror_5.mp3':'ホラー05',
+    'bgm/horror_6.mp3':'ホラー06','bgm/horror_7.mp3':'ホラー07','bgm/horror_8.mp3':'ホラー08','bgm/horror_9.mp3':'ホラー09','bgm/horror_10.mp3':'ホラー10',
+    'bgm/horror_11.mp3':'ホラー11','bgm/horror_12.mp3':'ホラー12','bgm/horror_13.mp3':'ホラー13','bgm/horror_14.mp3':'ホラー14','bgm/horror_15.mp3':'ホラー15',
+    'bgm/horror_16.mp3':'ホラー16','bgm/horror_17.mp3':'ホラー17','bgm/horror_18.mp3':'ホラー18','bgm/horror_19.mp3':'ホラー19','bgm/horror_20.mp3':'ホラー20',
+    'bgm/horror_21.mp3':'ホラー21','bgm/horror_22.mp3':'ホラー22','bgm/horror_23.mp3':'ホラー23','bgm/horror_24.mp3':'ホラー24','bgm/horror_25.mp3':'ホラー25',
+    'bgm/horror_26.mp3':'ホラー26','bgm/horror_27.mp3':'ホラー27','bgm/horror_28.mp3':'ホラー28'
   };
   const SE_SOURCE_LABELS={
     'se/se_1.mp3':'決定音','se/se_2.mp3':'会計・勝利音','se/se_3.mp3':'システム05','se/se_4.mp3':'ダメージ音','se/se_5.mp3':'システム04',
@@ -475,7 +482,7 @@
     '<label>ステージ<input data-field="stage" value="'+esc(m.stage)+'"></label>'+
     '<label>BGM（一覧から選択）<select data-field="bgm">'+bgmOptList(BGM_LIST.concat(BGM_LIST.includes(m.bgm)||!m.bgm?[]:[m.bgm]),m.bgm)+'</select></label>'+
     '<div class="toolbar"><button class="btn small" data-bgm-play="'+i+'">▶ このBGMを試聴</button><button class="btn small" data-bgm-stop="'+i+'">■ 停止</button></div>'+
-    '<label>BGM URL（アップした音源を使う場合はここに貼る）<input data-field="bgmUrl" value="'+esc(/^https?:/i.test(m.bgm)?m.bgm:'')+'" placeholder="https://drive.google.com/..."></label>'+
+    '<label>BGM URL / ファイル名（GitHubのbgmフォルダに直接アップした音源のファイル名を入力。例：bgm/horror_1.mp3）<input data-field="bgmUrl" value="'+esc(/^(https?:|bgm\/)/i.test(m.bgm)?m.bgm:'')+'" placeholder="bgm/曲名.mp3"></label>'+
     '<label>現在HP<input data-field="hp" type="number" value="'+(m.hp||0)+'"></label>'+
     '<label>最大HP<input data-field="maxHp" type="number" value="'+(m.maxHp||500)+'"></label>'+
     '<label>背景（一覧から選択）<select data-field="bg">'+optList(themeScopedBgList().concat(themeScopedBgList().includes(m.bg)||!m.bg||/^https?:/i.test(m.bg)?[]:[m.bg]),m.bg)+'</select></label>'+
@@ -1291,7 +1298,7 @@
       '</div>'+
       '<div class="admin-card"><div class="admin-card-title">📝 音源クレジット表記</div>'+
       '<p class="tiny">配布サイトの規約でクレジット表記が必須の音源を使っている場合、ここに書いておくとタイトル画面に小さく表示されます。音源を全部自分の物や表記不要の物に差し替えた場合は空欄でOKです。</p>'+
-      '<input id="tcAudioCredit" value="'+esc(s.audioCredit!==undefined?s.audioCredit:'音楽：魔王魂 / パンダの中のパンダ')+'" placeholder="例：音楽：魔王魂">'+
+      '<input id="tcAudioCredit" value="'+esc(s.audioCredit!==undefined?s.audioCredit:'音楽：魔王魂 / パンダの中のパンダ / BGMer')+'" placeholder="例：音楽：魔王魂">'+
       '</div>'+
       '<div class="toolbar"><button class="btn gold" id="saveThemeBgm">BGM・SE設定を保存</button><button class="btn" id="clearThemeCustom">場面BGMを初期化</button></div>'+
       '<h3>音源をアップロードする</h3>'+uploadWidgetHtml();
@@ -1520,10 +1527,10 @@
   }
 
   function uploadWidgetHtml(){
-    return `<div class="admin-card"><div class="tiny">敵画像・背景・BGM・メニュー写真をここからアップできます。アップ後に出るURLを、上の画像欄・BGM欄に貼れば使えます。</div></div>
+    return `<div class="admin-card"><div class="tiny">敵画像・背景・メニュー写真をここからアップできます。アップ後に出るURLを、上の画像欄に貼れば使えます。<br>⚠️BGM/SE（音声ファイル）は、この仕組みだと再生できない不具合があるため、ここからはアップロードしないでください。音声を追加・差し替えたい場合は、GitHubリポジトリの<code>bgm</code>フォルダに直接ファイルをアップロードし、ファイル名（例：<code>bgm/曲名.mp3</code>）をBGM欄に入力してください。</div></div>
     <div class="admin-card">
-      <label>ファイルを選択<input id="upFile" type="file"></label>
-      <label>用途メモ（任意・ファイル名に使います）<input id="upLabel" placeholder="例：slime2 / bgm_boss / menu_beer"></label>
+      <label>ファイルを選択（画像のみ）<input id="upFile" type="file" accept="image/*"></label>
+      <label>用途メモ（任意・ファイル名に使います）<input id="upLabel" placeholder="例：slime2 / menu_beer"></label>
       <div class="toolbar"><button class="btn gold" id="upBtn">アップロード</button></div>
       <div id="upProgress" class="tiny"></div>
     </div>
@@ -1545,6 +1552,7 @@
   }
   async function doUpload(){
     const f=$('upFile').files[0]; if(!f){toast('ファイルを選んでください');return;}
+    if(f.type.startsWith('audio')){ toast('⚠️音声ファイルはこの仕組みだと再生できません。GitHubのbgmフォルダに直接アップロードしてください'); return; }
     const url=(data.settings.gasUrl||'').trim(); if(!url){toast('先に同期タブでGAS URLを設定してください');return;}
     if(f.size>8*1024*1024){ if(!confirm('8MBを超えています。GAS経由だと失敗しやすいですが試しますか？'))return; }
     const label=($('upLabel').value.trim()||f.name.replace(/\.[^.]+$/,'')).replace(/[^\w\-]/g,'_');
@@ -1559,7 +1567,7 @@
       if(j&&j.ok&&j.url){
         data.settings.uploadHistory=data.settings.uploadHistory||[]; data.settings.uploadHistory.push({name:filename,url:j.url,at:new Date().toISOString()}); save();
         $('upProgress').textContent='';
-        $('upResult').innerHTML=`<div class="admin-card"><div class="admin-card-title">✅ アップ完了</div><div class="tiny">このURLを画像欄/BGM欄に貼ってください</div><input readonly value="${esc(j.url)}" onclick="this.select();this.setSelectionRange(0,99999)" style="width:100%"><div class="toolbar"><button class="btn gold" id="upCopy">URLをコピー</button></div><img src="${esc(GuildUtils.driveImg(j.url))}" style="max-width:100%;max-height:200px;margin-top:8px" onerror="this.style.display='none'"></div>`;
+        $('upResult').innerHTML=`<div class="admin-card"><div class="admin-card-title">✅ アップ完了</div><div class="tiny">このURLを画像欄に貼ってください</div><input readonly value="${esc(j.url)}" onclick="this.select();this.setSelectionRange(0,99999)" style="width:100%"><div class="toolbar"><button class="btn gold" id="upCopy">URLをコピー</button></div><img src="${esc(GuildUtils.driveImg(j.url))}" style="max-width:100%;max-height:200px;margin-top:8px" onerror="this.style.display='none'"></div>`;
         $('upCopy').onclick=()=>copyText(j.url,$('upCopy'));
         if($('upHistory')){ $('upHistory').innerHTML=uploadHistoryHtml(); bindUploadHistoryEvents(); }
       }else{ $('upProgress').textContent=''; $('upResult').innerHTML=`<div class="admin-card">❌ 失敗：${esc((j&&j.error)||'不明なエラー')}</div>`; }
@@ -1695,6 +1703,50 @@
     };
     r.readAsText(f);
   }
+  // ===== テーマパック（配布用）：見た目・演出だけを書き出す/読み込む =====
+  // 店舗名・GAS URL・管理パスワード・営業設定・顧客・売上・メニュー（商品）には一切触らない。
+  // 「敵」と「見た目・演出まわりの設定」だけを対象にする。
+  const THEME_PACK_SETTINGS_KEYS=['themeCustom','audioFiles','uiTheme','gachaEffect','defeatEffect'];
+  function doThemePackExport(){
+    try{
+      const themeSettings={};
+      THEME_PACK_SETTINGS_KEYS.forEach(k=>{ if(data.settings[k]!==undefined) themeSettings[k]=data.settings[k]; });
+      const payload={
+        _type:'otakuba_theme_pack', _version:'1.0', _exportedAt:new Date().toISOString(),
+        theme:{ monsters:data.monsters||[], settings:themeSettings }
+      };
+      const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      const name=(prompt('テーマパックのファイル名（例：horror）', 'theme')||'theme').replace(/[^\w\-]/g,'_');
+      a.href=url; a.download='themepack_'+name+'.json'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+      toast('テーマパックを書き出しました（店舗情報・顧客・売上・メニューは含まれません）');
+    }catch(e){ toast('書き出しに失敗しました: '+e); }
+  }
+  function doThemePackImport(ev){
+    const f=ev.target.files&&ev.target.files[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=()=>{
+      try{
+        const parsed=JSON.parse(r.result);
+        const incoming=(parsed&&parsed.theme)?parsed.theme:parsed;
+        if(!incoming||typeof incoming!=='object'||(!incoming.monsters&&!incoming.settings)){ toast('このファイルはテーマパックとして読めません'); ev.target.value=''; return; }
+        const cnt=`敵${(incoming.monsters||[]).length}体 / 見た目・演出設定`;
+        if(!confirm('このテーマパックを適用します。\n\n'+cnt+'\n\n※店舗名・GAS URL・管理パスワード・営業設定・顧客・売上・メニュー（商品）は変更されません。敵と見た目・演出だけが変わります。よろしいですか？')){ ev.target.value=''; return; }
+        if(Array.isArray(incoming.monsters)) data.monsters=incoming.monsters;
+        if(incoming.settings){
+          THEME_PACK_SETTINGS_KEYS.forEach(k=>{ if(incoming.settings[k]!==undefined) data.settings[k]=incoming.settings[k]; });
+        }
+        save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
+        const m=$('backupMsg'); if(m) m.textContent='✅ テーマパックを適用しました（'+cnt+'）';
+        toast('テーマパックを適用しました');
+        render();
+      }catch(e){ toast('読み込みに失敗しました: '+e); }
+      ev.target.value='';
+    };
+    r.readAsText(f);
+  }
   function sysRow(status,label,detail){
     const icon=status==='ok'?'🟢':status==='warn'?'🟡':status==='bad'?'🔴':'⚪';
     return '<div class="admin-card" style="display:flex;align-items:flex-start;gap:10px;margin:8px 0">'+
@@ -1824,7 +1876,7 @@
         '<li><b>⚔️ キャラクター</b>：注文に応じて登場する「敵」の名前・画像・体力（何注文で倒れるか）・大きさ（未設定の敵は自動で70%表示）を設定します。各敵ごとに「登場時／被弾時／撃破時」のセリフを自由に追加でき、複数登録するとその中からランダムで1つ表示されます（未入力なら何も表示されません）。さらに敵ごとに「撃破演出画像」を個別設定でき、設定しておくとその敵を倒した時だけ専用の画像が表示されます（未設定の敵は共通画像が使われます）。</li>'+
         '<li><b>🗺️ ステージ</b>：ボスの出現条件や演出まわりの設定です。</li>'+
         '<li><b>👁️ プレビュー</b>：変更内容をお客様目線で確認できます。保存前に必ずここでチェックしてください。</li>'+
-        '</ul><div class="guide-note">画像・BGMはご自身で用意したファイルをアップロードして使えます。ファイル形式に迷ったら画像はPNG/JPG、音声はMP3が安全です。</div>'
+        '</ul><div class="guide-note">画像はご自身で用意したファイルをアプリ内から直接アップロードして使えます（ファイル形式に迷ったらPNG/JPGが安全です）。⚠️BGM/SE（音声ファイル）は、アプリ内アップロードだと再生できない不具合があるため、GitHubリポジトリの<code>bgm</code>フォルダに直接ファイルをアップロードし、ファイル名（例：<code>bgm/曲名.mp3</code>）を各BGM欄に入力してください。</div>'
       )+
       sec('🖼️ UIテーマ（枠・パネル・ボタンの見た目）',
         '<p>お客様画面の「質素感」を減らすための設定です。特に効果が大きいのは<b>枠内背景を「半透明黒」にして背景ぼかしをONにする</b>組み合わせで、これだけで高級感がかなり変わります。</p><ul>'+
@@ -1952,6 +2004,14 @@
         </div>
         <div id="backupMsg" class="tiny"></div>
       </div>
+      <div class="admin-card" style="border-color:var(--gold)">
+        <div class="admin-card-title">🎨 テーマパック（見た目・演出だけ配布用）</div>
+        <p class="tiny">敵・配色・用語・BGM/SE・ボタンの見た目・撃破演出・ガチャの画像だけをファイルにまとめます。<b>店舗名・GAS URL・管理パスワード・営業設定・顧客・売上・メニュー（商品）は一切含まれません／変更されません。</b>ホラー・戦国・お伽話…のようにテーマごとにファイルを分けて配布できます。</p>
+        <div class="toolbar">
+          <button class="btn gold" id="themePackExport">今のテーマをパックとして書き出す</button>
+          <label class="btn green" style="cursor:pointer">テーマパックを読み込む（ファイル選択）<input id="themePackImport" type="file" accept="application/json,.json" style="display:none"></label>
+        </div>
+      </div>
       <div class="billbox">必要なものだけ初期化できます。メニューや敵データは、押した項目以外は残ります。</div>
       <div class="grid">
         <div class="admin-card"><div class="admin-card-title">討伐進行</div><p class="tiny">現在の敵・HP・注文中データをリセット</p><button class="btn red" id="resetProgress">討伐進行を初期化</button></div>
@@ -1965,6 +2025,8 @@
       </div>`;
     $('backupExport').onclick=doBackupExport;
     $('backupImport').onchange=doBackupImport;
+    $('themePackExport').onclick=doThemePackExport;
+    $('themePackImport').onchange=doThemePackImport;
     $('resetProgress').onclick=()=>{if(confirmReset('討伐進行','現在の敵を最初に戻し、敵HPと注文中データを初期化します。')){GuildStorage.resetProgress();toast('討伐進行を初期化しました');renderReset();}};
     $('resetActiveBill').onclick=resetActiveBill;
     $('resetOrderHistory').onclick=resetOrderHistory;
