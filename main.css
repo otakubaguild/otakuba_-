@@ -99,7 +99,11 @@ details.quest-fields label{display:block;margin-top:6px}
 .simple-mode .hud, .simple-mode .battlefield{display:none!important}
 .simple-mode .categories{order:0;margin-top:4px}
 
-/* ===== タイトル画面：お客様ごとのゲーム/通常メニュー切替トグル ===== */
+/* ===== 待ち時間ミニゲーム：全画面オーバーレイ ===== */
+.minigame-overlay{position:fixed;inset:0;z-index:12000;background:#000;display:flex;flex-direction:column}
+.minigame-overlay.hidden{display:none}
+.minigame-close{position:absolute;top:calc(env(safe-area-inset-top,0px) + 8px);right:10px;z-index:12001;background:rgba(20,20,20,.75);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:8px 12px;font-size:13px}
+.minigame-frame{flex:1;width:100%;height:100%;border:0;display:block}
 .mode-toggle-row{display:flex;gap:8px;margin:14px 0 4px}
 .mode-toggle-row .mode-toggle-btn{flex:1;font-size:12px;padding:9px 6px;opacity:.55;border-color:rgba(255,246,223,.35)}
 .mode-toggle-row .mode-toggle-btn.active{opacity:1;border-color:var(--gold);color:#1d1300;background:linear-gradient(#ffe58a,#c89225);font-weight:800}

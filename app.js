@@ -544,6 +544,63 @@ window.GuildApp = {VERSION:'4.0'};
     };
   };
   GuildApp.showVictoryClear=function(){ const o=$('guildReturnOverlay'); if(o) o.classList.add('show'); };
+
+  // ===== 待ち時間ミニゲーム =====
+  // 用意されているゲームの一覧。ファイルが実在するものだけ settings 側で有効化する想定。
+  const MINIGAMES=[
+    {id:'action',  name:'アクション',       file:'minigame/Action.html'},
+    {id:'slot',    name:'スロット',         file:'minigame/slot.html'},
+    {id:'shooting',name:'弾幕シューティング', file:'minigame/shooting.html'}
+  ];
+  function minigameSettings_(){
+    const def={enabled:true, games:{action:true, slot:false, shooting:false}};
+    const s=(data.settings&&data.settings.minigame)||{};
+    return {enabled:s.enabled!==false, games:Object.assign({}, def.games, s.games||{})};
+  }
+  function enabledMinigames_(){
+    const cfg=minigameSettings_();
+    if(!cfg.enabled) return [];
+    return MINIGAMES.filter(g=>cfg.games[g.id]);
+  }
+  function incrementSessionOrderCount(){
+    data.sessionOrderCount=(Number(data.sessionOrderCount)||0)+1;
+    GuildStorage.save();
+    return data.sessionOrderCount;
+  }
+  // 注文確定→ダメージ演出が終わった直後にorder.js側から呼ばれる
+  GuildApp.offerMinigame=function(){
+    const games=enabledMinigames_();
+    if(!games.length) return; // 使えるミニゲームが無ければ何も出さない
+    const lives=incrementSessionOrderCount();
+    const t=$('minigameLivesText'); if(t) t.textContent='残機 '+lives+'（ご来店からの注文数）';
+    GuildApp._pendingMinigamePick=games[Math.floor(Math.random()*games.length)];
+    GuildUI.openModal('modalMinigameOffer');
+  };
+  function launchMinigame_(game){
+    if(!game) return;
+    const frame=$('minigameFrame'); const overlay=$('minigameOverlay');
+    if(!frame||!overlay) return;
+    const lives=Number(data.sessionOrderCount)||1;
+    frame.src=game.file+'?lives='+lives;
+    overlay.classList.remove('hidden');
+  }
+  function closeMinigame_(){
+    const frame=$('minigameFrame'); const overlay=$('minigameOverlay');
+    if(overlay) overlay.classList.add('hidden');
+    if(frame) frame.src='about:blank'; // 音や処理を止めるため、閉じたら中身を破棄する
+  }
+  if($('btnMinigamePlay')) $('btnMinigamePlay').onclick=()=>{
+    GuildAudio.playSe('ok'); GuildUI.closeModals();
+    launchMinigame_(GuildApp._pendingMinigamePick);
+  };
+  if($('btnMinigameSkip')) $('btnMinigameSkip').onclick=()=>{ GuildAudio.playSe('cancel'); GuildUI.closeModals(); };
+  if($('btnMinigameClose')) $('btnMinigameClose').onclick=()=>{ GuildAudio.playSe('cancel'); closeMinigame_(); };
+  // ミニゲーム側が「閉じてほしい」と伝えてきた場合に対応（将来のゲーム追加に備えて）
+  window.addEventListener('message', function(ev){
+    if(ev && ev.data && ev.data.type==='PLAY_ORDER_CLOSE') closeMinigame_();
+  });
+
+
   if($('guildReturnBtn')) $('guildReturnBtn').onclick=(ev)=>{
     if(ev&&ev.stopPropagation) ev.stopPropagation();
     const g=$('guildReturnOverlay'); if(g) g.classList.remove('show');
@@ -571,7 +628,7 @@ window.GuildApp = {VERSION:'4.0'};
     GuildUI.show('screenName');
   };
   $('btnStartNo').onclick=()=>{ GuildAudio.playSe('cancel'); showMasterMessage(); };
-  $('btnAdmin').onclick=()=>location.href='admin.html';
+  if($('btnAdmin')) $('btnAdmin').onclick=()=>location.href='admin.html';
   if($('btnStoreInfo')) $('btnStoreInfo').onclick=()=>{ GuildAudio.playSe('ok'); renderStoreInfo(); $('storeInfoOverlay').classList.add('show'); };
   if($('btnShowTerms')) $('btnShowTerms').onclick=()=>{ GuildAudio.playSe('ok'); const b=$('termsBody'); if(b) b.innerHTML=(window.GuildTerms&&GuildTerms.html)||'利用規約が見つかりません。'; GuildUI.openModal('modalTerms'); };
   if($('btnCloseTerms')) $('btnCloseTerms').onclick=()=>{ GuildAudio.playSe('cancel'); GuildUI.closeModals(); };
@@ -615,12 +672,12 @@ window.GuildApp = {VERSION:'4.0'};
     });
     applyCoverCharge(); enterMenuScreen(true);
   };
-  $('btnBackTitle').onclick=()=>{ GuildAudio.playSe('cancel'); GuildUI.closeModals(); sessionGameMode=null; data.sessionGameMode=null; GuildStorage.save(); gameModeNoticeShown=false; welcomeText('メニューを開きますか？'); showWelcomeScreen(); };
+  $('btnBackTitle').onclick=()=>{ GuildAudio.playSe('cancel'); GuildUI.closeModals(); sessionGameMode=null; data.sessionGameMode=null; data.sessionOrderCount=0; GuildStorage.save(); gameModeNoticeShown=false; welcomeText('メニューを開きますか？'); showWelcomeScreen(); };
   $('btnCloseMenu').onclick=()=>GuildUI.closeModals(); $('btnCancelOrder').onclick=GuildOrder.cancelPending; $('btnNoOrder').onclick=GuildOrder.cancelPending; $('btnDoOrder').onclick=GuildOrder.confirmOrder; $('btnCheckout').onclick=GuildOrder.checkoutAsk; $('btnCancelCheckout').onclick=()=>GuildUI.closeModals(); $('btnNoCheckout').onclick=()=>GuildUI.closeModals(); $('btnDoCheckout').onclick=GuildOrder.checkoutDo;
   if($('btnReceiptConfirm')) $('btnReceiptConfirm').onclick=()=>{
     GuildAudio.playSe('ok');
     GuildUI.closeModals();
-    sessionGameMode=null; data.sessionGameMode=null; GuildStorage.save(); // 会計完了＝この方の来店は終了。次のお客様のためにモード選択をリセット
+    sessionGameMode=null; data.sessionGameMode=null; data.sessionOrderCount=0; GuildStorage.save(); // 会計完了＝この方の来店は終了。次のお客様のためにモード選択をリセット
     gameModeNoticeShown=false;
     if(GuildBattle.resetAudioFlag) GuildBattle.resetAudioFlag();
     if(window.GuildApp&&GuildApp.showWelcomeBack) GuildApp.showWelcomeBack(); else showWelcomeScreen();

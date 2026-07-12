@@ -84,6 +84,7 @@ window.GuildOrder = (() => {
       GuildUI.show('screenMain');
       $('btnCartConfirm').disabled=false;
       GuildUI.toast('ご注文を承りました');
+      if(window.GuildApp&&GuildApp.offerMinigame) GuildApp.offerMinigame();
       return;
     }
     GuildUI.show('screenMain');
@@ -92,6 +93,7 @@ window.GuildOrder = (() => {
       $('screenMain').classList.remove('combat-lock');$('damagePop').classList.remove('on');
       $('btnCartConfirm').disabled=false;
       GuildUI.toast(finalDefeated?(window.GuildTheme?GuildTheme.w('bossDefeatText'):'魔王を討伐した！'):(defeated?((window.GuildTheme?GuildTheme.w('defeat'):'撃破')+'！ 注文完了'):((window.GuildTheme?GuildTheme.w('questClear'):'クエスト達成')+'！')));
+      if(window.GuildApp&&GuildApp.offerMinigame) GuildApp.offerMinigame();
     });
   }
   function cancelCartReview(){ GuildUI.closeModals(); }
@@ -143,10 +145,11 @@ window.GuildOrder = (() => {
       GuildUI.show('screenMain');
       $('btnDoOrder').disabled=false;
       GuildUI.toast('ご注文を承りました');
+      if(window.GuildApp&&GuildApp.offerMinigame) GuildApp.offerMinigame();
       return;
     }
     GuildUI.show('screenMain');
-    await GuildBattle.applyDamage(item.subtotal,(defeated,finalDefeated)=>{GuildStorage.save();GuildBattle.render();$('screenMain').classList.remove('combat-lock');$('damagePop').classList.remove('on');$('btnDoOrder').disabled=false;GuildUI.toast(finalDefeated?(window.GuildTheme?GuildTheme.w('bossDefeatText'):'魔王を討伐した！'):(defeated?((window.GuildTheme?GuildTheme.w('defeat'):'撃破')+'！ 注文完了'):((window.GuildTheme?GuildTheme.w('questClear'):'クエスト達成')+'！')));});
+    await GuildBattle.applyDamage(item.subtotal,(defeated,finalDefeated)=>{GuildStorage.save();GuildBattle.render();$('screenMain').classList.remove('combat-lock');$('damagePop').classList.remove('on');$('btnDoOrder').disabled=false;GuildUI.toast(finalDefeated?(window.GuildTheme?GuildTheme.w('bossDefeatText'):'魔王を討伐した！'):(defeated?((window.GuildTheme?GuildTheme.w('defeat'):'撃破')+'！ 注文完了'):((window.GuildTheme?GuildTheme.w('questClear'):'クエスト達成')+'！')));if(window.GuildApp&&GuildApp.offerMinigame) GuildApp.offerMinigame();});
   }
   function checkoutAsk(){ const data=GuildStorage.getData(); const base=(data.activeBill||[]).slice(); const all=withCoverCharge(base); const total=all.reduce((s,i)=>s+Number(i.subtotal||0),0); $('checkoutConfirmBody').textContent=all.length?`帰還しますか？\n\n${all.map(i=>`・${i.name} ×${Number(i.qty||1)} = ${yen(i.subtotal,data.settings.currency)}`).join('\n')}\n\n会計合計 ${yen(total,data.settings.currency)}\n売上月 ${currentSalesMonth()} 月分\n\n会計のみ行います。ダメージは注文確定時に入ります。`:'未会計の注文はありません。帰還しますか？'; GuildUI.openModal('modalCheckoutConfirm'); }
   function checkoutDo(){

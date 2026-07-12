@@ -23,7 +23,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title data-theme-title>冒険者ギルド</title>
-  <link rel="stylesheet" href="main.css?v=1.76-ipadfix">
+  <link rel="stylesheet" href="main.css?v=1.77-minigame">
   <link rel="stylesheet" href="battle.css?v=1.40-defeatfx">
   <link rel="stylesheet" href="menu.css?v=1.33-lightbox">
   <link rel="stylesheet" href="effects.css?v=1.32-cartmode">
@@ -378,6 +378,25 @@
       </div>
     </div>
 
+    <div class="modal" id="modalMinigameOffer">
+      <div class="modal-head">
+        <h2>🎮 待ち時間にミニゲーム</h2>
+      </div>
+      <div class="scroll">
+        <div class="panel">
+          <div class="confirm-text">お料理が出来上がるまでの間、ミニゲームで遊びませんか？<br><span id="minigameLivesText" class="tiny"></span></div>
+          <div class="row mt">
+            <button class="btn gold" id="btnMinigamePlay">遊ぶ</button>
+            <button class="btn" id="btnMinigameSkip">あとで</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="minigameOverlay" class="minigame-overlay hidden">
+      <button type="button" id="btnMinigameClose" class="minigame-close">✕ 閉じる</button>
+      <iframe id="minigameFrame" class="minigame-frame" src="about:blank" allow="autoplay"></iframe>
+    </div>
+
     <div class="modal" id="modalGameModeNotice">
       <div class="modal-head">
         <h2>🎮 ご注文の前に</h2>
@@ -431,8 +450,8 @@
   <script src="battle.js?v=1.40-defeatfx"></script>
   <script src="discord.js?v=1.32-cartmode"></script>
   <script src="menu.js?v=1.33-lightbox"></script>
-  <script src="order.js?v=1.72-gachafix2"></script>
-  <script src="app.js?v=1.93-bgmer"></script>
+  <script src="order.js?v=1.73-minigame"></script>
+  <script src="app.js?v=1.95-minigame"></script>
   <script>
     // iOSのSafariで「戻る」操作をすると、スクリプトを再実行せずにページをそのまま復元(bfcache)する
     // ことがあり、その場合テーマ切り替えやデータ更新が反映されないまま古い画面が表示され続けてしまう。

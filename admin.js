@@ -564,7 +564,9 @@
       (th.length>1?'<button class="btn small" data-lv-del="'+i+'">×</button>':'')+
     '</div>').join('');
   }
-  function renderSettings(){var s=data.settings;s.notice=Object.assign({enabled:true,title:'本日のお知らせ',body:'',position:'top'},s.notice||{});$('adminContent').innerHTML='<h2>⚙️ 設定</h2>'+
+  function renderSettings(){var s=data.settings;s.notice=Object.assign({enabled:true,title:'本日のお知らせ',body:'',position:'top'},s.notice||{});
+    var mg=Object.assign({enabled:true,games:{action:true,slot:false,shooting:false}},s.minigame||{}); mg.games=Object.assign({action:true,slot:false,shooting:false},mg.games||{});
+    $('adminContent').innerHTML='<h2>⚙️ 設定</h2>'+
     '<div class="admin-card"><div class="admin-card-title">🎮 ゲームモード</div>'+
     '<label class="check-row"><input id="setGameMode" type="checkbox" '+(s.gameMode!==false?'checked':'')+'>ゲームモードON（討伐バトル演出つきのモバイルオーダー）</label>'+
     '<p class="tiny">オン＝今まで通り、注文するたびに敵にダメージが入るRPG演出つきのモバイルオーダー。オフ＝演出なしの、ただのメニュー＋カート＋会計（お客様の名前登録・レベル・討伐画面は出ません）。カバーチャージや会計・注文履歴の保存はオフでも引き続き動きます。</p>'+
@@ -574,6 +576,14 @@
     '<label>注意喚起の文言<textarea id="setGameNoticeText" placeholder="例：演出をお楽しみいただくのは大歓迎ですが、実際に召し上がる予定のないご注文はお控えください。">'+esc((s.gameModeNotice&&s.gameModeNotice.text)||'')+'</textarea></label>'+
     '<p class="tiny">「ゲームで注文」を選んだお客様が最初にメニューを開いた時だけ、1回表示されます（同じ来店中に再度メニューへ戻っても再表示されません）。演出目的で実際には飲食しないご注文を防ぐための注意喚起として使えます。</p>'+
     '<div class="toolbar"><button class="btn gold" id="saveGameMode">この項目だけ保存</button></div>'+
+    '</div>'+
+    '<div class="admin-card"><div class="admin-card-title">🎮 待ち時間ミニゲーム</div>'+
+    '<p class="tiny">注文が確定してダメージ演出が終わった後、「待ち時間にミニゲームしませんか？」と案内します。残機はご来店からの注文数と連動します。</p>'+
+    '<label class="check-row"><input id="setMinigameEnabled" type="checkbox" '+(mg.enabled!==false?'checked':'')+'>待ち時間ミニゲームの案内を表示する</label>'+
+    '<label class="check-row"><input id="setMinigameAction" type="checkbox" '+(mg.games.action?'checked':'')+'>アクション（ランナー）を使う</label>'+
+    '<label class="check-row"><input id="setMinigameSlot" type="checkbox" '+(mg.games.slot?'checked':'')+'>スロットを使う（ファイル未追加の場合はOFFのままにしてください）</label>'+
+    '<label class="check-row"><input id="setMinigameShooting" type="checkbox" '+(mg.games.shooting?'checked':'')+'>弾幕シューティングを使う（ファイル未追加の場合はOFFのままにしてください）</label>'+
+    '<div class="toolbar"><button class="btn gold" id="saveMinigame">この項目だけ保存</button></div>'+
     '</div>'+
     '<div class="admin-card"><div class="admin-card-title">🏪 基本設定</div>'+
     '<label>通貨単位<input id="setCurrency" value="'+esc(s.currency||'G')+'"></label>'+
@@ -608,6 +618,11 @@
     '</div><div class="toolbar"><button class="btn" id="jsonSettings">詳細JSON</button></div>';
     function pushToast(msg){ save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud(); toast(msg+'（クラウドにも送信）'); }
     $('saveGameMode').onclick=function(){ s.gameMode=$('setGameMode').checked; s.allowCustomerGameToggle=$('setAllowGameToggle').checked; s.gameModeNotice={enabled:$('setGameNoticeEnabled').checked, text:$('setGameNoticeText').value.trim()}; pushToast('ゲームモードを保存しました'); };
+    $('saveMinigame').onclick=function(){
+      s.minigame={enabled:$('setMinigameEnabled').checked, games:{action:$('setMinigameAction').checked, slot:$('setMinigameSlot').checked, shooting:$('setMinigameShooting').checked}};
+      save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
+      pushToast('待ち時間ミニゲームの設定を保存しました');
+    };
     if($('setPass')) $('setPass').addEventListener('input',function(){ const c=this.value.replace(/[^A-Za-z0-9]/g,''); if(c!==this.value) this.value=c; });
     $('saveBasic').onclick=function(){ s.currency=$('setCurrency').value||'G'; s.coverCharge=+$('setCover').value||0; s.adminPassword=($('setPass').value||'OTAKU').replace(/[^A-Za-z0-9]/g,'')||'OTAKU'; s.cartMode=$('setCartMode').checked; s.questMode=$('setQuestMode').checked; pushToast('基本設定を保存しました'); };
     $('saveNotify').onclick=function(){ s.notifyOn=$('setNotify').checked; s.gasUrl=$('setGas').value.trim(); s.discordWebhookUrl=$('setHook').value.trim(); pushToast('通知・連携設定を保存しました'); };
@@ -1707,13 +1722,29 @@
   // 店舗名・GAS URL・管理パスワード・営業設定・顧客・売上・メニュー（商品）には一切触らない。
   // 「敵」と「見た目・演出まわりの設定」だけを対象にする。
   const THEME_PACK_SETTINGS_KEYS=['themeCustom','audioFiles','uiTheme','gachaEffect','defeatEffect'];
+  // テーマパック内で「bgm/xxx.mp3」「se/xxx.mp3」のような相対パス参照を全部拾い出す。
+  // これらは颯さんのGitHub内にしか実体がないため、テーマパックのJSONだけ渡しても購入者側では無音になる。
+  // 実物のファイルも一緒に送る必要がある、という案内に使う。
+  function collectThemeAudioFileRefs_(themeSettings, monsters){
+    const refs=new Set();
+    const isLocalAudioPath=(v)=> typeof v==='string' && /^(bgm|se)\//i.test(v);
+    if(themeSettings.audioFiles){
+      Object.values(themeSettings.audioFiles).forEach(group=>{
+        if(group && typeof group==='object'){ Object.values(group).forEach(v=>{ if(isLocalAudioPath(v)) refs.add(v); }); }
+        else if(isLocalAudioPath(group)) refs.add(group);
+      });
+    }
+    (monsters||[]).forEach(m=>{ if(m && isLocalAudioPath(m.bgm)) refs.add(m.bgm); });
+    return Array.from(refs);
+  }
   function doThemePackExport(){
     try{
       const themeSettings={};
       THEME_PACK_SETTINGS_KEYS.forEach(k=>{ if(data.settings[k]!==undefined) themeSettings[k]=data.settings[k]; });
+      const monsters=data.monsters||[];
       const payload={
         _type:'otakuba_theme_pack', _version:'1.0', _exportedAt:new Date().toISOString(),
-        theme:{ monsters:data.monsters||[], settings:themeSettings }
+        theme:{ monsters, settings:themeSettings }
       };
       const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
       const url=URL.createObjectURL(blob);
@@ -1721,6 +1752,10 @@
       const name=(prompt('テーマパックのファイル名（例：horror）', 'theme')||'theme').replace(/[^\w\-]/g,'_');
       a.href=url; a.download='themepack_'+name+'.json'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
       setTimeout(()=>URL.revokeObjectURL(url),1000);
+      const audioRefs=collectThemeAudioFileRefs_(themeSettings, monsters);
+      if(audioRefs.length){
+        alert('⚠️このテーマは以下のBGM/SEファイルを使っています。JSONファイルだけでは音声の実体は含まれないので、下記のファイルの中身（mp3）も一緒に購入者へ送り、購入者のGitHubのbgm/seフォルダに同じファイル名で置いてもらってください：\n\n'+audioRefs.join('\n'));
+      }
       toast('テーマパックを書き出しました（店舗情報・顧客・売上・メニューは含まれません）');
     }catch(e){ toast('書き出しに失敗しました: '+e); }
   }
@@ -1742,6 +1777,18 @@
         const m=$('backupMsg'); if(m) m.textContent='✅ テーマパックを適用しました（'+cnt+'）';
         toast('テーマパックを適用しました');
         render();
+        // BGM/SEの実ファイルが、このサイトのbgm/seフォルダにちゃんと置かれているか確認する
+        const audioRefs=collectThemeAudioFileRefs_(incoming.settings||{}, incoming.monsters||[]);
+        if(audioRefs.length){
+          Promise.all(audioRefs.map(function(path){
+            return fetch(path,{method:'HEAD'}).then(function(res){ return {path:path, ok:res.ok}; }).catch(function(){ return {path:path, ok:false}; });
+          })).then(function(results){
+            const missing=results.filter(function(r){return !r.ok;}).map(function(r){return r.path;});
+            if(missing.length){
+              alert('⚠️このテーマが使うBGM/SEのうち、下記のファイルがこのサイトに見つかりませんでした。テーマの提供元から実物のmp3ファイルをもらい、GitHubの該当フォルダに同じファイル名で追加してください：\n\n'+missing.join('\n'));
+            }
+          });
+        }
       }catch(e){ toast('読み込みに失敗しました: '+e); }
       ev.target.value='';
     };
