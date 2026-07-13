@@ -2,8 +2,18 @@ window.GuildBattle = (() => {
   const {$, yen, sleep, esc} = GuildUtils;
   let data;
   function init(d){ data=d; }
-  function enemy(){ if(!data) data=GuildStorage.getData(); const list=data.monsters||[]; const i=GuildUtils.clamp(data.currentEnemyIndex||0,0,Math.max(0,list.length-1)); data.currentEnemyIndex=i; return list[i]; }
-  function isFinalEnemy(e){ if(!e) return false; const list=(data&&data.monsters)||GuildStorage.getData().monsters||[]; const idx=list.indexOf(e); return idx>=0 ? idx===list.length-1 : (list.length>0 && list[list.length-1] && list[list.length-1].id===e.id); }
+  // ===== レイドボス（普段の敵リストとは別に、期間限定で全員で削る共通の敵） =====
+  function raidBoss(){ return data && data.raidBoss; }
+  function raidActive(){ const b=raidBoss(); return !!(b && b.enabled && !b.defeated); }
+  function enemy(){
+    if(!data) data=GuildStorage.getData();
+    if(raidActive()){
+      const b=data.raidBoss;
+      return {id:'raid', name:b.name||'レイドボス', hp:b.hp, maxHp:b.maxHp, image:b.image, bg:b.bg, stage:'レイド討伐', scale:100, isRaid:true};
+    }
+    const list=data.monsters||[]; const i=GuildUtils.clamp(data.currentEnemyIndex||0,0,Math.max(0,list.length-1)); data.currentEnemyIndex=i; return list[i];
+  }
+  function isFinalEnemy(e){ if(!e) return false; if(e.isRaid) return true; const list=(data&&data.monsters)||GuildStorage.getData().monsters||[]; const idx=list.indexOf(e); return idx>=0 ? idx===list.length-1 : (list.length>0 && list[list.length-1] && list[list.length-1].id===e.id); }
   // 倒した敵の「次」が最後の敵(ラスボス)なら覚醒演出の対象
   function nextIsFinal(){ const list=(data&&data.monsters)||[]; const ni=(data.currentEnemyIndex||0)+1; return ni===list.length-1 && list.length>=2; }
   async function playAwaken(){
@@ -20,6 +30,28 @@ window.GuildBattle = (() => {
     const s=(data&&data.settings)||{};
     return Object.assign({style:'pop', image:'', imageEnabled:false}, s.defeatEffect||{});
   }
+  // ===== ダメージ演出（管理画面「💢 ダメージ演出」で選んだスタイルを反映）=====
+  function damageEffectSettings(){
+    const s=(data&&data.settings)||{};
+    return Object.assign({style:'default'}, s.damageEffect||{});
+  }
+  // ギャルゲー風エフェクト：ハートをふわっと舞い上げる（ダメージ演出・撃破演出どちらからも呼べる）
+  const HEART_CHARS=['💕','💗','💖','✨'];
+  function spawnHearts_(count){
+    const host=$('screenMain')||document.body; if(!host) return;
+    for(let i=0;i<count;i++){
+      const h=document.createElement('div');
+      h.className='galge-heart';
+      h.textContent=HEART_CHARS[Math.floor(Math.random()*HEART_CHARS.length)];
+      const startX=40+Math.random()*20; // 画面中央寄りにばらけさせる（%）
+      h.style.left=startX+'%';
+      h.style.setProperty('--drift', (Math.random()*60-30)+'px');
+      h.style.animationDelay=(Math.random()*220)+'ms';
+      h.style.fontSize=(18+Math.random()*14)+'px';
+      host.appendChild(h);
+      setTimeout(()=>h.remove(),1500);
+    }
+  }
   function triggerDefeatEffect(e){
     const cfg=defeatEffectSettings();
     if(cfg.style==='flash'){
@@ -28,6 +60,8 @@ window.GuildBattle = (() => {
     } else if(cfg.style==='ring'){
       const ring=$('defeatRing');
       if(ring){ ring.classList.remove('on'); void ring.offsetWidth; ring.classList.add('on'); setTimeout(()=>ring.classList.remove('on'),720); }
+    } else if(cfg.style==='galge'){
+      spawnHearts_(14);
     }
     if(cfg.imageEnabled){
       const imgSrc = (e && e.defeatImage) ? e.defeatImage : cfg.image;
@@ -52,6 +86,7 @@ window.GuildBattle = (() => {
   let suppressBgm=false;
   function resetAudioFlag(){ suppressBgm=false; lastShownEnemyId=''; }
   function render(quiet){
+    if(isRaidActive()) return renderRaid();
     const e=enemy(); const c=GuildCustomer.current(); if(!e) return;
     if(!suppressBgm && !quiet){ const bk=bgmKey(e); GuildAudio.playBgm(bk); }
     $('adventurerName').innerHTML = c ? (GuildUtils.avatarTag(c)+GuildUtils.esc(c.name)) : GuildUtils.esc('名もなき'+(window.GuildTheme?GuildTheme.w('customer'):'冒険者'));
@@ -69,7 +104,85 @@ window.GuildBattle = (() => {
     if((e.id||e.name)!==lastShownEnemyId){ lastShownEnemyId=e.id||e.name; const t=pickText(e,'appear'); if(t) showSpeech(t); }
     GuildUI.renderNotice(data.settings); GuildStorage.save();
   }
+  // レイドボス専用のダメージ処理：ローカルで計算せず、必ずGASに問い合わせて「本当のHP」を受け取ってから演出する。
+  // これにより、同時に他のお客様が注文していても、ダメージが正しく合算される。
+  async function applyRaidDamage(total, done){
+    const chunk=Math.max(0,Number(total)||0);
+    $('screenMain')?.classList.add('combat-lock'); GuildUI.show('screenMain');
+    const wasDefeated = !!(data.raidBoss && data.raidBoss.defeated);
+    GuildAudio.playBgm('daimaou');
+    render();
+    if(chunk<=0){ $('screenMain')?.classList.remove('combat-lock'); done&&done(false,false); return; }
+    GuildAudio.playSe('damage');
+    const sprite=$('enemySprite'); if(sprite){ sprite.classList.remove('hit'); void sprite.offsetWidth; sprite.classList.add('hit'); }
+    const damagePop=$('damagePop');
+    const dmgCfg=damageEffectSettings();
+    if(damagePop){
+      if(dmgCfg.style==='galge'){ damagePop.textContent=''; damagePop.classList.remove('on'); spawnHearts_(5); }
+      else { damagePop.textContent='-'+yen(chunk,data.settings.currency); damagePop.classList.remove('on'); void damagePop.offsetWidth; damagePop.classList.add('on'); }
+    }
+    await sleep(420);
+    const boss = await GuildStorage.applyRaidDamage(chunk); // ここでGASに減算してもらい、確定したHPを受け取る
+    render(); GuildStorage.save();
+    await sleep(930);
+    const nowDefeated = !!(boss && boss.defeated);
+    if(nowDefeated){
+      const sprite2=$('enemySprite'); if(sprite2) sprite2.classList.add('defeated');
+      triggerDefeatEffect({name:boss.name, defeatImage:''});
+      const defeatPop=$('defeatPop');
+      if(defeatPop){ defeatPop.textContent=(window.GuildTheme?GuildTheme.w('bossDefeatText'):'討伐成功！'); defeatPop.classList.add('on'); }
+      GuildAudio.stopBgm(); GuildAudio.playSe('victory');
+      setTimeout(()=>{
+        if(defeatPop) defeatPop.classList.remove('on');
+        if(window.GuildApp && GuildApp.showRaidVictory) GuildApp.showRaidVictory(boss, !wasDefeated);
+      },1600);
+      await sleep(2600);
+      done&&done(true,true);
+    } else {
+      $('screenMain')?.classList.remove('combat-lock');
+      done&&done(false,false);
+    }
+  }
+  function isRaidActive(){ return !!(data && data.raid && data.raid.enabled && Number(data.raid.hp)>0); }
+  // レイドボス表示：普段の敵表示エリアをそのまま流用する（別画面を作らず、見た目の混乱を避けるため）
+  function renderRaid(){
+    const r=data.raid||{};
+    $('adventurerName').innerHTML = (GuildCustomer.current()? (GuildUtils.avatarTag(GuildCustomer.current())+GuildUtils.esc(GuildCustomer.current().name)) : '');
+    $('stageName').textContent = '⚔️ 期間限定レイドボス';
+    $('enemyName').textContent = 'レイドボス：'+(r.name||'???')+(r.collaboratorName?'（コラボ：'+r.collaboratorName+'）':'');
+    $('enemyHpText').textContent = `HP ${Math.max(0,Math.ceil(Number(r.hp)||0)).toLocaleString()} / ${(Number(r.maxHp)||0).toLocaleString()}`;
+    $('enemyHpFill').style.width = `${Math.max(0,Math.min(100,(Number(r.hp||0)/Number(r.maxHp||1))*100))}%`;
+    GuildUI.applyBg(r.bg);
+    const sprite=$('enemySprite'); sprite.classList.remove('hit','defeated');
+    sprite.innerHTML = r.image ? `<img src="${esc(GuildUtils.driveImg(r.image))}" alt="${esc(r.name||'')}" onerror="this.replaceWith(document.createTextNode('👹'))">` : '👹';
+    if(r.message) showSpeech(r.message);
+  }
+  // レイドボスへのダメージ：GAS側で確定した本当のHPを使う（複数端末の同時注文でも取りこぼさない）
+  async function applyRaidDamage(chunk, done){
+    GuildAudio.playSe('damage');
+    const sprite=$('enemySprite'); if(sprite){ sprite.classList.remove('hit'); void sprite.offsetWidth; sprite.classList.add('hit'); }
+    const damagePop=$('damagePop');
+    const dmgCfg=damageEffectSettings();
+    if(dmgCfg.style==='galge'){ damagePop.textContent=''; damagePop.classList.remove('on'); spawnHearts_(5); }
+    else { damagePop.textContent='-'+yen(chunk,data.settings.currency); damagePop.classList.remove('on'); void damagePop.offsetWidth; damagePop.classList.add('on'); }
+    const result=await GuildStorage.applyRaidDamage(chunk);
+    if(result) data.raid=result;
+    await sleep(420);
+    renderRaid(); GuildStorage.save();
+    await sleep(650);
+    const justDefeated = !!(result && result._justDefeated);
+    if(justDefeated){
+      triggerDefeatEffect(null);
+      GuildAudio.stopBgm(); GuildAudio.playSe('victory');
+      const defeatPop=$('defeatPop'); if(defeatPop){ defeatPop.textContent='🎉 レイドボス討伐！'; defeatPop.classList.add('on'); }
+      await sleep(2200);
+      if(defeatPop) defeatPop.classList.remove('on');
+    }
+    done && done(justDefeated);
+  }
   async function applyDamage(total, done){
+    if(isRaidActive()){ return applyRaidDamage(total, (justDefeated)=>{ done && done(justDefeated, justDefeated); }); }
+    if(raidActive()) return applyRaidDamage(total, done);
     let remaining=Math.max(0,Number(total)||0); let defeatedAny=false, finalDefeated=false;
     $('screenMain')?.classList.add('combat-lock'); GuildUI.show('screenMain');
     // 今回の攻撃で複数の敵を通過するか判定
@@ -89,7 +202,14 @@ window.GuildBattle = (() => {
       if(bossArrived && willKill){ await sleep(2400); }
       const chunk=Math.min(remaining,e.hp); remaining-=chunk; GuildAudio.playSe('damage');
       const sprite=$('enemySprite'); sprite.classList.remove('hit'); void sprite.offsetWidth; sprite.classList.add('hit');
-      const damagePop=$('damagePop'); damagePop.textContent='-'+yen(chunk,data.settings.currency); damagePop.classList.remove('on'); void damagePop.offsetWidth; damagePop.classList.add('on');
+      const damagePop=$('damagePop');
+      const dmgCfg=damageEffectSettings();
+      if(dmgCfg.style==='galge'){
+        damagePop.textContent=''; damagePop.classList.remove('on');
+        spawnHearts_(5);
+      } else {
+        damagePop.textContent='-'+yen(chunk,data.settings.currency); damagePop.classList.remove('on'); void damagePop.offsetWidth; damagePop.classList.add('on');
+      }
       await sleep(420); e.hp=Math.max(0,Number(e.hp||0)-chunk); render(); GuildStorage.save();
       { const dt=pickText(e,'damage'); if(dt) showSpeech(dt); }
       await sleep(930);
@@ -118,5 +238,5 @@ window.GuildBattle = (() => {
     }
     return step();
   }
-  return {init, render, enemy, nextEnemy, applyDamage, isFinalEnemy, bgmKey, resetAudioFlag};
+  return {init, render, enemy, nextEnemy, applyDamage, isFinalEnemy, bgmKey, resetAudioFlag, raidActive, raidBoss};
 })();

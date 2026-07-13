@@ -5,7 +5,7 @@ window.GuildStorage = (() => {
     legacy:'otakubaGuildApp.v1.complete'
   };
   const files = {settings:'settings.json', menu:'menu.json', monsters:'monsters.json', customers:'customers.json', sales:'sales.json'};
-  let data = {settings:{}, menu:[], monsters:[], customers:[], sales:[], deletedSaleIds:[], deletedCustomerIds:[], salesSettings:{currentMonth:'', closedMonths:[], monthlyArchives:{}}, currentCustomer:'', activeBill:[], currentEnemyIndex:0, partyCount:1};
+  let data = {settings:{}, menu:[], monsters:[], raidBoss:{enabled:false,name:'',image:'',bg:'',maxHp:100000,hp:100000,defeated:false,defeatedAt:'',rewardMessage:''}, customers:[], sales:[], deletedSaleIds:[], deletedCustomerIds:[], salesSettings:{currentMonth:'', closedMonths:[], monthlyArchives:{}}, currentCustomer:'', activeBill:[], currentEnemyIndex:0, partyCount:1};
 
   async function fetchJson(path, fallback){
     try{ const res = await fetch(`${path}?v=${Date.now()}`, {cache:'no-store'}); if(!res.ok) throw new Error(path); return await res.json(); }
@@ -301,7 +301,7 @@ window.GuildStorage = (() => {
   // 共有すべき管理データだけを送る（戦闘の一時状態は端末ローカルのまま）
   function saleKey(s){ return s && (s.id || s.saleId || (String(s.time||'')+'|'+String(s.customer||'')+'|'+String(s.total||'')+'|'+JSON.stringify(s.items||[]))); }
   // 「画像・BGM・SE」に分類する設定項目。GAS側の分類と必ず一致させること
-  const ASSET_SETTINGS_KEYS=['themeCustom','audioFiles','uiTheme','gachaEffect','defeatEffect','storeInfo'];
+  const ASSET_SETTINGS_KEYS=['themeCustom','audioFiles','uiTheme','gachaEffect','defeatEffect','damageEffect','storeInfo'];
   function splitSettings_(){
     const core={}, asset={};
     Object.keys(data.settings||{}).forEach(function(k){
@@ -329,7 +329,7 @@ window.GuildStorage = (() => {
     const {core, asset}=splitSettings_();
     const savedAt=data.lastLocalSaveAt||0;
 
-    const gamePayload={menu:data.menu, monsters:data.monsters};
+    const gamePayload={menu:data.menu, monsters:data.monsters, raidBoss:data.raidBoss};
     const gameJson=JSON.stringify(gamePayload);
     if(gameJson!==lastPushed.game){
       postToGas_(url, Object.assign({action:'saveGameData', lastLocalSaveAt:savedAt}, gamePayload));
@@ -352,6 +352,17 @@ window.GuildStorage = (() => {
   }
   // 保存が連続しても1.2秒に1回だけ送る（GASの負荷・遅延対策）
   function schedulePush(){ if(!gasUrl())return; clearTimeout(pushTimer); pushTimer=setTimeout(pushCloud,1200); }
+  // レイドボスへダメージを送信し、GAS側で確定した本当のHPを受け取る（複数端末の同時注文でも正しく合算される）
+  async function applyRaidDamage(amount){
+    const url=gasUrl();
+    if(!url || !amount || amount<=0) return data.raid;
+    try{
+      const res=await fetch(url,{method:'POST',cache:'no-store',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'raidDamage', amount:Math.round(amount)})});
+      const j=await res.json();
+      if(j && j.raid){ data.raid=j.raid; set(keys.state,data); }
+      return Object.assign({}, data.raid, {_applied:(j&&j.applied)||0, _justDefeated:!!(j&&j.justDefeated)});
+    }catch(e){ return data.raid; }
+  }
   // 起動時：クラウドの管理データで上書き（端末固有の進行状態は維持）
   async function pullCloud(){
     const url=gasUrl(); if(!url) return false;
@@ -414,6 +425,9 @@ window.GuildStorage = (() => {
         data.monsters=remote.monsters.map(normalizeMonster);
         // 戦闘中の現在HPは端末側を尊重（メニュー定義だけ同期したい場合の保険）
         if(typeof curHp==='number' && data.monsters[idx]) data.monsters[idx].hp=curHp;
+      }
+      if(remote.raid && typeof remote.raid==='object'){
+        data.raid = remote.raid; // レイドボスは常にGAS側の値を正とする（複数端末の合算値のため）
       }
       if(Array.isArray(remote.deletedCustomerIds)){
         const cdelSet=new Set([...(data.deletedCustomerIds||[]), ...remote.deletedCustomerIds]);
@@ -533,5 +547,5 @@ window.GuildStorage = (() => {
     return data;
   }
 
-return {keys, init, save, getData, replace, resetProgress, settleAbandonedBill, pullCloud, pushCloud, markSaleDeleted, markCustomerDeleted, qrUrlForStore, qrUrlForGas, needsInitialSetup, completeInitialSetup};
+return {keys, init, save, getData, replace, resetProgress, settleAbandonedBill, pullCloud, pushCloud, applyRaidDamage, markSaleDeleted, markCustomerDeleted, qrUrlForStore, qrUrlForGas, needsInitialSetup, completeInitialSetup};
 })();

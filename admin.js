@@ -41,7 +41,7 @@
     ['reset','🧹 reset','hard'],
   ];
   // テーマ編集タブ内のサブナビ（Phase4-3: 店舗情報/テキスト/画像/BGM/キャラクター/ステージ/プレビューを1画面にまとめる）
-  const THEME_SUBTABS=[['store','🏪 店舗情報'],['text','✏️ テキスト'],['color','🎨 カラー'],['ui','🖼️ UIテーマ'],['effect','💥 撃破演出'],['gacha','🎰 会計ガチャ'],['image','🖼️ 画像'],['bgm','🎵 BGM'],['character','⚔️ キャラクター'],['stage','🗺️ ステージ'],['preview','👁️ プレビュー']];
+  const THEME_SUBTABS=[['store','🏪 店舗情報'],['text','✏️ テキスト'],['color','🎨 カラー'],['ui','🖼️ UIテーマ'],['effect','💥 撃破演出'],['gacha','🎰 会計ガチャ'],['image','🖼️ 画像'],['bgm','🎵 BGM'],['character','⚔️ キャラクター'],['stage','🗺️ ステージ'],['raid','👹 レイドボス'],['preview','👁️ プレビュー']];
   let themeSubTab='store';
   const MODE_KEY='otakuba.admin.mode';
   // 既存ユーザーの操作感を壊さないよう、初回デフォルトは「くわしい」＝これまで通り全タブ表示。新規は店側の判断でモード変更可能。
@@ -913,14 +913,23 @@
       renderThemeUi();
     };
   }
-  const DEFEAT_STYLE_OPTS=[['pop','通常（ポップ）'],['flash','フラッシュ（画面明滅）'],['ring','リング（衝撃波）']];
+  const DEFEAT_STYLE_OPTS=[['pop','通常（ポップ）'],['flash','フラッシュ（画面明滅）'],['ring','リング（衝撃波）'],['galge','💕ギャルゲー風（ハート）']];
+  const DAMAGE_STYLE_OPTS=[['default','通常（ダメージ数字のみ）'],['galge','💕ギャルゲー風（ハート）']];
   function renderThemeEffect(){
     const fx=Object.assign({style:'pop',image:'',imageEnabled:false}, data.settings.defeatEffect||{});
+    const dmg=Object.assign({style:'default'}, data.settings.damageEffect||{});
     $('themeSubContent').innerHTML=
+      '<div class="admin-card"><div class="admin-card-title">💢 ダメージ演出</div>'+
+      '<p class="tiny">注文するたびに敵にダメージが入る瞬間の演出です。</p>'+
+      '<label>演出スタイル<select id="dmgStyle">'+DAMAGE_STYLE_OPTS.map(([k,l])=>'<option value="'+k+'" '+(dmg.style===k?'selected':'')+'>'+l+'</option>').join('')+'</select></label>'+
+      '<p class="tiny">💕ギャルゲー風にすると、ダメージ数字の代わりに、ハートが画面にふわっと舞い上がる演出になります。</p>'+
+      '<div class="toolbar"><button class="btn gold" id="saveDmgTheme">ダメージ演出を保存</button></div>'+
+      '</div>'+
       '<div class="admin-card"><div class="admin-card-title">💥 撃破演出</div>'+
       '<p class="tiny">敵を倒した瞬間の演出です。演出スタイル（フラッシュ・リングなど）はすべての敵で共通です。画像は下で共通の1枚を設定できますが、敵ごとに個別の画像を設定したい場合は「⚔️ キャラクター」タブの各モンスター編集内「撃破演出画像」で上書きできます（そちらを設定した敵は、その敵専用の画像が優先されます）。</p>'+
 
       '<label>演出スタイル<select id="fxStyle">'+DEFEAT_STYLE_OPTS.map(([k,l])=>'<option value="'+k+'" '+(fx.style===k?'selected':'')+'>'+l+'</option>').join('')+'</select></label>'+
+      '<p class="tiny">💕ギャルゲー風にすると、撃破画像のまわりにハートが舞う演出が加わります（撃破画像自体は下の設定と組み合わせて使えます）。</p>'+
 
       '<label class="check-row"><input type="checkbox" id="fxImageEnabled" '+(fx.imageEnabled?'checked':'')+'> 撃破時に画像を表示する</label>'+
       '<label>撃破画像URL / ファイル名（共通・敵ごとの設定がなければこちらが使われます）<input data-img-upload id="fxImage" value="'+esc(fx.image||'')+'" placeholder="例：defeat_stamp.png / https://..."></label>'+
@@ -930,6 +939,12 @@
       '<div class="toolbar"><button class="btn gold" id="saveFxTheme">撃破演出を保存</button><button class="btn" id="resetFxTheme">既定に戻す</button></div>'+
       '</div>';
 
+    $('saveDmgTheme').onclick=function(){
+      data.settings.damageEffect={style:$('dmgStyle').value};
+      save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
+      toast('ダメージ演出を保存しました（全端末に反映されます）');
+      renderThemeEffect();
+    };
     $('saveFxTheme').onclick=function(){
       const partial={
         style:$('fxStyle').value,
@@ -1047,6 +1062,7 @@
     if(themeSubTab==='bgm') renderThemeBgm();
     if(themeSubTab==='character') renderMonsters('themeSubContent');
     if(themeSubTab==='stage') renderThemeStage();
+    if(themeSubTab==='raid') renderRaidBoss();
     if(themeSubTab==='preview') renderThemePreview();
   }
   function renderPresetPicker(){
@@ -1362,6 +1378,64 @@
       toast('初期化しました');
       renderThemeSub();
     };
+  }
+  function raidBossCfg_(){
+    return Object.assign({enabled:false,name:'',image:'',bg:'',maxHp:100000,hp:100000,defeated:false,defeatedAt:'',rewardMessage:''}, data.raidBoss||{});
+  }
+  function renderRaidBoss(){
+    const b=raidBossCfg_();
+    const pct=b.maxHp>0?Math.max(0,Math.min(100,(Number(b.hp)/Number(b.maxHp))*100)):0;
+    $('themeSubContent').innerHTML=
+      '<div class="admin-card"><div class="admin-card-title">👹 レイドボス（期間限定イベント）</div>'+
+      '<p class="tiny">来店中の全員が同じ敵に挑む、期間限定の特別イベントです。普段の敵リスト（スライム→ゴブリン→…）とは別枠で、有効にしている間はお客様全員がこのボスと戦います。1人1人の注文ダメージは、GAS側で確実に合算されるので、同時に何人が注文しても取りこぼしません。</p>'+
+      (b.enabled?('<div class="admin-card" style="background:rgba(246,200,79,.08)"><b>現在のHP：</b>'+Math.max(0,Math.ceil(b.hp))+' / '+b.maxHp+
+        '<div style="background:#000;border:1px solid rgba(246,200,79,.4);border-radius:6px;height:14px;margin-top:6px;overflow:hidden"><div style="background:linear-gradient(90deg,#f6c84f,#ffdf8a);height:100%;width:'+pct+'%"></div></div>'+
+        (b.defeated?'<div class="tiny" style="color:var(--green);margin-top:6px">✅ 討伐済み（'+esc(b.defeatedAt||'')+'）</div>':'<div class="tiny" style="margin-top:6px">⚔️ 討伐進行中</div>')+
+        '</div>'):'')+
+      '<label class="check-row"><input type="checkbox" id="raidEnabled" '+(b.enabled?'checked':'')+'> レイドボスイベントを開催する</label>'+
+      '<label>ボス名<input id="raidName" value="'+esc(b.name)+'" placeholder="例：コラボゲスト・◯◯"></label>'+
+      '<label>最大HP<input id="raidMaxHp" type="number" min="1" value="'+(b.maxHp||100000)+'"></label>'+
+      '<label>画像URL / ファイル名<input data-img-upload id="raidImage" value="'+esc(b.image||'')+'" placeholder="例：raid_boss.png / https://..."></label>'+
+      '<label>背景URL / ファイル名<input data-img-upload id="raidBg" value="'+esc(b.bg||'')+'" placeholder="例：raid_bg.png / https://..."></label>'+
+      '<label>討伐時に表示するメッセージ<textarea id="raidReward" rows="3" placeholder="例：ご協力ありがとうございました！特典は◯◯です！">'+esc(b.rewardMessage||'')+'</textarea></label>'+
+      '<div class="toolbar"><button class="btn gold" id="saveRaidBoss">保存</button>'+
+      '<button class="btn" id="resetRaidHp">HPを満タンに戻す（討伐フラグも解除）</button>'+
+      '<button class="btn red" id="endRaidBoss">イベントを終了する</button></div>'+
+      '</div>';
+
+    $('saveRaidBoss').onclick=function(){
+      const maxHp=Math.max(1,Number($('raidMaxHp').value)||100000);
+      const next=Object.assign({}, b, {
+        enabled:$('raidEnabled').checked,
+        name:$('raidName').value.trim(),
+        maxHp:maxHp,
+        image:$('raidImage').value.trim(),
+        bg:$('raidBg').value.trim(),
+        rewardMessage:$('raidReward').value.trim()
+      });
+      // 新規に有効化した瞬間、またはHPが未設定なら満タンから開始する
+      if(!b.enabled && next.enabled){ next.hp=maxHp; next.defeated=false; next.defeatedAt=''; }
+      data.raidBoss=next;
+      save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
+      toast('レイドボス設定を保存しました');
+      renderRaidBoss();
+    };
+    $('resetRaidHp').onclick=function(){
+      if(!confirm('HPを満タンに戻し、討伐フラグも解除します。よろしいですか？'))return;
+      const maxHp=Math.max(1,Number($('raidMaxHp').value)||b.maxHp||100000);
+      data.raidBoss=Object.assign({}, b, {hp:maxHp, maxHp:maxHp, defeated:false, defeatedAt:''});
+      save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
+      toast('レイドボスのHPをリセットしました');
+      renderRaidBoss();
+    };
+    $('endRaidBoss').onclick=function(){
+      if(!confirm('レイドボスイベントを終了しますか？（お客様は通常の敵リストに戻ります）'))return;
+      data.raidBoss=Object.assign({}, b, {enabled:false});
+      save(); if(GuildStorage.pushCloud)GuildStorage.pushCloud();
+      toast('レイドボスイベントを終了しました');
+      renderRaidBoss();
+    };
+    wireImageUploadButtons_();
   }
   function renderThemeStage(){
     data.monsters=(data.monsters||[]).map(normalizeMonster);
@@ -1721,7 +1795,7 @@
   // ===== テーマパック（配布用）：見た目・演出だけを書き出す/読み込む =====
   // 店舗名・GAS URL・管理パスワード・営業設定・顧客・売上・メニュー（商品）には一切触らない。
   // 「敵」と「見た目・演出まわりの設定」だけを対象にする。
-  const THEME_PACK_SETTINGS_KEYS=['themeCustom','audioFiles','uiTheme','gachaEffect','defeatEffect'];
+  const THEME_PACK_SETTINGS_KEYS=['themeCustom','audioFiles','uiTheme','gachaEffect','defeatEffect','damageEffect'];
   // テーマパック内で「bgm/xxx.mp3」「se/xxx.mp3」のような相対パス参照を全部拾い出す。
   // これらは颯さんのGitHub内にしか実体がないため、テーマパックのJSONだけ渡しても購入者側では無音になる。
   // 実物のファイルも一緒に送る必要がある、という案内に使う。
