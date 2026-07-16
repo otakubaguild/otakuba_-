@@ -46,3 +46,16 @@
   78%{opacity:1;transform:translate(-50%,-50%) scale(1)}
   100%{opacity:0;transform:translate(-50%,-50%) scale(1.12)}
 }
+
+/* ===== ギャルゲー風エフェクト：ダメージ演出・撃破演出どちらにも使えるハート ===== */
+.galge-heart{
+  position:absolute; bottom:38%; z-index:9; pointer-events:none;
+  transform:translate(-50%,0);
+  animation:galgeHeartFloat 1.4s ease-out forwards;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,.35));
+}
+@keyframes galgeHeartFloat{
+  0%{ opacity:0; transform:translate(-50%,0) scale(.4) rotate(0deg); }
+  15%{ opacity:1; transform:translate(-50%,-10px) scale(1.15) rotate(-6deg); }
+  100%{ opacity:0; transform:translate(calc(-50% + var(--drift,0px)),-150px) scale(.9) rotate(10deg); }
+}
